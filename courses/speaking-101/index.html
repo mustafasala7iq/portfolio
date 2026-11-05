@@ -855,6 +855,75 @@ audio.rec-media{background:none;height:40px}
 .vx-rate button{height:36px;border-radius:10px;border:1.5px solid var(--line-2);background:var(--card);font:700 .85rem/1 var(--font-display);cursor:pointer}
 .vx-rate button[aria-pressed="true"]{background:var(--black);color:var(--yellow);border-color:var(--black)}
 .vx-note{margin:8px 0 0;font-size:.78rem;line-height:1.6;color:var(--muted)}
+
+/* ---------- the climb: chapter mountain ---------- */
+.mtn-wrap{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:22px;align-items:center;margin:0 0 18px}
+.mtn-stage{min-width:0}
+.mtn-svg{direction:ltr;display:block;width:100%;height:auto;border-radius:22px;border:2px solid var(--black);box-shadow:0 5px 0 var(--black);font-family:var(--font-body);background:#fff}
+.mtn-sky{fill:var(--yellow-wash,#FFF6D2)}
+.mtn-sun{fill:var(--yellow);opacity:.9}
+.mtn-far{fill:#D9D6CB}
+.mtn-prev line{stroke:#8d8a80;stroke-width:2}.mtn-prev path{fill:#8d8a80}
+.mtn-far-t{font:800 12px var(--font-body);fill:#8d8a80;text-anchor:middle}
+.mtn-main{fill:var(--black)}
+.mtn-snow{fill:#fff}
+.mtn-shade{fill:#2b2b2b}
+.mtn-trail{fill:none;stroke:#5a5a5a;stroke-width:5;stroke-dasharray:2 9;stroke-linecap:round}
+.mtn-prog{fill:none;stroke:var(--yellow);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .9s ease}
+.mtn-flag line{stroke:#fff;stroke-width:3}
+.mtn-flag-cloth{fill:var(--yellow);stroke:var(--black);stroke-width:1.5}
+.mtn-flag-t{font-size:11px}
+.mtn-camp{cursor:pointer}
+.mtn-camp:focus{outline:none}
+.mtn-dot{fill:#3a3a3a;stroke:#8a8a8a;stroke-width:3;transition:transform .2s}
+.mtn-num{font:900 15px var(--font-body);text-anchor:middle;fill:#cfcfcf;pointer-events:none}
+.mtn-camp.done .mtn-dot{fill:var(--yellow);stroke:var(--black)}
+.mtn-camp.done .mtn-num{fill:var(--black)}
+.mtn-camp.cur .mtn-dot{fill:#fff;stroke:var(--yellow);stroke-width:4}
+.mtn-camp.cur .mtn-num{fill:var(--black)}
+.mtn-pulse{fill:none;stroke:var(--yellow);stroke-width:3;transform-box:fill-box;transform-origin:center;animation:mtnpulse 1.8s ease-out infinite}
+@keyframes mtnpulse{from{opacity:.9;transform:scale(.7)}to{opacity:0;transform:scale(1.5)}}
+.mtn-camp:hover .mtn-dot,.mtn-camp:focus .mtn-dot{stroke:#fff;stroke-width:4}
+.mtn-chip{fill:#fff;stroke:var(--black);stroke-width:1.5}
+.mtn-camp.todo .mtn-chip{fill:#ECEAE2;stroke:#9a978d}
+.mtn-camp.cur .mtn-chip{fill:var(--yellow)}
+.mtn-lab-t{font:800 13px var(--font-display),var(--font-body);fill:#141414;dominant-baseline:auto}
+.mtn-lab.r .mtn-lab-t{text-anchor:start}.mtn-lab.l .mtn-lab-t{text-anchor:end}.mtn-lab.top .mtn-lab-t{text-anchor:middle}
+.mtn-camp.todo .mtn-lab-t{fill:#6d6a62}
+.mtn-stars{font-size:11px;fill:var(--yellow);text-anchor:middle;paint-order:stroke;stroke:var(--black);stroke-width:2px;letter-spacing:1px}
+.mtn-lab.r .mtn-stars{text-anchor:start}.mtn-lab.l .mtn-stars{text-anchor:end}
+.mtn-climber{pointer-events:none;transition:none}
+.mtn-climber-b{fill:#fff;stroke:var(--black);stroke-width:2.5}
+.mtn-climber-e{font-size:17px;text-anchor:middle}
+.mtn-climber.summit .mtn-climber-b{fill:var(--yellow)}
+.mtn-side{display:grid;gap:10px;align-content:center;min-width:0}
+.mtn-kick{margin:0;font-weight:800;color:var(--muted)}
+.mtn-now{margin:0;font:900 1.5rem/1.35 var(--font-display);text-wrap:balance}
+.mtn-now-n{display:block;font-size:.85rem;color:var(--muted);font-weight:800}
+.mtn-sub{margin:0;color:var(--ink-2)}
+.mtn-go{justify-self:start}
+.mtn-bar{height:12px;border-radius:99px;background:#ECEAE2;border:1.5px solid var(--black);overflow:hidden}
+.mtn-bar i{display:block;height:100%;background:var(--yellow);transition:width .6s ease}
+.mtn-meta{margin:0;font-size:.85rem;color:var(--muted)}
+.mtn-listbox{margin:4px 0 12px}
+.mtn-listbox>summary{cursor:pointer;font-weight:800;padding:10px 14px;border-radius:12px;border:1.5px solid var(--line-2);background:var(--card);width:max-content;max-width:100%}
+.mtn-listbox[open]>summary{margin-bottom:12px}
+/* the climb moment */
+.mtn-ov{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:rgba(14,14,14,.55);opacity:0;transition:opacity .25s}
+.mtn-ov.on{opacity:1}
+.mtn-ov-card{width:min(420px,100%);max-height:100%;overflow:auto;display:grid;gap:10px;padding:18px;border-radius:24px;background:#fff;border:2px solid var(--black);box-shadow:0 8px 0 var(--black);transform:translateY(20px) scale(.96);transition:transform .3s cubic-bezier(.2,1.3,.4,1)}
+.mtn-ov.on .mtn-ov-card{transform:none}
+.mtn-ov-t{margin:0;text-align:center;font:900 1.4rem/1.3 var(--font-display)}
+.mtn-ov-s{margin:0;text-align:center;color:var(--ink-2)}
+.mtn-ov-stage .mtn-svg{max-height:52vh;width:auto;max-width:100%;margin:0 auto}
+.mtn-ov-acts{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+@media (max-width:760px){ .mtn-wrap{grid-template-columns:1fr} .mtn-side{order:-1} .mtn-now{font-size:1.25rem} }
+@media (prefers-reduced-motion: reduce){ .mtn-pulse{animation:none} .mtn-prog{transition:none} }
+/* tap again = slow */
+#slow-cue{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:400;transform:translate(-50%,20px);opacity:0;pointer-events:none;padding:8px 16px 10px;border-radius:999px;background:var(--black);color:var(--yellow);font-weight:800;transition:all .25s}
+#slow-cue span{font-size:1.2rem}
+#slow-cue.on{opacity:1;transform:translate(-50%,0)}
+.slow-say{outline:2px dashed var(--yellow);outline-offset:3px}
 </style>
 
 </head><body>
@@ -921,7 +990,7 @@ audio.rec-media{background:none;height:40px}
     <div class="how">
       <div><i dir="ltr">+100</i><span>خلّص الدرس واضغط "خلصت الدرس" بآخره</span></div>
       <div><i dir="ltr">+25</i><span>سوّي التمرين واضغط "سويته"</span></div>
-      <div><i dir="ltr">+5</i><span id="how-listen">اضغط على أي عبارة إنكليزية حتى تسمع نطقها</span></div>
+      <div><i dir="ltr">+5</i><span id="how-listen">اضغط على أي عبارة إنكليزية حتى تسمع نطقها، واضغط عليها مرة ثانية حتى تسمعها ببطء 🐢</span></div>
       <div><i dir="ltr">+30</i><span>اكشف كل كلمات جدول بوضع "اختبر نفسك"</span></div>
       <div><i dir="ltr">+10</i><span>كل جواب صح بالاختبار السريع، وكل جملة تسجلها وتقارنها</span></div>
       <div><i dir="ltr">+40</i><span>خلّص حوار تمثيلي للآخر</span></div>
@@ -2041,9 +2110,14 @@ audio.rec-media{background:none;height:40px}
   if(canSpeak){ pickVoice(); try{synth.onvoiceschanged=pickVoice;}catch(e){} document.documentElement.classList.add('can-speak'); }
   else { var hl=$('how-listen'); if(hl) hl.textContent='اقرأ كل عبارة إنكليزية بصوت عالي — هذا أساس تقنية التقليد'; }
   function clean(t){return t.replace(/[….]{3,}|_{2,}/g,' ... ').replace(/\s+/g,' ').trim();}
+  var lastSay={t:'',at:0,slow:false};
+  function slowCue(el){ var c=document.getElementById('slow-cue'); if(!c){ c=document.createElement('div'); c.id='slow-cue'; c.setAttribute('aria-live','polite'); document.body.appendChild(c); }
+    c.innerHTML='<span>🐢</span> ببطء'; c.classList.remove('on'); void c.offsetWidth; c.classList.add('on'); clearTimeout(c._t); c._t=setTimeout(function(){ c.classList.remove('on'); },1800);
+    if(el){ el.classList.add('slow-say'); setTimeout(function(){ el.classList.remove('slow-say'); },1800); } }
   function speak(text,el,onend){
     if(!canSpeak) return false;
-    try{ synth.cancel(); var u=new SpeechSynthesisUtterance(clean(text)); u.lang=(voice&&voice.lang)||'en-US'; u.rate=rate; if(voice) u.voice=voice;
+    try{ synth.cancel(); var ct=clean(text), now=Date.now(), slow=(ct===lastSay.t && now-lastSay.at<6000 && !lastSay.slow); lastSay={t:ct,at:now,slow:slow};
+      var u=new SpeechSynthesisUtterance(ct); u.lang=(voice&&voice.lang)||'en-US'; u.rate=slow?Math.max(.4,rate*.6):rate; if(slow) slowCue(el); if(voice) u.voice=voice;
       if(el){el.classList.add('speaking'); u.onend=u.onerror=function(){el.classList.remove('speaking'); if(onend) onend();};}
       synth.speak(u); return true; }catch(e){ return false; }
   }
@@ -3078,5 +3152,139 @@ map:{rounds:[
 </script>
 
 
+
+<script>window.MTN_CFG={title:'Speaking 101',ar:'الفصل الأول',H:820,short:['تعرّف بنفسك','تعرّف الآخرين','يومك','الطلب المؤدب','المطعم','الاتجاهات','المطار','رأيك','القراءة والكتابة','تحدي الفيديو']};</script>
+<script>
+/* ---------- the climb: a mountain map of the chapter (drawn in SVG, no images) ---------- */
+(function(){
+  var T=window.T3; if(!T) return;
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var NS='http://www.w3.org/2000/svg';
+  var secs=[].slice.call(document.querySelectorAll('.lecture'));
+  var TOTAL=secs.length; if(!TOTAL) return;
+  var NAMES=secs.map(function(s){ var t=s.querySelector('.lec-title'); return t?t.textContent.trim():''; });
+  var CFG=window.MTN_CFG||{};
+  var SHORT=CFG.short||['أقسام الكلام','الشجرة النحوية','أدوات التعريف','in · on · at','الأزمنة الـ12','تحدي القواعد'];
+  var CH={title:CFG.title||'Grammar 101',ar:CFG.ar||'الفصل الثاني'};
+  var H=CFG.H||540, K=H/540;
+  /* camps from the base (lesson 1) to the summit (capstone) */
+  var P=CFG.P||[[96,470],[300,412],[118,338],[286,262],[150,188],[222,92]], LBL=[];
+  if(!CFG.P && TOTAL!==6){ P=[]; var yb=H-70, ys=92*K; var y9=ys+118; for(var c=0;c<TOTAL;c++){ var y=c===TOTAL-1?ys:yb-(yb-y9)*c/(TOTAL-2), yu=y/K;
+      if(c===TOTAL-1){ P.push([222,y]); break; }
+      var xl=20+(500-yu)/426*202, xr=410-(470-yu)/396*188; P.push([c%2===0?Math.round(xl+58):Math.round(xr-58),Math.round(y)]); } }
+  P.forEach(function(p,c){ LBL.push([c===P.length-1?'top':(p[0]<222?'r':'l'),0]); });
+  function el(tag,a,par){ var e=document.createElementNS(NS,tag); for(var k in a) e.setAttribute(k,a[k]); if(par) par.appendChild(e); return e; }
+  function h(tag,cls,txt){ var e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; }
+  function pathD(){ var d='M'+P[0][0]+' '+P[0][1];
+    for(var i=1;i<P.length;i++){ var a=P[i-1], b=P[i], my=(a[1]+b[1])/2; d+=' C'+a[0]+' '+(my-6)+' '+b[0]+' '+(my+6)+' '+b[0]+' '+b[1]; } return d; }
+  function state(){ var S=T.st(), done=S.done||{}, lg=S.lg||{}, cur=-1;
+    for(var i=0;i<TOTAL;i++){ if(!done[i+1]){ cur=i; break; } }
+    return {done:done,lg:lg,cur:cur,count:Object.keys(done).filter(function(k){return done[k];}).length}; }
+  function go(n){ var s=document.getElementById('lecture-'+n); if(s) s.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'}); }
+
+  /* draw one mountain into `box`; opts.reach = camp index the trail is filled to */
+  function draw(box,opts){ opts=opts||{}; var st=state(); var reach=opts.reach!=null?opts.reach:(st.cur<0?TOTAL-1:st.cur);
+    box.innerHTML='';
+    var svg=el('svg',{viewBox:'0 0 400 '+H,'class':'mtn-svg',role:'img','aria-label':'جبل '+CH.ar+': '+TOTAL+' محطات من الأسفل للقمة'});
+    el('rect',{x:0,y:0,width:400,height:H,rx:22,'class':'mtn-sky'},svg);
+    el('circle',{cx:330,cy:72,r:30,'class':'mtn-sun'},svg);
+    /* the range: previous chapter on the left, next one on the right */
+    var terr=el('g',{transform:'scale(1 '+K+')'},svg);
+    var back=el('g',{'class':'mtn-back'},terr);
+    el('path',{d:'M-10 540 L-10 330 L40 250 L78 300 L120 230 L170 330 L170 540Z','class':'mtn-far'},back);
+    el('path',{d:'M250 540 L280 330 L330 240 L360 280 L410 200 L410 540Z','class':'mtn-far'},back);
+    /* the mountain of this chapter */
+    el('path',{d:'M-10 545 L20 500 L58 452 L84 404 L70 380 L112 316 L140 270 L132 246 L176 170 L200 124 L222 74 L246 118 L262 140 L258 160 L300 232 L322 286 L344 330 L336 352 L372 418 L410 470 L410 545Z','class':'mtn-main'},terr);
+    el('path',{d:'M176 170 L200 124 L222 74 L246 118 L262 140 L250 150 L236 136 L222 154 L208 140 L194 162 Z','class':'mtn-snow'},terr);
+    el('path',{d:'M58 452 L84 404 L104 430 Z M300 232 L322 286 L304 270 Z M112 316 L140 270 L150 300 Z','class':'mtn-shade'},terr);
+    /* the trail */
+    var D=pathD();
+    el('path',{d:D,'class':'mtn-trail'},svg);
+    var prog=el('path',{d:D,'class':'mtn-prog'},svg);
+    /* summit flag */
+    var fl=el('g',{'class':'mtn-flag'},svg); el('line',{x1:222,y1:74*K,x2:222,y2:74*K-46},fl); el('path',{d:'M222 '+(74*K-46)+' L276 '+(74*K-38)+' L222 '+(74*K-28)+'Z','class':'mtn-flag-cloth'},fl);
+    var ft=el('text',{x:238,y:74*K-33,'class':'mtn-flag-t'},fl); ft.textContent='🏆';
+    /* camps */
+    var camps=[];
+    P.forEach(function(p,i){ var n=i+1, isDone=!!st.done[n], isCur=(i===st.cur);
+      var g=el('g',{'class':'mtn-camp'+(isDone?' done':'')+(isCur?' cur':'')+(!isDone&&!isCur?' todo':''),tabindex:0,role:'link','aria-label':'المحطة '+n+': '+NAMES[i]+(isDone?' (مكتملة)':'')},svg);
+      if(isCur) el('circle',{cx:p[0],cy:p[1],r:26,'class':'mtn-pulse'},g);
+      el('circle',{cx:p[0],cy:p[1],r:i===TOTAL-1?21:18,'class':'mtn-dot'},g);
+      var tx=el('text',{x:p[0],y:p[1]+6,'class':'mtn-num'},g); tx.textContent=isDone?'✓':(i===TOTAL-1?'🎬':String(n));
+      var side=LBL[i][0], lx=side==='r'?p[0]+28:side==='l'?p[0]-28:p[0], ly=side==='top'?p[1]+44:p[1]+5;
+      var lab=el('g',{'class':'mtn-lab '+side},g); var lt=el('text',{x:lx,y:ly,'class':'mtn-lab-t'},lab); lt.textContent=SHORT[i]||NAMES[i];
+      var stars=st.lg[n]||0; if(stars){ var sy=ly+25; var s=el('text',{x:lx,y:sy,'class':'mtn-stars'},lab); s.textContent='★★★'.slice(0,stars)+'☆☆☆'.slice(0,3-stars); }
+      g.addEventListener('click',function(){ if(opts.onCamp) opts.onCamp(n); else go(n); });
+      g.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(n); } });
+      camps.push(g); });
+    /* climber */
+    var cl=el('g',{'class':'mtn-climber'},svg); el('circle',{r:15,'class':'mtn-climber-b'},cl); var ce=el('text',{y:6,'class':'mtn-climber-e'},cl); ce.textContent='🧗';
+    box.appendChild(svg);
+    /* fit label chips behind text */
+    [].forEach.call(svg.querySelectorAll('.mtn-lab'),function(lab){ var t=lab.querySelector('.mtn-lab-t'); try{ var b=t.getBBox(); var side=lab.getAttribute('class'); var r=el('rect',{x:b.x-8,y:b.y-4,width:b.width+16,height:b.height+8,rx:9,'class':'mtn-chip'}); lab.insertBefore(r,t);
+        if(b.x-8<4){ lab.setAttribute('transform','translate('+(4-(b.x-8))+' 0)'); } if(b.x+b.width+8>396){ lab.setAttribute('transform','translate('+(396-(b.x+b.width+8))+' 0)'); } }catch(e){} });
+    /* trail lengths at each camp */
+    var L=prog.getTotalLength(), at=[0];
+    for(var i=1;i<P.length;i++){ var best=at[i-1], bd=1e9; for(var l=at[i-1];l<=L;l+=2){ var q=prog.getPointAtLength(l), d=Math.abs(q.x-P[i][0])+Math.abs(q.y-P[i][1]); if(d<bd){bd=d;best=l;} if(d>bd+40) break; } at.push(best); }
+    at[P.length-1]=L;
+    prog.style.strokeDasharray=L;
+    function setReach(k){ prog.style.strokeDashoffset=L-at[Math.max(0,k)]; var q=prog.getPointAtLength(at[Math.max(0,k)]); cl.setAttribute('transform','translate('+q.x+' '+(q.y-30)+')'); }
+    function climb(from,to,done){ if(reduce){ setReach(to); if(done) done(); return; } var a=at[from], b=at[to], t0=null, dur=1400+300*(to-from);
+      function step(ts){ if(!t0) t0=ts; var k=Math.min(1,(ts-t0)/dur), e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2, l=a+(b-a)*e; prog.style.strokeDashoffset=L-l; var q=prog.getPointAtLength(l); cl.setAttribute('transform','translate('+q.x+' '+(q.y-30)+')');
+        if(k<1) requestAnimationFrame(step); else if(done) done(); }
+      requestAnimationFrame(step); }
+    setReach(reach);
+    if(st.cur<0){ cl.classList.add('summit'); }
+    return {svg:svg,setReach:setReach,climb:climb,camps:camps}; }
+
+  /* ---- the map in the "الرحلة" section ---- */
+  var toc=document.getElementById('contents'); if(!toc) return;
+  var list=toc.querySelector('.toc-list');
+  var wrap=h('div','mtn-wrap'); var stage=h('div','mtn-stage'); var side=h('div','mtn-side');
+  wrap.appendChild(stage); wrap.appendChild(side);
+  toc.insertBefore(wrap,list);
+  var det=h('details','mtn-listbox'); var sm=h('summary',null,'عرض الدروس كقائمة'); det.appendChild(sm); list.parentNode.insertBefore(det,list); det.appendChild(list);
+  function paintSide(){ var st=state(); side.innerHTML='';
+    var pct=Math.round(st.count/TOTAL*100);
+    var k=h('p','mtn-kick',st.cur<0?'وصلت القمة! 🏆':'وين وصلت؟'); side.appendChild(k);
+    if(st.cur<0){ side.appendChild(h('h3','mtn-now','خلّصت '+CH.title)); side.appendChild(h('p','mtn-sub','كل المحطات مكتملة. الفصل الجاي ينتظرك.')); }
+    else { var nowT=h('h3','mtn-now'); nowT.appendChild(h('span','mtn-now-n','المحطة '+(st.cur+1))); nowT.appendChild(document.createTextNode(NAMES[st.cur])); side.appendChild(nowT);
+      side.appendChild(h('p','mtn-sub',st.cur===TOTAL-1?'هذي القمة: سجّل فيديوك وخلّص الفصل.':'باقي '+(TOTAL-st.cur)+' محطات للقمة.'));
+      var b=h('button','ix-btn mtn-go','كمّل من هنا'); b.type='button'; var n=st.cur+1; b.addEventListener('click',function(){ go(n); }); side.appendChild(b); }
+    var bar=h('div','mtn-bar'); var f=h('i'); f.style.width=pct+'%'; bar.appendChild(f); side.appendChild(bar);
+    side.appendChild(h('p','mtn-meta',st.count+' من '+TOTAL+' محطات · '+pct+'%')); }
+  var M=null;
+  function paint(){ M=draw(stage,{id:'a'}); paintSide(); }
+  paint();
+  try{ if(document.fonts&&document.fonts.ready) document.fonts.ready.then(function(){ paint(); }); }catch(e){}
+  window.addEventListener('load',function(){ paint(); });
+  if(!reduce && 'IntersectionObserver' in window){ var st0=state(); if(st0.cur>0){ M.setReach(0); var io=new IntersectionObserver(function(es){ es.forEach(function(x){ if(x.isIntersecting){ io.disconnect(); var s=state(); M.climb(0,s.cur<0?TOTAL-1:s.cur); } }); },{threshold:.4}); io.observe(stage); } }
+
+  /* ---- the climb moment: finishing a lesson moves you up the mountain ---- */
+  var ov=h('div','mtn-ov'); ov.hidden=true; ov.setAttribute('role','dialog'); ov.setAttribute('aria-modal','true'); ov.setAttribute('aria-label','تقدّمك على الجبل');
+  var card=h('div','mtn-ov-card'); var ttl=h('h3','mtn-ov-t'); var sub=h('p','mtn-ov-s'); var ms=h('div','mtn-ov-stage');
+  var acts=h('div','mtn-ov-acts'); var next=h('button','ix-btn','الدرس الجاي ←'); next.type='button'; var close=h('button','ix-btn alt','سكّر'); close.type='button';
+  acts.appendChild(next); acts.appendChild(close); card.appendChild(ttl); card.appendChild(sub); card.appendChild(ms); card.appendChild(acts); ov.appendChild(card); document.body.appendChild(ov);
+  var target=null;
+  function hide(){ ov.classList.remove('on'); setTimeout(function(){ ov.hidden=true; },250); document.removeEventListener('keydown',esc); }
+  function esc(e){ if(e.key==='Escape') hide(); }
+  close.addEventListener('click',hide); ov.addEventListener('click',function(e){ if(e.target===ov) hide(); });
+  next.addEventListener('click',function(){ hide(); if(target) setTimeout(function(){ go(target); },200); });
+  function celebrate(n){ var st=state(), top=st.cur<0, nx=-1;
+    for(var k=n;k<TOTAL;k++){ if(!st.done[k+1]){ nx=k; break; } } if(nx<0) nx=st.cur;
+    ttl.textContent=top?'🏆 وصلت القمة!':'🎉 خلّصت المحطة '+n;
+    sub.textContent=top?'خلّصت كل '+CH.title+'. عاشت إيدك!':('الجاية: '+NAMES[nx]+' · باقي '+(TOTAL-nx)+' للقمة');
+    target=top?null:nx+1; next.hidden=top;
+    var from=n-1, to=top?TOTAL-1:(nx>from?nx:from);
+    ov.hidden=false; void ov.offsetWidth; ov.classList.add('on'); document.addEventListener('keydown',esc); next.focus({preventScroll:true});
+    var m=draw(ms,{id:'b',reach:from,onCamp:function(k){ hide(); setTimeout(function(){ go(k); },200); }});
+    setTimeout(function(){ m.climb(from,to,function(){ if(top&&T.burst) T.burst(true); }); },450); }
+  secs.forEach(function(sec,i){ var b=sec.querySelector('.done-btn'); if(!b) return;
+    b.addEventListener('click',function(){ setTimeout(function(){ paint(); if(state().done[i+1]) celebrate(i+1); },60); }); });
+  /* lesson games change the stars on the mountain */
+  var oldHub=window.LGHUB; window.LGHUB=function(){ if(oldHub) try{ oldHub(); }catch(e){} paint(); };
+  window.T3Mountain={paint:paint};
+})();
+</script>
 
 </body></html>
