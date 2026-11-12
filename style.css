@@ -1039,3 +1039,125 @@ img {
     margin-right: auto;
   }
 }
+
+/* Curriculum (3 chapters) */
+.curriculum-section {
+  background: var(--black);
+  position: relative;
+}
+
+.curriculum-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 241, 49, 0.2), transparent);
+}
+
+.chapters {
+  max-width: 820px;
+  margin: 2rem auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: start;
+}
+
+.chapter {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  transition: var(--transition);
+}
+
+.chapter[open] {
+  border-color: rgba(255, 241, 49, 0.2);
+}
+
+.chapter summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 1.25rem 1.5rem;
+  padding-inline-end: 3.5rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.chapter summary::-webkit-details-marker {
+  display: none;
+}
+
+.chapter summary::after {
+  content: '+';
+  position: absolute;
+  inset-inline-end: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--yellow);
+  font-size: 1.5rem;
+  font-weight: 300;
+}
+
+.chapter[open] summary::after {
+  content: '−';
+}
+
+.chapter-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--yellow);
+}
+
+.chapter-sub {
+  color: var(--gray-400);
+  font-size: 0.95rem;
+}
+
+.lessons {
+  list-style: none;
+  counter-reset: lesson;
+  padding: 0 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.lessons li {
+  counter-increment: lesson;
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  column-gap: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 0.9rem;
+}
+
+.lessons li::before {
+  content: counter(lesson);
+  grid-row: span 2;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: rgba(255, 241, 49, 0.1);
+  color: var(--yellow);
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lessons strong {
+  font-weight: 600;
+  color: var(--white);
+  text-align: right;
+}
+
+.lessons span {
+  color: var(--gray-200);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
