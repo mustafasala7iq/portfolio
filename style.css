@@ -1310,7 +1310,6 @@ img {
 }
 
 .hl-months {
-  font-size: 1.2em;
   color: var(--yellow);
   font-weight: 700;
   white-space: nowrap;
