@@ -1314,3 +1314,23 @@ img {
   font-weight: inherit;
   white-space: nowrap;
 }
+
+/* Desktop only: show the whole photo on first screen, without scrolling */
+@media (min-width: 1025px) {
+  .hero-container {
+    align-items: flex-start;
+  }
+
+  .hero-image-wrapper {
+    position: sticky;
+    top: 90px;
+    width: auto;
+    max-width: 480px;
+  }
+
+  .hero-image-wrapper img {
+    width: auto;
+    max-width: 100%;
+    max-height: calc(100vh - 120px);
+  }
+}
