@@ -1350,3 +1350,7 @@ img {
     margin-top: calc(min(calc((100vh - 72px) / 0.9), 960px) * -0.1);
   }
 }
+
+.hl-yellow {
+  color: var(--yellow);
+}
