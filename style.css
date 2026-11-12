@@ -1311,6 +1311,6 @@ img {
 
 .hl-months {
   color: var(--yellow);
-  font-weight: 700;
+  font-weight: inherit;
   white-space: nowrap;
 }
