@@ -1334,3 +1334,19 @@ img {
     max-height: calc(100vh - 120px);
   }
 }
+
+/* Desktop only: photo fills the space from the menu down to the bottom of the screen */
+@media (min-width: 1025px) {
+  .hero-image-wrapper {
+    top: 0;
+    max-width: 640px;
+    margin-top: -40px;
+  }
+
+  .hero-image-wrapper img {
+    max-width: none;
+    max-height: none;
+    height: min(calc((100vh - 72px) / 0.9), 960px);
+    margin-top: calc(min(calc((100vh - 72px) / 0.9), 960px) * -0.1);
+  }
+}
