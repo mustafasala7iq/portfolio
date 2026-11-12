@@ -1262,3 +1262,49 @@ img {
   max-height: 1100px;
   background: radial-gradient(closest-side, rgba(255, 241, 49, 0.08) 0%, rgba(255, 241, 49, 0.03) 50%, transparent 100%);
 }
+
+/* Phones: compact steps, icon beside the text, so the section stays short */
+@media (max-width: 640px) {
+  .how-section .section-title {
+    margin-bottom: 0.5rem;
+  }
+
+  .steps {
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+  }
+
+  .step-card {
+    flex-direction: row;
+    align-items: center;
+    text-align: start;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 14px;
+  }
+
+  .step-card .step-icon {
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    border-radius: 14px;
+  }
+
+  .step-card .step-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .step-card .step-badge {
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    top: -6px;
+    inset-inline-start: -6px;
+  }
+
+  .step-card p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+}
