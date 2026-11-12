@@ -806,12 +806,12 @@ img {
   color: var(--yellow);
 }
 
-/* Vertical 9:16 explainer video */
+/* Horizontal 16:9 explainer video */
 .explainer-video {
   position: relative;
   width: 100%;
-  max-width: 240px;
-  aspect-ratio: 9 / 16;
+  max-width: 560px;
+  aspect-ratio: 16 / 9;
   margin-top: 2rem;
   border-radius: 20px;
   overflow: hidden;
