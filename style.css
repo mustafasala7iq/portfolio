@@ -1565,3 +1565,70 @@ img {
     inset-inline-start: calc(50% - 6px);
   }
 }
+
+/* Phones: slightly bigger hero photo */
+@media (max-width: 768px) {
+  .hero-image-wrapper {
+    width: 300px;
+  }
+}
+
+/* Phones: "how to register" as one compact row of 4 with arrows */
+@media (max-width: 640px) {
+  .how-section {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .how-section .section-title {
+    font-size: 1.6rem;
+    margin-bottom: 0;
+  }
+
+  .steps {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.9rem;
+    margin-top: 1.25rem;
+  }
+
+  .step-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+    padding: 0;
+    background: none;
+    border: none;
+  }
+
+  .step-card .step-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+  }
+
+  .step-card p {
+    font-size: 0.72rem;
+    line-height: 1.5;
+  }
+
+  .step-card:not(:last-child)::after {
+    top: 23px;
+    bottom: auto;
+    inset-inline-start: calc(50% + 28px);
+    width: calc(100% + 0.9rem - 56px);
+    height: 2px;
+    background: repeating-linear-gradient(to left, var(--yellow) 0 4px, transparent 4px 7px);
+  }
+
+  .step-card:not(:last-child)::before {
+    top: 19px;
+    bottom: auto;
+    inset-inline-start: auto;
+    inset-inline-end: calc(-0.9rem / 2 - 50% + 28px - 8px);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-right: 7px solid var(--yellow);
+    border-left: 0;
+  }
+}
