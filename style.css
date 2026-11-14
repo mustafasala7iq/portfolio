@@ -1433,3 +1433,124 @@ img {
     gap: 0.6rem;
   }
 }
+
+/* ========================================
+   Steps as a flow chart with arrows
+   ======================================== */
+.steps {
+  gap: 2.5rem;
+}
+
+.step-card {
+  position: relative;
+  background: none;
+  border: none;
+  padding: 0.5rem 0.25rem;
+}
+
+.step-card:hover {
+  background: none;
+  border: none;
+}
+
+.step-card .step-icon {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border-width: 2px;
+  box-shadow: 0 0 0 8px rgba(255, 241, 49, 0.04);
+}
+
+.step-card .step-icon svg {
+  width: 34px;
+  height: 34px;
+}
+
+.step-card .step-badge {
+  top: -4px;
+  inset-inline-start: -4px;
+}
+
+.step-card p {
+  font-weight: 500;
+}
+
+/* Arrow from each step to the next (RTL: flows right to left) */
+.step-card:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: calc(0.5rem + 44px);
+  inset-inline-start: calc(50% + 56px);
+  width: calc(100% + 2.5rem - 112px);
+  height: 2px;
+  background: repeating-linear-gradient(to left, var(--yellow) 0 8px, transparent 8px 14px);
+  opacity: 0.6;
+}
+
+.step-card:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: calc(0.5rem + 44px - 6px);
+  inset-inline-end: calc(-2.5rem / 2 - 50% + 56px - 8px);
+  width: 0;
+  height: 0;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-right: 10px solid var(--yellow);
+}
+
+@media (max-width: 1024px) and (min-width: 641px) {
+  .steps {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+
+  .step-card:not(:last-child)::after {
+    width: calc(100% + 1.5rem - 112px);
+  }
+}
+
+/* Phones: vertical flow, arrow pointing down between steps */
+@media (max-width: 640px) {
+  .steps {
+    gap: 1.6rem;
+  }
+
+  .step-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .step-card .step-icon {
+    width: 46px;
+    height: 46px;
+    border-width: 1px;
+    box-shadow: none;
+  }
+
+  .step-card .step-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .step-card:not(:last-child)::after {
+    top: auto;
+    bottom: -1.45rem;
+    inset-inline-start: calc(1rem + 22px);
+    width: 2px;
+    height: 1.3rem;
+    background: repeating-linear-gradient(to bottom, var(--yellow) 0 4px, transparent 4px 7px);
+  }
+
+  .step-card:not(:last-child)::before {
+    top: auto;
+    bottom: -1.55rem;
+    inset-inline-end: auto;
+    inset-inline-start: calc(1rem + 22px - 5px);
+    border-top: 7px solid var(--yellow);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 0;
+    z-index: 1;
+  }
+}
