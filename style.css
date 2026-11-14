@@ -1554,3 +1554,14 @@ img {
     z-index: 1;
   }
 }
+
+/* Phones: arrows between steps centered */
+@media (max-width: 640px) {
+  .step-card:not(:last-child)::after {
+    inset-inline-start: calc(50% - 1px);
+  }
+
+  .step-card:not(:last-child)::before {
+    inset-inline-start: calc(50% - 6px);
+  }
+}
