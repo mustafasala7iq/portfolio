@@ -370,7 +370,7 @@ section+section{margin-top:26px}
     if (h >= 12) {
       const at = new Date(data.next_open), now = new Date();
       const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toDateString() === at.toDateString();
-      el.textContent = `⏱️ اليوم الجاي ينفتح ${tomorrow ? 'بكرة' : 'اليوم'} الساعة ${data.send_hour % 12 || 12} العصر`;
+      el.textContent = `⏱️ اليوم الجاي ينفتح ${tomorrow ? 'غداً' : 'اليوم'} الساعة ${data.send_hour % 12 || 12} العصر`;
       return;
     }
     el.textContent = '⏱️ اليوم الجاي ينفتح بعد ' + (h ? `${h} ساعة و` : '') + `${m} دقيقة`;
