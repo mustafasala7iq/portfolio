@@ -80,6 +80,9 @@ section+section{margin-top:26px}
 .hero{position:relative;overflow:hidden}
 .hero .inner{position:relative;z-index:1}
 .hero::before{content:"";position:absolute;width:300px;height:300px;inset-inline-end:-90px;top:-70px;border-radius:50%;border:44px solid rgba(255,255,255,.28)}
+.links{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.links a{color:var(--ink-2);font-weight:600}
+.act{margin-bottom:18px;border-color:var(--black)}
 .tip{padding:16px 18px;margin-bottom:18px;display:flex;flex-direction:column;gap:8px;background:var(--yellow-wash);border-color:#F2DE92;box-shadow:none}
 .tip-h{display:flex;align-items:center;gap:10px}
 .tip-h b{font:900 1.05rem/1.3 var(--font-display)}
@@ -129,21 +132,25 @@ section+section{margin-top:26px}
     <form class="login card pad stack" id="loginForm" novalidate>
       <div>
         <h1 id="loginTitle">كورس مصطفى صلاح</h1>
-        <p class="sub muted" id="loginSub">ما راح تحفظ، راح تحجي. ادخل برقم موبايلك وكود التفعيل اللي وصلك.</p>
+        <p class="sub muted" id="loginSub">ما راح تحفظ، راح تحجي.</p>
       </div>
-      <div class="field"><label for="phone">رقم الموبايل</label>
-        <input class="input en" id="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="07xx xxx xxxx" maxlength="16" required></div>
-      <div class="field" id="codeF"><label for="code">كود التفعيل</label>
-        <input class="input en" id="code" autocapitalize="characters" autocomplete="one-time-code" placeholder="TA-XXXXX" required></div>
-      <div class="field" id="nameF" hidden><label for="name">اسمك</label>
+      <div class="field" data-m="act free"><label for="name">اسمك</label>
         <input class="input" id="name" autocomplete="name" placeholder="مثلاً: علي حسن"></div>
-      <div class="field" id="goalF" hidden><label for="goal">ليش تتعلم إنكليزي؟</label>
+      <div class="field" data-m="act free"><label for="phone">رقم الموبايل</label>
+        <input class="input en" id="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="07xx xxx xxxx" maxlength="16"></div>
+      <div class="field" data-m="login act free"><label for="email">الإيميل</label>
+        <input class="input en" id="email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" placeholder="name@gmail.com"></div>
+      <div class="field" data-m="login act free"><label for="pw">الباسورد</label>
+        <input class="input en" id="pw" type="password" autocomplete="current-password" placeholder="6 أحرف أو أكثر"></div>
+      <div class="field" data-m="act"><label for="code">كود التفعيل</label>
+        <input class="input en" id="code" autocapitalize="characters" autocomplete="one-time-code" placeholder="TA-XXXXX"></div>
+      <div class="field" data-m="free"><label for="goal">ليش تتعلم إنكليزي؟</label>
         <select class="input" id="goal"><option value="">اختار</option><option>للشغل</option><option>للدراسة</option><option>للسفر</option><option>أريد أحچي بثقة</option><option>غيرها</option></select></div>
-      <div class="field" id="cityF" hidden><label for="city">المحافظة</label>
+      <div class="field" data-m="free"><label for="city">المحافظة</label>
         <select class="input" id="city"><option value="">اختار محافظتك</option><option>البصرة</option><option>بغداد</option><option>أربيل</option><option>الأنبار</option><option>بابل</option><option>حلبجة</option><option>دهوك</option><option>ديالى</option><option>ذي قار</option><option>السليمانية</option><option>صلاح الدين</option><option>القادسية</option><option>كربلاء</option><option>كركوك</option><option>المثنى</option><option>ميسان</option><option>النجف</option><option>نينوى</option><option>واسط</option><option>خارج العراق</option></select></div>
       <div class="err small" id="loginErr" role="alert"></div>
       <button class="btn y" id="loginBtn">دخول</button>
-      <p class="muted small" style="margin:0" id="loginNote">أول مرة تدخل؟ الكود يرتبط برقمك. بعدها تكدر تدخل من أي موبايل بنفس الرقم والكود.</p>
+      <div class="links small" id="loginLinks"></div>
     </form>
   </div>
 </div>
@@ -156,6 +163,11 @@ section+section{margin-top:26px}
   </div></div>
   <main><div class="inner">
     <button type="button" class="fbnote" id="fbNote" hidden></button>
+    <form class="card pad stack act" id="actBox" hidden>
+      <b style="font-family:var(--font-display)">🔑 اشتركت؟ فعّل الكورس الكامل بالكود</b>
+      <div class="row"><input class="input en" id="actCode" placeholder="TA-XXXXX" autocapitalize="characters" style="flex:1;min-width:0"><button class="btn">فعّل</button></div>
+      <div class="err small" id="actErr"></div>
+    </form>
     <div class="tip card" id="tip" hidden>
       <div class="tip-h"><b>👋 شلون تبدي؟</b><button type="button" class="tip-x" id="tipX" aria-label="سكّر">فهمت ✓</button></div>
       <ol class="tip-steps">
@@ -207,17 +219,28 @@ section+section{margin-top:26px}
 
   function show(v) { $('vLogin').hidden = v !== 'login'; $('vApp').hidden = v !== 'app'; $('logout').hidden = v !== 'app'; $('dayChip').hidden = v !== 'app'; }
 
-  // ---------- login ----------
+  // ---------- login / sign up ----------
   const params = new URLSearchParams(location.search);
-  const FREE = params.has('free');
   const SOURCE = params.get('src') || params.get('utm_source') || (document.referrer ? new URL(document.referrer).hostname : '') || 'direct';
-  if (FREE) {
-    $('codeF').hidden = true; $('nameF').hidden = false; $('goalF').hidden = false; $('cityF').hidden = false;
-    $('loginTitle').textContent = 'درسك الأول مجاناً 🎁';
-    $('loginSub').textContent = 'سجّل اسمك ورقمك، وشوف المقدمة والمحاضرة الأولى، وجرّب واجب المحاكاة.';
-    $('loginBtn').textContent = 'ابدي الدرس المجاني';
-    $('loginNote').textContent = 'عندك كود اشتراك؟ ادخل من mustafasalah.net/learn';
+  const WA = window.SUPPORT_WA ? 'https://wa.me/' + window.SUPPORT_WA : null;
+  let mode = params.has('free') ? 'free' : 'login';
+  const MODES = {
+    login: { t: 'كورس مصطفى صلاح', s: 'ما راح تحفظ، راح تحجي. سجّل دخول بإيميلك والباسورد.', b: 'دخول',
+      l: `<a href="#" data-go="act">أول مرة؟ فعّل اشتراكك بالكود</a><a href="/learn/free">جرّب الدرس الأول مجاناً</a>${WA ? `<a href="${WA}" target="_blank" rel="noopener">نسيت الباسورد؟ راسلنا على واتساب</a>` : ''}` },
+    act: { t: 'فعّل اشتراكك', s: 'سوّي حسابك بالكود اللي وصلك. بعدها تدخل بإيميلك والباسورد من موبايلك ولابتوبك.', b: 'فعّل وابدي الكورس',
+      l: `<a href="#" data-go="login">عندك حساب؟ سجّل دخول</a>` },
+    free: { t: 'درسك الأول مجاناً 🎁', s: 'سوّي حسابك، وشوف المقدمة والمحاضرة الأولى، وجرّب واجب المحاكاة.', b: 'ابدي الدرس المجاني',
+      l: `<a href="#" data-go="login">عندك حساب؟ سجّل دخول</a>` },
+  };
+  function setMode(m) {
+    mode = m; const M = MODES[m];
+    $('loginTitle').textContent = M.t; $('loginSub').textContent = M.s; $('loginBtn').textContent = M.b;
+    $('loginLinks').innerHTML = M.l; $('loginErr').textContent = '';
+    document.querySelectorAll('#loginForm [data-m]').forEach(f => { f.hidden = !f.dataset.m.split(' ').includes(m); });
+    $('pw').autocomplete = m === 'login' ? 'current-password' : 'new-password';
+    $('loginLinks').querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); setMode(a.dataset.go); });
   }
+  setMode(mode);
   // Iraqi mobile: 07 then 5/7/8/9 then 8 digits (spaces, +964 and 00964 are fine)
   function iraqiMobile(v) {
     let d = (v || '').replace(/\D/g, '').replace(/^00/, '');
@@ -227,36 +250,32 @@ section+section{margin-top:26px}
   }
   $('loginForm').onsubmit = async e => {
     e.preventDefault();
-    if (FREE) {
-      const err = $('loginErr'); err.textContent = '';
-      if (!$('name').value.trim()) { err.textContent = 'اكتب اسمك.'; $('name').focus(); return; }
-      if (!iraqiMobile($('phone').value)) { err.textContent = 'اكتب رقم موبايلك العراقي الصحيح: 11 رقم يبدي بـ 07، مثل 0770 123 4567'; $('phone').focus(); return; }
-      if (!$('city').value) { err.textContent = 'اختار محافظتك.'; $('city').focus(); return; }
-      const btn = $('loginBtn'); btn.disabled = true;
-      try {
-        const r = await call('/api/free', { method: 'POST', json: { name: $('name').value, phone: $('phone').value, goal: $('goal').value, city: $('city').value, source: SOURCE } });
-        token = r.token; store.set('learn_token', token); await load(true);
-      } catch (x) { err.textContent = x.message; } finally { btn.disabled = false; }
-      return;
-    }
-    const btn = $('loginBtn'), err = $('loginErr');
+    const err = $('loginErr'), v = id => $(id).value.trim();
     err.textContent = '';
-    const phone = $('phone').value, code = $('code').value, name = $('name').value;
-    if (!phone.trim() || !code.trim()) { err.textContent = 'اكتب رقمك والكود.'; return; }
-    btn.disabled = true;
+    const fail = (msg, id) => { err.textContent = msg; if (id) $(id).focus(); };
+    if (mode !== 'login') {
+      if (!v('name')) return fail('اكتب اسمك.', 'name');
+      if (!iraqiMobile(v('phone'))) return fail('اكتب رقم موبايلك العراقي الصحيح: 11 رقم يبدي بـ 07، مثل 0770 123 4567', 'phone');
+    }
+    if (!/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(v('email'))) return fail('اكتب إيميلك صح، مثل name@gmail.com', 'email');
+    if ($('pw').value.length < 6) return fail(mode === 'login' ? 'اكتب الباسورد.' : 'الباسورد لازم يكون 6 أحرف أو أكثر.', 'pw');
+    if (mode === 'act' && !v('code')) return fail('اكتب كود التفعيل.', 'code');
+    if (mode === 'free' && !v('city')) return fail('اختار محافظتك.', 'city');
+    const btn = $('loginBtn'); btn.disabled = true;
     try {
-      if ($('nameF').hidden) {
-        const c = await call('/api/check', { method: 'POST', json: { phone, code } });
-        if (!c.known && !c.code_ok) throw { message: 'الكود غلط أو مستخدم. تأكد منه، أو اطلب كود من المنسّقة.' };
-        if (!c.known) { $('nameF').hidden = false; $('name').focus(); btn.textContent = 'ابدي الكورس'; return; }
-      }
-      const r = await call('/api/login', { method: 'POST', json: { phone, code, name } });
+      const body = { email: v('email'), password: $('pw').value };
+      const r = mode === 'login' ? await call('/api/login', { method: 'POST', json: body })
+        : await call('/api/register', { method: 'POST', json: { ...body, name: v('name'), phone: v('phone'), free: mode === 'free',
+            code: v('code'), goal: v('goal'), city: v('city'), source: SOURCE } });
       token = r.token; store.set('learn_token', token);
       await load(true);
     } catch (x) { err.textContent = x.message; }
     finally { btn.disabled = false; }
   };
-  $('logout').onclick = () => { store.set('learn_token', null); token = null; show('login'); };
+  $('logout').onclick = async () => {
+    try { await call('/api/logout', { method: 'POST', token }); } catch (e) {}
+    store.set('learn_token', null); token = null; setMode('login'); show('login');
+  };
 
   // ---------- data ----------
   async function load(first) {
@@ -284,6 +303,12 @@ section+section{margin-top:26px}
   };
   let tick = null;
 
+  $('actBox').onsubmit = async e => {
+    e.preventDefault(); $('actErr').textContent = '';
+    try { await call('/api/activate', { method: 'POST', json: { code: $('actCode').value }, token }); toast('🎉 انفتحلك الكورس الكامل'); load(true); }
+    catch (x) { $('actErr').textContent = x.message; }
+  };
+
   function render(first) {
     const d = data;
     show('app');
@@ -291,6 +316,7 @@ section+section{margin-top:26px}
     $('dayChip').hidden = d.trial;
     $('hello').textContent = `أهلاً ${d.name} 👋`;
     const miss = d.missing.length;
+    $('actBox').hidden = !d.trial;
     if (d.trial) {
       $('heroTag').textContent = 'هذا درسك المجاني: المقدمة، وشرح المحاكاة، والمحاضرة الأولى ويا واجبها.';
       $('heroMeta').innerHTML = d.sales ? `<a class="btn sm" href="${esc(d.sales)}" target="_blank" rel="noopener">اشترك بالكورس الكامل ←</a>` : '';

@@ -183,13 +183,29 @@ tr:last-child td{border-bottom:0}
       const flag = s.missing === 0 ? '🟢' : s.missing <= 2 ? '🟡' : '🔴';
       const text = `هلا ${s.name} 👋\nعندك ${s.missing} واجبات ناقصة بكورس مصطفى صلاح. ادخل على ${SITE} وسلّمهن 🎙️`;
       const wa = `https://wa.me/${s.phone}?text=${encodeURIComponent(text)}`;
-      return `<tr><td><b>${esc(s.name)}</b><div class="muted small en" style="text-align:right">+${esc(s.phone)} · ${esc(s.code)}</div></td>
+      return `<tr><td><b>${esc(s.name)}</b><div class="muted small en" style="text-align:right">+${esc(s.phone)} · ${esc(s.code)}</div>
+          <div class="muted small en" style="text-align:right">${esc(s.email || '')}</div>
+          <div class="muted small">📱 ${s.devices.length ? s.devices.map(esc).join('، ') : 'ماكو جهاز داخل'}</div></td>
         <td class="num">${s.finished ? 'خلص 🎉' : s.day + '/' + r.total_days}</td>
         <td>${flag} <span class="num">${s.missing}</span></td>
         <td class="small">${s.last ? when(s.last) : '<span class="muted">ماكو</span>'}</td>
         <td><div class="row">${s.missing ? `<a class="btn sm y" href="${wa}" target="_blank" rel="noopener">ذكّره واتساب</a>` : ''}
+          <button class="btn sm ghost dv" data-id="${s.id}" data-name="${esc(s.name)}">تصفير الأجهزة</button>
+          <button class="btn sm ghost pw" data-id="${s.id}" data-name="${esc(s.name)}" data-phone="${esc(s.phone)}" data-email="${esc(s.email || '')}">باسورد جديد</button>
           ${r.admin ? `<button class="btn sm ghost rm" data-id="${s.id}" data-name="${esc(s.name)}">حذف</button>` : ''}</div></td></tr>`;
     }).join('') || '<tr><td colspan="5" class="muted">ماكو طلاب بعد.</td></tr>';
+    $('stBody').querySelectorAll('.dv').forEach(b => b.onclick = async () => {
+      try { await call('/api/staff/devices', { method: 'POST', json: { id: +b.dataset.id }, token }); toast('📱 انطلع ' + b.dataset.name + ' من كل الأجهزة، هسه يكدر يدخل من جديد'); loadSt(); } catch (x) { out(x); }
+    });
+    $('stBody').querySelectorAll('.pw').forEach(b => b.onclick = async () => {
+      if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'متأكد؟ اضغط مرة ثانية'; return; }
+      try {
+        const r = await call('/api/staff/password', { method: 'POST', json: { id: +b.dataset.id }, token });
+        const text = `هلا ${b.dataset.name} 👋\nباسوردك الجديد لكورس مصطفى صلاح: ${r.password}\nادخل على ${SITE} بإيميلك (${b.dataset.email}) وهذا الباسورد.`;
+        const cell = b.closest('td');
+        cell.innerHTML = `<div class="stack"><div class="msg">${esc(text)}</div><a class="btn sm y" target="_blank" rel="noopener" href="https://wa.me/${b.dataset.phone}?text=${encodeURIComponent(text)}">أرسله واتساب</a></div>`;
+      } catch (x) { out(x); }
+    });
     $('stBody').querySelectorAll('.rm').forEach(b => b.onclick = async () => {
       if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'متأكد؟ اضغط مرة ثانية'; b.classList.add('rec'); return; }
       try { await call('/api/staff/remove', { method: 'POST', json: { id: +b.dataset.id }, token }); toast('انحذف ' + b.dataset.name); loadSt(); } catch (x) { out(x); }
@@ -205,15 +221,15 @@ tr:last-child td{border-bottom:0}
     $('leadCount').textContent = leads.length + ' شخص';
     $('leadBody').innerHTML = leads.map(l => {
       const text = `هلا ${l.name} 👋 شلون شفت الدرس المجاني بكورس مصطفى صلاح؟`;
-      return `<tr><td><b>${esc(l.name)}</b><div class="muted small en" style="text-align:right">+${esc(l.phone)}</div></td>
+      return `<tr><td><b>${esc(l.name)}</b><div class="muted small en" style="text-align:right">+${esc(l.phone)}</div><div class="muted small en" style="text-align:right">${esc(l.email || '')}</div></td>
         <td>${esc(l.goal || '')}</td><td>${esc(l.city || '')}</td><td class="en small">${esc(l.source || '')}</td>
         <td>${l.homework ? '✅' : '—'}</td><td class="small">${when(l.created_at)}</td>
         <td><a class="btn sm y" href="https://wa.me/${l.phone}?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">واتساب</a></td></tr>`;
     }).join('') || '<tr><td colspan="7" class="muted">ماكو أحد بعد.</td></tr>';
   }
   $('leadCsv').onclick = () => {
-    const rows = [['name', 'phone', 'goal', 'city', 'source', 'homework', 'signed_up']].concat(
-      leads.map(l => [l.name, '+' + l.phone, l.goal || '', l.city || '', l.source || '', l.homework, l.created_at]));
+    const rows = [['name', 'phone', 'email', 'goal', 'city', 'source', 'homework', 'signed_up']].concat(
+      leads.map(l => [l.name, '+' + l.phone, l.email || '', l.goal || '', l.city || '', l.source || '', l.homework, l.created_at]));
     const csv = '\ufeff' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
     a.download = 'free-signups.csv'; document.body.appendChild(a); a.click(); a.remove();
@@ -225,7 +241,7 @@ tr:last-child td{border-bottom:0}
     try {
       const r = await call('/api/staff/codes', { method: 'POST', json: { label: $('lbl').value }, token });
       $('newCode').hidden = false; $('codeBig').textContent = r.code;
-      $('codeMsg').textContent = `أهلاً بيك بكورس مصطفى صلاح 🎉\n\n1. ادخل على: ${SITE}\n2. اكتب رقم موبايلك\n3. اكتب كود التفعيل: ${r.code}\n\nالكود يشتغل مرة وحدة ويرتبط برقمك.`;
+      $('codeMsg').textContent = `أهلاً بيك بكورس مصطفى صلاح 🎉\n\n1. ادخل على: ${SITE}\n2. اضغط "أول مرة؟ فعّل اشتراكك بالكود"\n3. اكتب اسمك ورقمك وإيميلك وباسورد تختاره، وكود التفعيل: ${r.code}\n\nإذا سجلت بالدرس المجاني قبل، ادخل بحسابك وفعّل الكود من الصفحة الرئيسية.\nالحساب يشتغل على جهازين: موبايلك ولابتوبك.`;
       $('lbl').value = ''; loadCodes();
     } catch (x) { out(x); }
   };
