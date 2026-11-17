@@ -179,10 +179,14 @@ section+section{margin-top:26px}
       </ol>
       <div class="muted small">كل يوم ينفتح درس جديد الساعة 5 العصر، والمدرب يرد على واجبك هنا.</div>
     </div>
-    <section id="todaySec"><div class="today card" id="today"></div></section>
     <section id="introSec" hidden>
-      <div class="sec-h"><h2>🎬 قبل ما تبدي</h2></div>
+      <div class="sec-h"><h2>🎬 ابدي من هنا: المقدمة</h2></div>
       <div class="card pad intro-grid" id="introBody"></div>
+    </section>
+    <section id="todaySec"><div class="today card" id="today"></div></section>
+    <section id="howtoSec" hidden>
+      <div class="sec-h"><h2>🎙️ شلون تسوي واجب المحاكاة</h2></div>
+      <div class="card pad intro-grid" id="howtoBody"></div>
     </section>
     <section id="daysSec">
       <div class="sec-h"><h2 id="daysH">📚 كل الأيام</h2></div>
@@ -204,7 +208,7 @@ section+section{margin-top:26px}
 
 <div class="lesson" id="lesson" hidden>
   <div class="lesson-bar"><button type="button" class="chip" id="lessonBack">→ رجوع</button><b id="lessonTitle"></b></div>
-  <iframe id="lessonFrame" title="الدرس" allow="microphone;autoplay;encrypted-media;fullscreen;picture-in-picture" allowfullscreen></iframe>
+  <iframe id="lessonFrame" title="الدرس" allow="microphone;encrypted-media;fullscreen;picture-in-picture" allowfullscreen></iframe>
 </div>
 
 <script src="/learn/config.js"></script>
@@ -334,9 +338,11 @@ section+section{margin-top:26px}
     renderMountain();
 
     // intro + how-to: open on the first day, a small card after that
-    const intro = [...d.intro.map(u => ['المقدمة', u]), ...d.howto.map(u => ['شلون تسوي واجب المحاكاة (Imitation)', u])];
-    $('introSec').hidden = !intro.length;
-    $('introBody').innerHTML = intro.map(([t, u]) => `<div class="stack"><h4 style="margin:0;font-family:var(--font-display)">${t}</h4>${frame(u)}</div>`).join('');
+    // order: the intro first, then today's lecture, then how to do the imitation homework
+    $('introSec').hidden = !d.intro.length;
+    $('introBody').innerHTML = d.intro.map(frame).join('');
+    $('howtoSec').hidden = !d.howto.length;
+    $('howtoBody').innerHTML = d.howto.map(frame).join('');
 
     const box = $('days'); box.innerHTML = '';
     const all = [...d.days].reverse(), SHOW = 7;
@@ -449,7 +455,7 @@ section+section{margin-top:26px}
   }
 
   function frame(u) {
-    return `<div class="video"><iframe src="${esc(u)}" loading="lazy" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen" allowfullscreen title="فيديو المحاضرة"></iframe></div>`;
+    return `<div class="video"><iframe src="${esc(u)}" loading="lazy" allow="accelerometer;gyroscope;encrypted-media;picture-in-picture;fullscreen" allowfullscreen title="فيديو المحاضرة"></iframe></div>`;
   }
 
   function dayCard(day, isToday) {
