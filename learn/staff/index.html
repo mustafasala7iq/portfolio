@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B0B0B">
+<title>لوحة الفريق</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+main .inner{padding-block:20px 60px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;scrollbar-width:none}
+.tabs button{flex:none;height:40px;padding:0 16px 2px;border-radius:999px;border:1px solid var(--line-2);background:#fff;font:800 .95rem/1 var(--font-display)}
+.tabs button[aria-selected="true"]{background:var(--black);color:#fff;border-color:var(--black)}
+.tabs .n{display:inline-block;min-width:22px;margin-inline-start:6px;padding:2px 6px;border-radius:99px;background:var(--yellow);color:var(--black);font-size:.78rem}
+.list{display:flex;flex-direction:column;gap:12px}
+.sub h3{font-size:1rem;font-weight:800}
+.hd{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.tbl-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--line);background:#fff}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.93rem}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;vertical-align:middle}
+th{font:800 .82rem/1.3 var(--font-display);color:var(--muted);background:var(--paper)}
+tr:last-child td{border-bottom:0}
+.num{font-variant-numeric:tabular-nums}
+.codebig{font:900 1.8rem/1 var(--font-display);letter-spacing:.06em;direction:ltr;text-align:center;padding:14px;border:2px dashed var(--black);border-radius:14px;background:var(--yellow-wash)}
+.msg{white-space:pre-wrap;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px}
+.login{max-width:420px;margin:40px auto 0}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:#fff;padding:6px 12px;font:700 .85rem/1.4 var(--font-display)}
+.seg button[aria-pressed="true"]{background:var(--black);color:#fff}
+</style>
+</head>
+<body>
+<header class="bar"><div class="inner">
+  <div class="lock" id="lock"></div>
+  <div class="sp"></div>
+  <span class="chip y" id="who" hidden></span>
+  <button class="chip" id="logout" hidden>خروج</button>
+</div></header>
+
+<div id="vLogin" hidden><div class="inner">
+  <form class="login card pad stack" id="loginForm">
+    <h1 style="font-size:1.5rem;font-weight:900">لوحة الفريق</h1>
+    <p class="muted" style="margin:0">للمدربين والمنسّقين: تصحيح الواجبات، أكواد التفعيل، ومتابعة الطلاب.</p>
+    <div class="field"><label for="u">الاسم</label><input class="input en" id="u" autocomplete="username" autocapitalize="none"></div>
+    <div class="field"><label for="p">الباسورد</label><input class="input en" id="p" type="password" autocomplete="current-password"></div>
+    <div class="err small" id="loginErr" role="alert"></div>
+    <button class="btn y">دخول</button>
+  </form>
+</div></div>
+
+<main id="vApp" hidden><div class="inner">
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-t="hw" aria-selected="true">الواجبات<span class="n" id="nHw">0</span></button>
+    <button role="tab" data-t="st">الطلاب</button>
+    <button role="tab" data-t="codes">أكواد التفعيل</button>
+    <button role="tab" data-t="lib">الفيديوهات</button>
+  </nav>
+
+  <section id="t-hw">
+    <div class="hd" style="margin-bottom:12px"><h2 style="font-size:1.15rem">الواجبات</h2>
+      <div class="seg"><button data-s="pending" aria-pressed="true">تنتظر التصحيح</button><button data-s="all" aria-pressed="false">الكل</button></div></div>
+    <div class="list" id="hwList"></div>
+  </section>
+
+  <section id="t-st" hidden>
+    <div class="hd" style="margin-bottom:12px"><h2 style="font-size:1.15rem">الطلاب</h2><span class="muted small" id="stCount"></span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>الطالب</th><th>اليوم</th><th>ناقص</th><th>آخر تسليم</th><th></th></tr></thead><tbody id="stBody"></tbody></table></div>
+  </section>
+
+  <section id="t-codes" hidden class="stack">
+    <form class="card pad stack" id="codeForm">
+      <h2 style="font-size:1.15rem">كود تفعيل جديد</h2>
+      <div class="field"><label for="lbl">اسم الطالب (حتى تعرف الكود لمنو)</label><input class="input" id="lbl" placeholder="مثلاً: علي حسن"></div>
+      <button class="btn y">طلّع كود</button>
+      <div id="newCode" class="stack" hidden>
+        <div class="codebig" id="codeBig"></div>
+        <div class="msg" id="codeMsg"></div>
+        <button type="button" class="btn sm" id="copyMsg">📋 انسخ الرسالة للطالب</button>
+      </div>
+    </form>
+    <div class="tbl-wrap"><table><thead><tr><th>الكود</th><th>لمنو</th><th>استخدمه</th><th>التاريخ</th></tr></thead><tbody id="codeBody"></tbody></table></div>
+  </section>
+
+  <section id="t-lib" hidden class="stack">
+    <div class="hd"><h2 style="font-size:1.15rem">الفيديوهات على Bunny</h2><button class="btn sm ghost" id="libRefresh">↻ حدّث</button></div>
+    <p class="muted small" style="margin:0">المنصة تعرف كل فيديو من عنوانه بـ Bunny، مثل <span class="en">C1 · L01 · Introducing Yourself</span>، و<span class="en">INTRO</span>، و<span class="en">IMITATION</span>.</p>
+    <div id="libNote"></div>
+    <div class="tbl-wrap"><table><thead><tr><th>الكود</th><th>المحاضرة</th><th>الحالة</th></tr></thead><tbody id="libBody"></tbody></table></div>
+  </section>
+</div></main>
+
+<script src="../config.js"></script>
+<script src="../brand.js"></script>
+<script src="../common.js"></script>
+<script>
+(function () {
+  const { call, esc, store, fileUrl, toast, when, recorder } = Learn;
+  const $ = id => document.getElementById(id);
+  $('lock').innerHTML = `<img class="sig" src="${BRAND.sig}" alt="Mustafa Salah"><span class="x">×</span><img src="${BRAND.logo}" alt="Ta3alm English">`;
+  let token = store.get('staff_token'), me = store.get('staff_name'), hwStatus = 'pending';
+  const SITE = location.origin + location.pathname.replace(/staff\/?(index\.html)?$/, '');
+
+  function show(v) { $('vLogin').hidden = v !== 'login'; $('vApp').hidden = v !== 'app'; $('logout').hidden = v !== 'app'; $('who').hidden = v !== 'app'; }
+  function out(x) { if (x && x.status === 401) { store.set('staff_token', null); token = null; show('login'); } else toast(x.message || 'صار خطأ'); }
+
+  $('loginForm').onsubmit = async e => {
+    e.preventDefault(); $('loginErr').textContent = '';
+    try {
+      const r = await call('/api/staff/login', { method: 'POST', json: { user: $('u').value, password: $('p').value } });
+      token = r.token; me = r.name; store.set('staff_token', token); store.set('staff_name', me); start();
+    } catch (x) { $('loginErr').textContent = x.message; }
+  };
+  $('logout').onclick = () => { store.set('staff_token', null); token = null; show('login'); };
+
+  // tabs
+  document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => openTab(b.dataset.t));
+  function openTab(t) {
+    document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.t === t)));
+    ['hw', 'st', 'codes', 'lib'].forEach(x => { $('t-' + x).hidden = x !== t; });
+    ({ hw: loadHw, st: loadSt, codes: loadCodes, lib: loadLib })[t]();
+  }
+  document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
+    hwStatus = b.dataset.s; document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); loadHw();
+  });
+
+  // ---------- homework ----------
+  async function loadHw() {
+    let r; try { r = await call('/api/staff/submissions?status=' + hwStatus, { token }); } catch (x) { return out(x); }
+    if (hwStatus === 'pending') $('nHw').textContent = r.submissions.length;
+    const box = $('hwList'); box.innerHTML = '';
+    if (!r.submissions.length) { box.innerHTML = `<div class="card pad muted">${hwStatus === 'pending' ? '👏 ماكو واجبات تنتظر التصحيح.' : 'ماكو واجبات بعد.'}</div>`; return; }
+    r.submissions.forEach(s => box.appendChild(hwCard(s)));
+  }
+  function hwCard(s) {
+    const el = document.createElement('article'); el.className = 'card pad stack sub';
+    const wa = 'https://wa.me/' + s.student.phone;
+    el.innerHTML = `<div class="hd"><h3>${esc(s.student.name)} <a class="muted small en" href="${wa}" target="_blank" rel="noopener">+${esc(s.student.phone)}</a></h3><span class="muted small">${when(s.created_at)}</span></div>
+      <div class="muted small en" dir="ltr" style="text-align:right">${esc(s.title)} · <b style="white-space:nowrap">${esc(s.hw_key)}</b> · Day ${s.day}</div>
+      ${s.audio ? `<audio controls preload="none" src="${esc(fileUrl(s.audio, token))}"></audio>` : ''}
+      ${s.link ? `<a class="btn ghost sm" href="${esc(s.link)}" target="_blank" rel="noopener">🎥 افتح فيديو التحدي</a>` : ''}
+      ${s.feedback ? `<div class="pill ok">✅ صحّحه ${esc(s.feedback.by)} · ${when(s.feedback.at)}</div>${s.feedback.text ? `<div class="msg">${esc(s.feedback.text)}</div>` : ''}` : ''}
+      <div class="fb-area stack" ${s.feedback ? 'hidden' : ''}>
+        <div class="field"><label>تصحيحك (كتابة، أو سجّل فويس، أو الاثنين)</label><textarea class="input fb-text" placeholder="مثلاً: ممتاز 👏 بس انتبه لنطق th بـ three"></textarea></div>
+        <div class="fb-rec"></div>
+        <button type="button" class="btn y fb-send-text">أرسل التصحيح</button>
+      </div>
+      ${s.feedback ? '<button type="button" class="btn ghost sm fb-edit">✏️ صحّح مرة ثانية</button>' : ''}`;
+    const send = async (blob, name) => {
+      const fd = new FormData(); fd.append('id', s.id); fd.append('text', el.querySelector('.fb-text').value);
+      if (blob) fd.append('audio', blob, name);
+      await call('/api/staff/feedback', { method: 'POST', form: fd, token });
+      toast('✅ وصل التصحيح للطالب');
+      if (hwStatus === 'pending') { el.remove(); $('nHw').textContent = Math.max(0, (+$('nHw').textContent || 1) - 1); if (!$('hwList').children.length) loadHw(); }
+      else loadHw();
+    };
+    recorder(el.querySelector('.fb-rec'), { sendLabel: 'أرسل الفويس والتصحيح', onSend: send,
+      onState: st => { el.querySelector('.fb-send-text').hidden = st === 'review'; } });
+    el.querySelector('.fb-send-text').onclick = async () => {
+      if (!el.querySelector('.fb-text').value.trim()) { toast('اكتب التصحيح، أو سجّل فويس واضغط "أرسل الفويس"'); return; }
+      try { await send(null); } catch (x) { out(x); }
+    };
+    const ed = el.querySelector('.fb-edit'); if (ed) ed.onclick = () => { el.querySelector('.fb-area').hidden = false; ed.hidden = true; };
+    return el;
+  }
+
+  // ---------- students ----------
+  async function loadSt() {
+    let r; try { r = await call('/api/staff/students', { token }); } catch (x) { return out(x); }
+    $('stCount').textContent = r.students.length + ' طالب';
+    $('stBody').innerHTML = r.students.map(s => {
+      const flag = s.missing === 0 ? '🟢' : s.missing <= 2 ? '🟡' : '🔴';
+      const text = `هلا ${s.name} 👋\nعندك ${s.missing} واجبات ناقصة بكورس مصطفى صلاح. ادخل على ${SITE} وسلّمهن 🎙️`;
+      const wa = `https://wa.me/${s.phone}?text=${encodeURIComponent(text)}`;
+      return `<tr><td><b>${esc(s.name)}</b><div class="muted small en" style="text-align:right">+${esc(s.phone)} · ${esc(s.code)}</div></td>
+        <td class="num">${s.finished ? 'خلص 🎉' : s.day + '/' + r.total_days}</td>
+        <td>${flag} <span class="num">${s.missing}</span></td>
+        <td class="small">${s.last ? when(s.last) : '<span class="muted">ماكو</span>'}</td>
+        <td><div class="row">${s.missing ? `<a class="btn sm y" href="${wa}" target="_blank" rel="noopener">ذكّره واتساب</a>` : ''}
+          <button class="btn sm ghost rm" data-id="${s.id}" data-name="${esc(s.name)}">حذف</button></div></td></tr>`;
+    }).join('') || '<tr><td colspan="5" class="muted">ماكو طلاب بعد.</td></tr>';
+    $('stBody').querySelectorAll('.rm').forEach(b => b.onclick = async () => {
+      if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'متأكد؟ اضغط مرة ثانية'; b.classList.add('rec'); return; }
+      try { await call('/api/staff/remove', { method: 'POST', json: { id: +b.dataset.id }, token }); toast('انحذف ' + b.dataset.name); loadSt(); } catch (x) { out(x); }
+    });
+  }
+
+  // ---------- codes ----------
+  $('codeForm').onsubmit = async e => {
+    e.preventDefault();
+    try {
+      const r = await call('/api/staff/codes', { method: 'POST', json: { label: $('lbl').value }, token });
+      $('newCode').hidden = false; $('codeBig').textContent = r.code;
+      $('codeMsg').textContent = `أهلاً بيك بكورس مصطفى صلاح 🎉\n\n1. ادخل على: ${SITE}\n2. اكتب رقم موبايلك\n3. اكتب كود التفعيل: ${r.code}\n\nالكود يشتغل مرة وحدة ويرتبط برقمك.`;
+      $('lbl').value = ''; loadCodes();
+    } catch (x) { out(x); }
+  };
+  $('copyMsg').onclick = async () => {
+    const t = $('codeMsg').textContent;
+    try { await navigator.clipboard.writeText(t); toast('📋 انسخت'); }
+    catch (e) { const r = document.createRange(); r.selectNodeContents($('codeMsg')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('حدد النص وانسخه'); }
+  };
+  async function loadCodes() {
+    let r; try { r = await call('/api/staff/codes', { token }); } catch (x) { return out(x); }
+    $('codeBody').innerHTML = r.codes.map(c => `<tr><td class="en" style="text-align:right"><b>${esc(c.code)}</b></td><td>${esc(c.label || '')}</td>
+      <td>${c.used_by ? '✅ ' + esc(c.used_by) : '<span class="muted">بعده</span>'}</td><td class="small">${when(c.created_at)}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">ماكو أكواد.</td></tr>';
+  }
+
+  // ---------- library ----------
+  $('libRefresh').onclick = () => loadLib(true);
+  async function loadLib(force) {
+    let r; try { r = await call('/api/staff/library' + (force ? '?refresh=1' : ''), { token }); } catch (x) { return out(x); }
+    $('libNote').innerHTML = !r.ready ? '<div class="card pad" style="border-color:#F5C6C1;background:var(--red-soft)">⚠️ مفاتيح Bunny مو موجودة بـ Railway (BUNNY_LIBRARY_ID و BUNNY_API_KEY).</div>'
+      : (!r.signed ? '<div class="card pad" style="background:var(--yellow-wash)">⚠️ BUNNY_TOKEN_KEY مو موجود: الفيديوهات تشتغل، بس روابطها مو محمية.</div>' : '')
+      + (r.unmatched.length ? `<div class="card pad small">فيديوهات ما عرفتها من عنوانها: <span class="en">${r.unmatched.map(esc).join(' · ')}</span></div>` : '');
+    $('libBody').innerHTML = r.items.map(i => `<tr><td class="en" style="text-align:right">${esc(i.key)}</td><td class="en" style="text-align:right">${esc(i.title)}</td>
+      <td>${i.videos ? '✅' + (i.videos > 1 ? ` (${i.videos} أجزاء)` : '') : (i.optional ? '<span class="muted">ماكو (اختياري)</span>' : '❌ ناقص')}</td></tr>`).join('');
+  }
+
+  function start() { show('app'); $('who').textContent = me || ''; openTab('hw'); }
+  if (token) start(); else show('login');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B0B0B">
+<title>كورس مصطفى صلاح</title>
+<meta name="description" content="منصة كورس مصطفى صلاح: محاضراتك وواجباتك يوم بيوم.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+.hero{background:var(--yellow);color:var(--black)}
+.hero .inner{padding-block:26px 30px}
+.hero h1{font-size:clamp(1.5rem,5vw,2.1rem);font-weight:900}
+.hero .tag{font:600 1rem/1.5 var(--font-display);margin-top:4px}
+.prog{height:10px;border-radius:99px;background:rgba(0,0,0,.14);overflow:hidden;margin-top:16px}
+.prog i{display:block;height:100%;background:var(--black);border-radius:99px;width:0;transition:width .6s}
+.hero .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.hero .meta .pill{background:rgba(255,255,255,.55);border-color:rgba(0,0,0,.12);color:var(--black)}
+main .inner{padding-block:22px 60px}
+section+section{margin-top:26px}
+.sec-h{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+.sec-h h2{font-size:1.2rem;font-weight:800}
+
+/* login */
+.login{max-width:440px;margin:40px auto 0}
+.login h1{font-size:1.6rem;font-weight:900}
+.login .sub{margin:4px 0 18px}
+
+/* day cards */
+.day{overflow:hidden}
+.day > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:16px 18px}
+.day > summary::-webkit-details-marker{display:none}
+.dnum{flex:none;width:52px;height:52px;border-radius:14px;background:var(--paper);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;font:900 1.15rem/1 var(--font-display)}
+.dnum small{font:700 .62rem/1.2 var(--font-display);color:var(--muted)}
+.day.today .dnum{background:var(--yellow);border-color:var(--yellow)}
+.dtitle{flex:1;min-width:0}
+.dtitle h3{font-size:1.02rem;font-weight:800}
+.dtitle .k{font:700 .78rem/1.4 var(--font-display);color:var(--muted)}
+.chev{flex:none;transition:transform .2s;color:var(--muted)}
+.day[open] .chev{transform:rotate(180deg)}
+.dbody{padding:0 18px 20px;display:flex;flex-direction:column;gap:16px}
+.blk{border-top:1px dashed var(--line-2);padding-top:14px;display:flex;flex-direction:column;gap:10px}
+.blk h4{margin:0;font:800 .98rem/1.4 var(--font-display)}
+.note{background:var(--yellow-wash);border:1px solid #F2DE92;border-radius:12px;padding:12px 14px}
+.sub-item{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.fb{background:var(--green-soft);border:1px solid #BFE6CF;border-radius:10px;padding:10px 12px;white-space:pre-wrap}
+.fb b{font-family:var(--font-display)}
+.days{display:flex;flex-direction:column;gap:12px}
+.lockd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;border:1px dashed var(--line-2);color:var(--muted)}
+.lockd b{color:var(--ink-2);font-family:var(--font-display)}
+.intro-grid{display:grid;gap:14px}
+</style>
+</head>
+<body>
+<header class="bar"><div class="inner">
+  <div class="lock" id="lock"></div>
+  <div class="sp"></div>
+  <span class="chip" id="dayChip" hidden>اليوم <b id="dayNum">1</b>/<span id="dayTot">30</span></span>
+  <button class="chip" id="logout" hidden>خروج</button>
+</div></header>
+
+<div id="vLogin" hidden>
+  <div class="inner">
+    <form class="login card pad stack" id="loginForm" novalidate>
+      <div>
+        <h1>كورس مصطفى صلاح</h1>
+        <p class="sub muted">ما راح تحفظ، راح تحجي. ادخل برقم موبايلك وكود التفعيل اللي وصلك.</p>
+      </div>
+      <div class="field"><label for="phone">رقم الموبايل</label>
+        <input class="input en" id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07xx xxx xxxx" required></div>
+      <div class="field"><label for="code">كود التفعيل</label>
+        <input class="input en" id="code" autocapitalize="characters" autocomplete="one-time-code" placeholder="TA-XXXXX" required></div>
+      <div class="field" id="nameF" hidden><label for="name">اسمك</label>
+        <input class="input" id="name" autocomplete="name" placeholder="مثلاً: علي حسن"></div>
+      <div class="err small" id="loginErr" role="alert"></div>
+      <button class="btn y" id="loginBtn">دخول</button>
+      <p class="muted small" style="margin:0">أول مرة تدخل؟ الكود يرتبط برقمك. بعدها تكدر تدخل من أي موبايل بنفس الرقم والكود.</p>
+    </form>
+  </div>
+</div>
+
+<div id="vApp" hidden>
+  <div class="hero"><div class="inner">
+    <h1 id="hello">أهلاً 👋</h1>
+    <div class="tag" id="heroTag"></div>
+    <div class="prog" aria-hidden="true"><i id="progBar"></i></div>
+    <div class="meta" id="heroMeta"></div>
+  </div></div>
+  <main><div class="inner">
+    <section id="introSec" hidden>
+      <div class="sec-h"><h2>🎬 قبل ما تبدي</h2></div>
+      <details class="card day" id="introBox"><summary>
+        <div class="dnum">▶</div>
+        <div class="dtitle"><h3>المقدمة وشلون تسوي واجب المحاكاة</h3><div class="k">شوفهن أول شي</div></div>
+        <span class="chev">▾</span></summary>
+        <div class="dbody intro-grid" id="introBody"></div>
+      </details>
+    </section>
+    <section>
+      <div class="sec-h"><h2>📚 أيامك</h2><span class="muted small" id="nextOpen"></span></div>
+      <div class="days" id="days"></div>
+    </section>
+    <section id="upSec" hidden>
+      <div class="sec-h"><h2>🔒 الجاي</h2></div>
+      <div class="days" id="upcoming"></div>
+    </section>
+  </div></main>
+</div>
+
+<script src="config.js"></script>
+<script src="brand.js"></script>
+<script src="common.js"></script>
+<script>
+(function () {
+  const { call, esc, store, fileUrl, toast, when, recorder } = Learn;
+  const $ = id => document.getElementById(id);
+  $('lock').innerHTML = `<img class="sig" src="${BRAND.sig}" alt="Mustafa Salah"><span class="x">×</span><img src="${BRAND.logo}" alt="Ta3alm English">`;
+  let token = store.get('learn_token');
+  let data = null;
+
+  function show(v) { $('vLogin').hidden = v !== 'login'; $('vApp').hidden = v !== 'app'; $('logout').hidden = v !== 'app'; $('dayChip').hidden = v !== 'app'; }
+
+  // ---------- login ----------
+  $('loginForm').onsubmit = async e => {
+    e.preventDefault();
+    const btn = $('loginBtn'), err = $('loginErr');
+    err.textContent = '';
+    const phone = $('phone').value, code = $('code').value, name = $('name').value;
+    if (!phone.trim() || !code.trim()) { err.textContent = 'اكتب رقمك والكود.'; return; }
+    btn.disabled = true;
+    try {
+      if ($('nameF').hidden) {
+        const c = await call('/api/check', { method: 'POST', json: { phone, code } });
+        if (!c.known && !c.code_ok) throw { message: 'الكود غلط أو مستخدم. تأكد منه، أو اطلب كود من المنسّقة.' };
+        if (!c.known) { $('nameF').hidden = false; $('name').focus(); btn.textContent = 'ابدي الكورس'; return; }
+      }
+      const r = await call('/api/login', { method: 'POST', json: { phone, code, name } });
+      token = r.token; store.set('learn_token', token);
+      await load(true);
+    } catch (x) { err.textContent = x.message; }
+    finally { btn.disabled = false; }
+  };
+  $('logout').onclick = () => { store.set('learn_token', null); token = null; show('login'); };
+
+  // ---------- data ----------
+  async function load(first) {
+    try { data = await call('/api/me', { token }); }
+    catch (x) {
+      if (x.status === 401) { store.set('learn_token', null); token = null; show('login'); return; }
+      toast(x.message); return;
+    }
+    render(first);
+  }
+
+  const chap = n => (data.chapters[String(n)] || {});
+  function dayLabel(d) {
+    if (d.kind === 'lecture') return { k: `${chap(d.chapter).ar || ''} · المحاضرة ${d.lecture}`, t: d.title, en: true };
+    if (d.kind === 'homework') return { k: `واجب B · المحاضرة ${d.lecture}`, t: d.title, en: true };
+    if (d.kind === 'rest') return { k: 'يوم مراجعة', t: 'ماكو شي جديد اليوم', en: false };
+    if (d.kind === 'capstone') return { k: `${chap(d.chapter).ar || ''} · التحدي النهائي`, t: d.title, en: true };
+    return { k: 'التحدي النهائي', t: d.last ? 'آخر يوم لتسليم فيديو التحدي' : 'يوم تسجيل فيديو التحدي', en: false };
+  }
+
+  function render(first) {
+    const d = data;
+    show('app');
+    $('dayNum').textContent = d.day; $('dayTot').textContent = d.total;
+    $('hello').textContent = `أهلاً ${d.name} 👋`;
+    $('heroTag').textContent = d.finished ? 'خلصت الكورس! 🎉 تكدر ترجع لأي محاضرة بأي وقت.' : `انت باليوم ${d.day} من ${d.total}`;
+    requestAnimationFrame(() => { $('progBar').style.width = Math.round(100 * (d.finished ? 1 : d.day / d.total)) + '%'; });
+    const miss = d.missing.length;
+    $('heroMeta').innerHTML = (miss ? `<span class="pill">🎙️ عندك ${miss} ${miss === 1 ? 'واجب ناقص' : 'واجبات ناقصة'}</span>` : `<span class="pill">✅ ما عندك واجبات ناقصة</span>`);
+    $('nextOpen').textContent = d.finished || d.day >= d.total ? '' : `اليوم الجاي ينفتح الساعة ${d.send_hour % 12 || 12} العصر`;
+
+    // intro + how-to
+    const intro = [...d.intro.map(u => ['المقدمة', u]), ...d.howto.map(u => ['شلون تسوي واجب المحاكاة (Imitation)', u])];
+    $('introSec').hidden = !intro.length;
+    $('introBody').innerHTML = intro.map(([t, u]) => `<div class="stack"><h4 style="margin:0;font-family:var(--font-display)">${t}</h4>${frame(u)}</div>`).join('');
+    if (first && d.day === 1) $('introBox').open = true;
+
+    // days, newest first
+    const box = $('days'); box.innerHTML = '';
+    [...d.days].reverse().forEach((day, i) => box.appendChild(dayCard(day, i === 0)));
+
+    const up = d.upcoming;
+    $('upSec').hidden = !up.length;
+    $('upcoming').innerHTML = up.map(u => `<div class="lockd"><span>🔒</span><div style="min-width:0"><div><b>اليوم ${u.number}</b> · ${u.kind === 'capstone' ? 'التحدي النهائي' : 'المحاضرة ' + u.lecture}</div><div class="en" dir="ltr" style="text-align:right">${esc(u.title)}</div></div></div>`).join('');
+  }
+
+  function frame(u) {
+    return `<div class="video"><iframe src="${esc(u)}" loading="lazy" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen" allowfullscreen title="فيديو المحاضرة"></iframe></div>`;
+  }
+
+  function dayCard(day, isToday) {
+    const L = dayLabel(day);
+    const el = document.createElement('details');
+    el.className = 'card day' + (isToday ? ' today' : '');
+    el.open = isToday;
+    const hw = day.homework;
+    const done = hw && hw.submissions.length;
+    const status = !hw ? '' : done ? (hw.submissions.some(s => s.feedback) ? '<span class="pill ok">✅ مصحّح</span>' : '<span class="pill wait">⏳ ينتظر التصحيح</span>') : (isToday ? '' : '<span class="pill bad">ناقص</span>');
+    el.innerHTML = `<summary>
+        <div class="dnum">${day.number}<small>${isToday ? 'اليوم' : 'يوم'}</small></div>
+        <div class="dtitle"><div class="k">${esc(L.k)}</div><h3 class="${L.en ? 'en' : ''}" style="${L.en ? 'text-align:right' : ''}">${esc(L.t)}</h3></div>
+        ${status}<span class="chev">▾</span></summary>
+      <div class="dbody"></div>`;
+    const body = el.querySelector('.dbody');
+    let built = false;
+    const build = () => {
+      if (built) return; built = true;
+      let h = '';
+      if (day.kind === 'rest') {
+        h += `<div class="note">☕ <b>يوم مراجعة.</b> إذا عندك واجب ناقص هذا وقته. اسمع فويسات المحاضرة مرة ثانية وقلّدها بدون ما تشوف النص${day.chapter ? '' : ''}.</div>`;
+      }
+      if (day.videos !== undefined) {
+        h += `<div class="blk"><h4>🎬 ${day.kind === 'capstone' ? 'فيديو التحدي' : 'المحاضرة'}</h4>` +
+          (day.videos.length ? day.videos.map((u, i) => (day.videos.length > 1 ? `<div class="muted small">الجزء ${i + 1}</div>` : '') + frame(u)).join('') : '<div class="note">⏳ الفيديو راح ينزل قريباً.</div>') +
+          (day.page ? `<a class="btn ghost sm" href="${esc(day.page)}" target="_blank" rel="noopener">🎮 صفحة الدرس التفاعلية ←</a>` : '') + `</div>`;
+      }
+      if (hw && hw.type === 'audio') {
+        h += `<div class="blk"><h4>🎙️ واجب المحاكاة <span class="muted en small">${esc(hw.key)}</span></h4>
+          <div class="muted small">اسمع الفويس كذا مرة، بعدين سجّل صوتك وانت تقلّده بنفس النطق والنغمة.</div>
+          <audio controls preload="none" src="${esc(hw.audio)}"></audio>
+          <div class="hw-subs stack"></div>
+          <div class="hw-rec"></div></div>`;
+      }
+      if (hw && hw.type === 'link') {
+        h += `<div class="blk"><h4>🏆 سلّم فيديو التحدي</h4>
+          <div class="muted small">سجّل فيديو من دقيقتين لثلاث تحچي بيه عن نفسك وتستخدم اللي تعلمته. ارفعه على Google Drive (خلّي المشاركة: أي شخص عنده الرابط) وحط الرابط هنا.</div>
+          <div class="hw-subs stack"></div>
+          <form class="row cap-f"><input class="input en" type="url" placeholder="https://drive.google.com/..." required style="flex:1;min-width:0"><button class="btn y">سلّم</button></form>
+          <div class="err small cap-err"></div></div>`;
+      }
+      body.innerHTML = h;
+      if (hw) {
+        renderSubs(body.querySelector('.hw-subs'), hw.submissions);
+        if (hw.type === 'audio') {
+          recorder(body.querySelector('.hw-rec'), {
+            sendLabel: 'أرسل للمدرب',
+            onSend: async (blob, name) => {
+              const fd = new FormData(); fd.append('hw_key', hw.key); fd.append('audio', blob, name);
+              const r = await call('/api/homework', { method: 'POST', form: fd, token });
+              hw.submissions.push(r.submission); renderSubs(body.querySelector('.hw-subs'), hw.submissions);
+              toast('✅ وصل واجبك للمدرب'); refreshMissing();
+            }
+          });
+        } else {
+          const f = body.querySelector('.cap-f');
+          f.onsubmit = async e => {
+            e.preventDefault();
+            const fd = new FormData(); fd.append('hw_key', hw.key); fd.append('link', f.querySelector('input').value);
+            try {
+              const r = await call('/api/homework', { method: 'POST', form: fd, token });
+              hw.submissions.push(r.submission); renderSubs(body.querySelector('.hw-subs'), hw.submissions);
+              f.reset(); body.querySelector('.cap-err').textContent = ''; toast('✅ وصل فيديو التحدي'); refreshMissing();
+            } catch (x) { body.querySelector('.cap-err').textContent = x.message; }
+          };
+        }
+      }
+    };
+    if (el.open) build();
+    el.addEventListener('toggle', () => { if (el.open) build(); });
+    return el;
+  }
+
+  function renderSubs(host, subs) {
+    if (!host) return;
+    host.innerHTML = subs.map((s, i) => `<div class="sub-item">
+        <div class="row"><b style="font-family:var(--font-display)">تسليمك ${subs.length > 1 ? i + 1 : ''}</b><span class="muted small">${when(s.created_at)}</span>
+        ${s.feedback ? '<span class="pill ok">✅ مصحّح</span>' : '<span class="pill wait">⏳ ينتظر التصحيح</span>'}</div>
+        ${s.audio ? `<audio controls preload="none" src="${esc(fileUrl(s.audio, token))}"></audio>` : ''}
+        ${s.link ? `<a class="en small" href="${esc(s.link)}" target="_blank" rel="noopener">${esc(s.link)}</a>` : ''}
+        ${s.feedback ? `<div class="fb"><b>👨‍🏫 تصحيح المدرب:</b>${s.feedback.text ? '\n' + esc(s.feedback.text) : ''}</div>${s.feedback.audio ? `<audio controls preload="none" src="${esc(fileUrl(s.feedback.audio, token))}"></audio>` : ''}` : ''}
+      </div>`).join('');
+  }
+
+  async function refreshMissing() {
+    try { const d = await call('/api/me', { token }); data.missing = d.missing; const miss = d.missing.length;
+      $('heroMeta').innerHTML = miss ? `<span class="pill">🎙️ عندك ${miss} ${miss === 1 ? 'واجب ناقص' : 'واجبات ناقصة'}</span>` : `<span class="pill">✅ ما عندك واجبات ناقصة</span>`;
+    } catch (e) {}
+  }
+
+  if (token) load(true); else show('login');
+})();
+</script>
+</body>
+</html>
