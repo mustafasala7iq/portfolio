@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="/learn/shared.css">
 <style>
 .hero{background:var(--yellow);color:var(--black)}
 .hero .inner{padding-block:26px 30px}
@@ -63,7 +63,7 @@ section+section{margin-top:26px}
   <button class="chip" id="logout" hidden>خروج</button>
 </div></header>
 
-<div id="vLogin" hidden>
+<div id="vLogin">
   <div class="inner">
     <form class="login card pad stack" id="loginForm" novalidate>
       <div>
@@ -111,9 +111,9 @@ section+section{margin-top:26px}
   </div></main>
 </div>
 
-<script src="config.js"></script>
-<script src="brand.js"></script>
-<script src="common.js"></script>
+<script src="/learn/config.js"></script>
+<script src="/learn/brand.js"></script>
+<script src="/learn/common.js"></script>
 <script>
 (function () {
   const { call, esc, store, fileUrl, toast, when, recorder } = Learn;

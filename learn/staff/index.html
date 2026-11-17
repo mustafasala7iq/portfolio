@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../shared.css">
+<link rel="stylesheet" href="/learn/shared.css">
 <style>
 main .inner{padding-block:20px 60px}
 .tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;scrollbar-width:none}
@@ -41,7 +41,7 @@ tr:last-child td{border-bottom:0}
   <button class="chip" id="logout" hidden>خروج</button>
 </div></header>
 
-<div id="vLogin" hidden><div class="inner">
+<div id="vLogin"><div class="inner">
   <form class="login card pad stack" id="loginForm">
     <h1 style="font-size:1.5rem;font-weight:900">لوحة الفريق</h1>
     <p class="muted" style="margin:0">للمدربين والمنسّقين: تصحيح الواجبات، أكواد التفعيل، ومتابعة الطلاب.</p>
@@ -93,9 +93,9 @@ tr:last-child td{border-bottom:0}
   </section>
 </div></main>
 
-<script src="../config.js"></script>
-<script src="../brand.js"></script>
-<script src="../common.js"></script>
+<script src="/learn/config.js"></script>
+<script src="/learn/brand.js"></script>
+<script src="/learn/common.js"></script>
 <script>
 (function () {
   const { call, esc, store, fileUrl, toast, when, recorder } = Learn;
