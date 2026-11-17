@@ -53,6 +53,15 @@ section+section{margin-top:26px}
 .lockd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;border:1px dashed var(--line-2);color:var(--muted)}
 .lockd b{color:var(--ink-2);font-family:var(--font-display)}
 .intro-grid{display:grid;gap:14px}
+.day-open{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;align-items:center;gap:12px;padding:16px 18px}
+.day-open:focus-visible{outline:3px solid var(--black);outline-offset:-3px;border-radius:18px}
+.day .go{flex:none;font:800 .88rem/1 var(--font-display);color:var(--ink-2)}
+.day.today .go{background:var(--black);color:#fff;padding:10px 12px 12px;border-radius:10px}
+.lesson{position:fixed;inset:0;z-index:100;background:var(--paper);display:flex;flex-direction:column}
+.lesson-bar{flex:none;display:flex;align-items:center;gap:12px;background:var(--black);color:#fff;
+  padding:calc(10px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));box-shadow:0 2px 0 var(--yellow)}
+.lesson-bar b{font:800 .95rem/1.3 var(--font-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.lesson iframe{flex:1;width:100%;border:0;background:var(--paper)}
 </style>
 </head>
 <body>
@@ -67,18 +76,21 @@ section+section{margin-top:26px}
   <div class="inner">
     <form class="login card pad stack" id="loginForm" novalidate>
       <div>
-        <h1>كورس مصطفى صلاح</h1>
-        <p class="sub muted">ما راح تحفظ، راح تحجي. ادخل برقم موبايلك وكود التفعيل اللي وصلك.</p>
+        <h1 id="loginTitle">كورس مصطفى صلاح</h1>
+        <p class="sub muted" id="loginSub">ما راح تحفظ، راح تحجي. ادخل برقم موبايلك وكود التفعيل اللي وصلك.</p>
       </div>
       <div class="field"><label for="phone">رقم الموبايل</label>
         <input class="input en" id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07xx xxx xxxx" required></div>
-      <div class="field"><label for="code">كود التفعيل</label>
+      <div class="field" id="codeF"><label for="code">كود التفعيل</label>
         <input class="input en" id="code" autocapitalize="characters" autocomplete="one-time-code" placeholder="TA-XXXXX" required></div>
       <div class="field" id="nameF" hidden><label for="name">اسمك</label>
         <input class="input" id="name" autocomplete="name" placeholder="مثلاً: علي حسن"></div>
+      <div class="field" id="goalF" hidden><label for="goal">ليش تتعلم إنكليزي؟</label>
+        <select class="input" id="goal"><option value="">اختار</option><option>للشغل</option><option>للدراسة</option><option>للسفر</option><option>أريد أحچي بثقة</option><option>غيرها</option></select></div>
+      <div class="field" id="cityF" hidden><label for="city">المحافظة</label><input class="input" id="city" placeholder="مثلاً: البصرة"></div>
       <div class="err small" id="loginErr" role="alert"></div>
       <button class="btn y" id="loginBtn">دخول</button>
-      <p class="muted small" style="margin:0">أول مرة تدخل؟ الكود يرتبط برقمك. بعدها تكدر تدخل من أي موبايل بنفس الرقم والكود.</p>
+      <p class="muted small" style="margin:0" id="loginNote">أول مرة تدخل؟ الكود يرتبط برقمك. بعدها تكدر تدخل من أي موبايل بنفس الرقم والكود.</p>
     </form>
   </div>
 </div>
@@ -101,14 +113,20 @@ section+section{margin-top:26px}
       </details>
     </section>
     <section>
-      <div class="sec-h"><h2>📚 أيامك</h2><span class="muted small" id="nextOpen"></span></div>
+      <div class="sec-h"><h2 id="daysH">📚 أيامك</h2><span class="muted small" id="nextOpen"></span></div>
       <div class="days" id="days"></div>
     </section>
     <section id="upSec" hidden>
       <div class="sec-h"><h2>🔒 الجاي</h2></div>
       <div class="days" id="upcoming"></div>
+      <a class="btn y" id="upCta" hidden target="_blank" rel="noopener" style="margin-top:14px;width:100%">🔓 اشترك وافتح كل الدروس</a>
     </section>
   </div></main>
+</div>
+
+<div class="lesson" id="lesson" hidden>
+  <div class="lesson-bar"><button type="button" class="chip" id="lessonBack">→ رجوع</button><b id="lessonTitle"></b></div>
+  <iframe id="lessonFrame" title="الدرس" allow="microphone;autoplay;encrypted-media;fullscreen;picture-in-picture" allowfullscreen></iframe>
 </div>
 
 <script src="/learn/config.js"></script>
@@ -125,8 +143,26 @@ section+section{margin-top:26px}
   function show(v) { $('vLogin').hidden = v !== 'login'; $('vApp').hidden = v !== 'app'; $('logout').hidden = v !== 'app'; $('dayChip').hidden = v !== 'app'; }
 
   // ---------- login ----------
+  const params = new URLSearchParams(location.search);
+  const FREE = params.has('free');
+  const SOURCE = params.get('src') || params.get('utm_source') || (document.referrer ? new URL(document.referrer).hostname : '') || 'direct';
+  if (FREE) {
+    $('codeF').hidden = true; $('nameF').hidden = false; $('goalF').hidden = false; $('cityF').hidden = false;
+    $('loginTitle').textContent = 'درسك الأول مجاناً 🎁';
+    $('loginSub').textContent = 'سجّل اسمك ورقمك، وشوف المقدمة والمحاضرة الأولى، وجرّب واجب المحاكاة.';
+    $('loginBtn').textContent = 'ابدي الدرس المجاني';
+    $('loginNote').textContent = 'عندك كود اشتراك؟ ادخل من mustafasalah.net/learn';
+  }
   $('loginForm').onsubmit = async e => {
     e.preventDefault();
+    if (FREE) {
+      const btn = $('loginBtn'), err = $('loginErr'); err.textContent = ''; btn.disabled = true;
+      try {
+        const r = await call('/api/free', { method: 'POST', json: { name: $('name').value, phone: $('phone').value, goal: $('goal').value, city: $('city').value, source: SOURCE } });
+        token = r.token; store.set('learn_token', token); await load(true);
+      } catch (x) { err.textContent = x.message; } finally { btn.disabled = false; }
+      return;
+    }
     const btn = $('loginBtn'), err = $('loginErr');
     err.textContent = '';
     const phone = $('phone').value, code = $('code').value, name = $('name').value;
@@ -174,7 +210,13 @@ section+section{margin-top:26px}
     requestAnimationFrame(() => { $('progBar').style.width = Math.round(100 * (d.finished ? 1 : d.day / d.total)) + '%'; });
     const miss = d.missing.length;
     $('heroMeta').innerHTML = (miss ? `<span class="pill">🎙️ عندك ${miss} ${miss === 1 ? 'واجب ناقص' : 'واجبات ناقصة'}</span>` : `<span class="pill">✅ ما عندك واجبات ناقصة</span>`);
-    $('nextOpen').textContent = d.finished || d.day >= d.total ? '' : `اليوم الجاي ينفتح الساعة ${d.send_hour % 12 || 12} العصر`;
+    $('nextOpen').textContent = d.trial || d.finished || d.day >= d.total ? '' : `اليوم الجاي ينفتح الساعة ${d.send_hour % 12 || 12} العصر`;
+    $('dayChip').hidden = d.trial;
+    if (d.trial) {
+      $('heroTag').textContent = 'هذا درسك المجاني: المقدمة، وشرح المحاكاة، والمحاضرة الأولى ويا واجبها.';
+      $('progBar').parentNode.hidden = true;
+      $('heroMeta').innerHTML = d.sales ? `<a class="btn sm" href="${esc(d.sales)}" target="_blank" rel="noopener">اشترك بالكورس الكامل ←</a>` : '';
+    } else { $('progBar').parentNode.hidden = false; }
 
     // intro + how-to
     const intro = [...d.intro.map(u => ['المقدمة', u]), ...d.howto.map(u => ['شلون تسوي واجب المحاكاة (Imitation)', u])];
@@ -185,9 +227,12 @@ section+section{margin-top:26px}
     // days, newest first
     const box = $('days'); box.innerHTML = '';
     [...d.days].reverse().forEach((day, i) => box.appendChild(dayCard(day, i === 0)));
+    $('daysH').textContent = d.trial ? '📚 درسك المجاني' : '📚 أيامك';
 
     const up = d.upcoming;
     $('upSec').hidden = !up.length;
+    $('upCta').hidden = !(d.trial && d.sales);
+    if (d.trial && d.sales) $('upCta').href = d.sales;
     $('upcoming').innerHTML = up.map(u => `<div class="lockd"><span>🔒</span><div style="min-width:0"><div><b>اليوم ${u.number}</b> · ${u.kind === 'capstone' ? 'التحدي النهائي' : 'المحاضرة ' + u.lecture}</div><div class="en" dir="ltr" style="text-align:right">${esc(u.title)}</div></div></div>`).join('');
   }
 
@@ -197,92 +242,38 @@ section+section{margin-top:26px}
 
   function dayCard(day, isToday) {
     const L = dayLabel(day);
-    const el = document.createElement('details');
+    const el = document.createElement('article');
     el.className = 'card day' + (isToday ? ' today' : '');
-    el.open = isToday;
     const hw = day.homework;
     const done = hw && hw.submissions.length;
-    const status = !hw ? '' : done ? (hw.submissions.some(s => s.feedback) ? '<span class="pill ok">✅ مصحّح</span>' : '<span class="pill wait">⏳ ينتظر التصحيح</span>') : (isToday ? '' : '<span class="pill bad">ناقص</span>');
-    el.innerHTML = `<summary>
+    const status = !hw ? '' : done ? (hw.submissions.some(s => s.feedback) ? '<span class="pill ok">✅ مصحّح</span>' : '<span class="pill wait">⏳ ينتظر التصحيح</span>') : (isToday ? '<span class="pill">🎙️ واجب اليوم</span>' : '<span class="pill bad">الواجب ناقص</span>');
+    el.innerHTML = `<button type="button" class="day-open">
         <div class="dnum">${day.number}<small>${isToday ? 'اليوم' : 'يوم'}</small></div>
-        <div class="dtitle"><div class="k">${esc(L.k)}</div><h3 class="${L.en ? 'en' : ''}" style="${L.en ? 'text-align:right' : ''}">${esc(L.t)}</h3></div>
-        ${status}<span class="chev">▾</span></summary>
-      <div class="dbody"></div>`;
-    const body = el.querySelector('.dbody');
-    let built = false;
-    const build = () => {
-      if (built) return; built = true;
-      let h = '';
-      if (day.kind === 'rest') {
-        h += `<div class="note">☕ <b>يوم مراجعة.</b> إذا عندك واجب ناقص هذا وقته. اسمع فويسات المحاضرة مرة ثانية وقلّدها بدون ما تشوف النص${day.chapter ? '' : ''}.</div>`;
-      }
-      if (day.videos !== undefined) {
-        h += `<div class="blk"><h4>🎬 ${day.kind === 'capstone' ? 'فيديو التحدي' : 'المحاضرة'}</h4>` +
-          (day.videos.length ? day.videos.map((u, i) => (day.videos.length > 1 ? `<div class="muted small">الجزء ${i + 1}</div>` : '') + frame(u)).join('') : '<div class="note">⏳ الفيديو راح ينزل قريباً.</div>') +
-          (day.page ? `<a class="btn ghost sm" href="${esc(day.page)}" target="_blank" rel="noopener">🎮 صفحة الدرس التفاعلية ←</a>` : '') + `</div>`;
-      }
-      if (hw && hw.type === 'audio') {
-        h += `<div class="blk"><h4>🎙️ واجب المحاكاة <span class="muted en small">${esc(hw.key)}</span></h4>
-          <div class="muted small">اسمع الفويس كذا مرة، بعدين سجّل صوتك وانت تقلّده بنفس النطق والنغمة.</div>
-          <audio controls preload="none" src="${esc(hw.audio)}"></audio>
-          <div class="hw-subs stack"></div>
-          <div class="hw-rec"></div></div>`;
-      }
-      if (hw && hw.type === 'link') {
-        h += `<div class="blk"><h4>🏆 سلّم فيديو التحدي</h4>
-          <div class="muted small">سجّل فيديو من دقيقتين لثلاث تحچي بيه عن نفسك وتستخدم اللي تعلمته. ارفعه على Google Drive (خلّي المشاركة: أي شخص عنده الرابط) وحط الرابط هنا.</div>
-          <div class="hw-subs stack"></div>
-          <form class="row cap-f"><input class="input en" type="url" placeholder="https://drive.google.com/..." required style="flex:1;min-width:0"><button class="btn y">سلّم</button></form>
-          <div class="err small cap-err"></div></div>`;
-      }
-      body.innerHTML = h;
-      if (hw) {
-        renderSubs(body.querySelector('.hw-subs'), hw.submissions);
-        if (hw.type === 'audio') {
-          recorder(body.querySelector('.hw-rec'), {
-            sendLabel: 'أرسل للمدرب',
-            onSend: async (blob, name) => {
-              const fd = new FormData(); fd.append('hw_key', hw.key); fd.append('audio', blob, name);
-              const r = await call('/api/homework', { method: 'POST', form: fd, token });
-              hw.submissions.push(r.submission); renderSubs(body.querySelector('.hw-subs'), hw.submissions);
-              toast('✅ وصل واجبك للمدرب'); refreshMissing();
-            }
-          });
-        } else {
-          const f = body.querySelector('.cap-f');
-          f.onsubmit = async e => {
-            e.preventDefault();
-            const fd = new FormData(); fd.append('hw_key', hw.key); fd.append('link', f.querySelector('input').value);
-            try {
-              const r = await call('/api/homework', { method: 'POST', form: fd, token });
-              hw.submissions.push(r.submission); renderSubs(body.querySelector('.hw-subs'), hw.submissions);
-              f.reset(); body.querySelector('.cap-err').textContent = ''; toast('✅ وصل فيديو التحدي'); refreshMissing();
-            } catch (x) { body.querySelector('.cap-err').textContent = x.message; }
-          };
-        }
-      }
-    };
-    if (el.open) build();
-    el.addEventListener('toggle', () => { if (el.open) build(); });
+        <div class="dtitle"><div class="k">${esc(L.k)}</div><h3 class="${L.en ? 'en' : ''}" style="${L.en ? 'text-align:right' : ''}">${esc(L.t)}</h3>
+          <div class="row" style="margin-top:6px;gap:6px">${status}</div></div>
+        <span class="go">${isToday ? 'ابدي الدرس' : 'افتح'} ←</span></button>`;
+    el.querySelector('.day-open').onclick = () => openLesson(day, L);
     return el;
   }
 
-  function renderSubs(host, subs) {
-    if (!host) return;
-    host.innerHTML = subs.map((s, i) => `<div class="sub-item">
-        <div class="row"><b style="font-family:var(--font-display)">تسليمك ${subs.length > 1 ? i + 1 : ''}</b><span class="muted small">${when(s.created_at)}</span>
-        ${s.feedback ? '<span class="pill ok">✅ مصحّح</span>' : '<span class="pill wait">⏳ ينتظر التصحيح</span>'}</div>
-        ${s.audio ? `<audio controls preload="none" src="${esc(fileUrl(s.audio, token))}"></audio>` : ''}
-        ${s.link ? `<a class="en small" href="${esc(s.link)}" target="_blank" rel="noopener">${esc(s.link)}</a>` : ''}
-        ${s.feedback ? `<div class="fb"><b>👨‍🏫 تصحيح المدرب:</b>${s.feedback.text ? '\n' + esc(s.feedback.text) : ''}</div>${s.feedback.audio ? `<audio controls preload="none" src="${esc(fileUrl(s.feedback.audio, token))}"></audio>` : ''}` : ''}
-      </div>`).join('');
+  // ---------- the lesson: full screen (video + workbook + homework), served by the API ----------
+  let dirty = false;
+  addEventListener('message', e => { if (e.data && e.data.lessonChanged) dirty = true; });
+  function openLesson(day, L) {
+    const ov = $('lesson');
+    $('lessonTitle').textContent = `اليوم ${day.number} · ${L.t}`;
+    $('lessonFrame').src = Learn.API + day.lesson + '?t=' + encodeURIComponent(token);
+    ov.hidden = false; document.body.style.overflow = 'hidden';
+    history.pushState({ lesson: day.number }, '');
   }
-
-  async function refreshMissing() {
-    try { const d = await call('/api/me', { token }); data.missing = d.missing; const miss = d.missing.length;
-      $('heroMeta').innerHTML = miss ? `<span class="pill">🎙️ عندك ${miss} ${miss === 1 ? 'واجب ناقص' : 'واجبات ناقصة'}</span>` : `<span class="pill">✅ ما عندك واجبات ناقصة</span>`;
-    } catch (e) {}
+  function closeLesson(fromPop) {
+    const ov = $('lesson'); if (ov.hidden) return;
+    ov.hidden = true; document.body.style.overflow = ''; $('lessonFrame').src = 'about:blank';
+    if (!fromPop) history.back();
+    if (dirty) { dirty = false; load(false); }
   }
+  $('lessonBack').onclick = () => closeLesson(false);
+  addEventListener('popstate', () => closeLesson(true));
 
   if (token) load(true); else show('login');
 })();

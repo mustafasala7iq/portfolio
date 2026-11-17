@@ -56,19 +56,26 @@ tr:last-child td{border-bottom:0}
   <nav class="tabs" role="tablist">
     <button role="tab" data-t="hw" aria-selected="true">الواجبات<span class="n" id="nHw">0</span></button>
     <button role="tab" data-t="st">الطلاب</button>
+    <button role="tab" data-t="leads">المسجلين مجاناً</button>
     <button role="tab" data-t="codes">أكواد التفعيل</button>
     <button role="tab" data-t="lib">الفيديوهات</button>
   </nav>
 
   <section id="t-hw">
     <div class="hd" style="margin-bottom:12px"><h2 style="font-size:1.15rem">الواجبات</h2>
-      <div class="seg"><button data-s="pending" aria-pressed="true">تنتظر التصحيح</button><button data-s="all" aria-pressed="false">الكل</button></div></div>
+      <div class="seg"><button data-s="pending" aria-pressed="true">تنتظر التصحيح</button><button data-s="all" aria-pressed="false">الكل</button><button data-s="trial" aria-pressed="false">الدرس المجاني</button></div></div>
     <div class="list" id="hwList"></div>
   </section>
 
   <section id="t-st" hidden>
     <div class="hd" style="margin-bottom:12px"><h2 style="font-size:1.15rem">الطلاب</h2><span class="muted small" id="stCount"></span></div>
     <div class="tbl-wrap"><table><thead><tr><th>الطالب</th><th>اليوم</th><th>ناقص</th><th>آخر تسليم</th><th></th></tr></thead><tbody id="stBody"></tbody></table></div>
+  </section>
+
+  <section id="t-leads" hidden class="stack">
+    <div class="hd"><h2 style="font-size:1.15rem">المسجلين بالدرس المجاني</h2><div class="row"><span class="muted small" id="leadCount"></span><button class="btn sm ghost" id="leadCsv">⬇︎ Excel (CSV)</button></div></div>
+    <p class="muted small" style="margin:0">رابط الدرس المجاني: <b class="en" id="freeLink"></b>. حط بعده <span class="en">?src=</span> واسم المصدر حتى تعرف منين إجه كل واحد، مثل <span class="en">/learn/free?src=ig-ad1</span></p>
+    <div class="tbl-wrap"><table><thead><tr><th>الاسم</th><th>الهدف</th><th>المحافظة</th><th>المصدر</th><th>واجب</th><th>سجّل</th><th></th></tr></thead><tbody id="leadBody"></tbody></table></div>
   </section>
 
   <section id="t-codes" hidden class="stack">
@@ -120,8 +127,8 @@ tr:last-child td{border-bottom:0}
   document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => openTab(b.dataset.t));
   function openTab(t) {
     document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.t === t)));
-    ['hw', 'st', 'codes', 'lib'].forEach(x => { $('t-' + x).hidden = x !== t; });
-    ({ hw: loadHw, st: loadSt, codes: loadCodes, lib: loadLib })[t]();
+    ['hw', 'st', 'leads', 'codes', 'lib'].forEach(x => { $('t-' + x).hidden = x !== t; });
+    ({ hw: loadHw, st: loadSt, leads: loadLeads, codes: loadCodes, lib: loadLib })[t]();
   }
   document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
     hwStatus = b.dataset.s; document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); loadHw();
@@ -129,7 +136,8 @@ tr:last-child td{border-bottom:0}
 
   // ---------- homework ----------
   async function loadHw() {
-    let r; try { r = await call('/api/staff/submissions?status=' + hwStatus, { token }); } catch (x) { return out(x); }
+    const q = hwStatus === 'trial' ? 'status=all&trial=1' : 'status=' + hwStatus;
+    let r; try { r = await call('/api/staff/submissions?' + q, { token }); } catch (x) { return out(x); }
     if (hwStatus === 'pending') $('nHw').textContent = r.submissions.length;
     const box = $('hwList'); box.innerHTML = '';
     if (!r.submissions.length) { box.innerHTML = `<div class="card pad muted">${hwStatus === 'pending' ? '👏 ماكو واجبات تنتظر التصحيح.' : 'ماكو واجبات بعد.'}</div>`; return; }
@@ -138,7 +146,7 @@ tr:last-child td{border-bottom:0}
   function hwCard(s) {
     const el = document.createElement('article'); el.className = 'card pad stack sub';
     const wa = 'https://wa.me/' + s.student.phone;
-    el.innerHTML = `<div class="hd"><h3>${esc(s.student.name)} <a class="muted small en" href="${wa}" target="_blank" rel="noopener">+${esc(s.student.phone)}</a></h3><span class="muted small">${when(s.created_at)}</span></div>
+    el.innerHTML = `<div class="hd"><h3>${s.trial ? '<span class="pill wait">🎁 مجاني</span> ' : ''}${esc(s.student.name)} <a class="muted small en" href="${wa}" target="_blank" rel="noopener">+${esc(s.student.phone)}</a></h3><span class="muted small">${when(s.created_at)}</span></div>
       <div class="muted small en" dir="ltr" style="text-align:right">${esc(s.title)} · <b style="white-space:nowrap">${esc(s.hw_key)}</b> · Day ${s.day}</div>
       ${s.audio ? `<audio controls preload="none" src="${esc(fileUrl(s.audio, token))}"></audio>` : ''}
       ${s.link ? `<a class="btn ghost sm" href="${esc(s.link)}" target="_blank" rel="noopener">🎥 افتح فيديو التحدي</a>` : ''}
@@ -187,6 +195,29 @@ tr:last-child td{border-bottom:0}
       try { await call('/api/staff/remove', { method: 'POST', json: { id: +b.dataset.id }, token }); toast('انحذف ' + b.dataset.name); loadSt(); } catch (x) { out(x); }
     });
   }
+
+  // ---------- free-lesson sign-ups ----------
+  let leads = [];
+  $('freeLink').textContent = SITE + 'free';
+  async function loadLeads() {
+    let r; try { r = await call('/api/staff/leads', { token }); } catch (x) { return out(x); }
+    leads = r.leads;
+    $('leadCount').textContent = leads.length + ' شخص';
+    $('leadBody').innerHTML = leads.map(l => {
+      const text = `هلا ${l.name} 👋 شلون شفت الدرس المجاني بكورس مصطفى صلاح؟`;
+      return `<tr><td><b>${esc(l.name)}</b><div class="muted small en" style="text-align:right">+${esc(l.phone)}</div></td>
+        <td>${esc(l.goal || '')}</td><td>${esc(l.city || '')}</td><td class="en small">${esc(l.source || '')}</td>
+        <td>${l.homework ? '✅' : '—'}</td><td class="small">${when(l.created_at)}</td>
+        <td><a class="btn sm y" href="https://wa.me/${l.phone}?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">واتساب</a></td></tr>`;
+    }).join('') || '<tr><td colspan="7" class="muted">ماكو أحد بعد.</td></tr>';
+  }
+  $('leadCsv').onclick = () => {
+    const rows = [['name', 'phone', 'goal', 'city', 'source', 'homework', 'signed_up']].concat(
+      leads.map(l => [l.name, '+' + l.phone, l.goal || '', l.city || '', l.source || '', l.homework, l.created_at]));
+    const csv = '\ufeff' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'free-signups.csv'; document.body.appendChild(a); a.click(); a.remove();
+  };
 
   // ---------- codes ----------
   $('codeForm').onsubmit = async e => {
