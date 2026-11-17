@@ -81,7 +81,9 @@ section+section{margin-top:26px}
 .hero .inner{position:relative;z-index:1}
 .hero::before{content:"";position:absolute;width:300px;height:300px;inset-inline-end:-90px;top:-70px;border-radius:50%;border:44px solid rgba(255,255,255,.28)}
 .links{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
-.links a{color:var(--ink-2);font-weight:600}
+.links{align-items:center;text-align:center;margin-top:4px}
+.links a{color:var(--ink);font-weight:700}
+.links span{color:var(--muted)}
 .act{margin-bottom:18px;border-color:var(--black)}
 .tip{padding:16px 18px;margin-bottom:18px;display:flex;flex-direction:column;gap:8px;background:var(--yellow-wash);border-color:#F2DE92;box-shadow:none}
 .tip-h{display:flex;align-items:center;gap:10px}
@@ -223,14 +225,15 @@ section+section{margin-top:26px}
   const params = new URLSearchParams(location.search);
   const SOURCE = params.get('src') || params.get('utm_source') || (document.referrer ? new URL(document.referrer).hostname : '') || 'direct';
   const WA = window.SUPPORT_WA ? 'https://wa.me/' + window.SUPPORT_WA : null;
-  let mode = params.has('free') ? 'free' : 'login';
+  // new visitors sign up first; a device that already had an account opens on "log in"
+  let mode = params.has('free') ? 'free' : (params.has('login') || store.get('has_account') ? 'login' : 'act');
   const MODES = {
-    login: { t: 'كورس مصطفى صلاح', s: 'ما راح تحفظ، راح تحجي. سجّل دخول بإيميلك والباسورد.', b: 'دخول',
-      l: `<a href="#" data-go="act">أول مرة؟ فعّل اشتراكك بالكود</a><a href="/learn/free">جرّب الدرس الأول مجاناً</a>${WA ? `<a href="${WA}" target="_blank" rel="noopener">نسيت الباسورد؟ راسلنا على واتساب</a>` : ''}` },
-    act: { t: 'فعّل اشتراكك', s: 'سوّي حسابك بالكود اللي وصلك. بعدها تدخل بإيميلك والباسورد من موبايلك ولابتوبك.', b: 'فعّل وابدي الكورس',
-      l: `<a href="#" data-go="login">عندك حساب؟ سجّل دخول</a>` },
+    login: { t: 'سجّل دخول', s: 'أهلاً بيك مرة ثانية 👋 ادخل بإيميلك والباسورد.', b: 'دخول',
+      l: `<a href="#" data-go="act">ما عندك حساب؟ سوّي حساب</a>${WA ? `<a href="${WA}" target="_blank" rel="noopener">نسيت الباسورد؟ راسلنا على واتساب</a>` : ''}` },
+    act: { t: 'سوّي حسابك', s: 'اكتب معلوماتك وكود التفعيل اللي وصلك. بعدها تدخل بإيميلك والباسورد من موبايلك ولابتوبك.', b: 'سوّي الحساب وابدي الكورس',
+      l: `<span>عندك حساب؟ <a href="#" data-go="login">سجّل دخول</a></span><span>ما عندك كود؟ <a href="/learn/free">جرّب الدرس الأول مجاناً</a></span>` },
     free: { t: 'درسك الأول مجاناً 🎁', s: 'سوّي حسابك، وشوف المقدمة والمحاضرة الأولى، وجرّب واجب المحاكاة.', b: 'ابدي الدرس المجاني',
-      l: `<a href="#" data-go="login">عندك حساب؟ سجّل دخول</a>` },
+      l: `<span>عندك حساب؟ <a href="#" data-go="login">سجّل دخول</a></span>` },
   };
   function setMode(m) {
     mode = m; const M = MODES[m];
@@ -267,7 +270,7 @@ section+section{margin-top:26px}
       const r = mode === 'login' ? await call('/api/login', { method: 'POST', json: body })
         : await call('/api/register', { method: 'POST', json: { ...body, name: v('name'), phone: v('phone'), free: mode === 'free',
             code: v('code'), goal: v('goal'), city: v('city'), source: SOURCE } });
-      token = r.token; store.set('learn_token', token);
+      token = r.token; store.set('learn_token', token); store.set('has_account', '1');
       await load(true);
     } catch (x) { err.textContent = x.message; }
     finally { btn.disabled = false; }
