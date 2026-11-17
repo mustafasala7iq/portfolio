@@ -132,14 +132,15 @@ section+section{margin-top:26px}
         <p class="sub muted" id="loginSub">ما راح تحفظ، راح تحجي. ادخل برقم موبايلك وكود التفعيل اللي وصلك.</p>
       </div>
       <div class="field"><label for="phone">رقم الموبايل</label>
-        <input class="input en" id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07xx xxx xxxx" required></div>
+        <input class="input en" id="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="07xx xxx xxxx" maxlength="16" required></div>
       <div class="field" id="codeF"><label for="code">كود التفعيل</label>
         <input class="input en" id="code" autocapitalize="characters" autocomplete="one-time-code" placeholder="TA-XXXXX" required></div>
       <div class="field" id="nameF" hidden><label for="name">اسمك</label>
         <input class="input" id="name" autocomplete="name" placeholder="مثلاً: علي حسن"></div>
       <div class="field" id="goalF" hidden><label for="goal">ليش تتعلم إنكليزي؟</label>
         <select class="input" id="goal"><option value="">اختار</option><option>للشغل</option><option>للدراسة</option><option>للسفر</option><option>أريد أحچي بثقة</option><option>غيرها</option></select></div>
-      <div class="field" id="cityF" hidden><label for="city">المحافظة</label><input class="input" id="city" placeholder="مثلاً: البصرة"></div>
+      <div class="field" id="cityF" hidden><label for="city">المحافظة</label>
+        <select class="input" id="city"><option value="">اختار محافظتك</option><option>البصرة</option><option>بغداد</option><option>أربيل</option><option>الأنبار</option><option>بابل</option><option>حلبجة</option><option>دهوك</option><option>ديالى</option><option>ذي قار</option><option>السليمانية</option><option>صلاح الدين</option><option>القادسية</option><option>كربلاء</option><option>كركوك</option><option>المثنى</option><option>ميسان</option><option>النجف</option><option>نينوى</option><option>واسط</option><option>خارج العراق</option></select></div>
       <div class="err small" id="loginErr" role="alert"></div>
       <button class="btn y" id="loginBtn">دخول</button>
       <p class="muted small" style="margin:0" id="loginNote">أول مرة تدخل؟ الكود يرتبط برقمك. بعدها تكدر تدخل من أي موبايل بنفس الرقم والكود.</p>
@@ -217,10 +218,21 @@ section+section{margin-top:26px}
     $('loginBtn').textContent = 'ابدي الدرس المجاني';
     $('loginNote').textContent = 'عندك كود اشتراك؟ ادخل من mustafasalah.net/learn';
   }
+  // Iraqi mobile: 07 then 5/7/8/9 then 8 digits (spaces, +964 and 00964 are fine)
+  function iraqiMobile(v) {
+    let d = (v || '').replace(/\D/g, '').replace(/^00/, '');
+    if (d.startsWith('964')) d = '0' + d.slice(3);
+    if (d.length === 10 && d.startsWith('7')) d = '0' + d;
+    return /^07[5789]\d{8}$/.test(d) ? d : null;
+  }
   $('loginForm').onsubmit = async e => {
     e.preventDefault();
     if (FREE) {
-      const btn = $('loginBtn'), err = $('loginErr'); err.textContent = ''; btn.disabled = true;
+      const err = $('loginErr'); err.textContent = '';
+      if (!$('name').value.trim()) { err.textContent = 'اكتب اسمك.'; $('name').focus(); return; }
+      if (!iraqiMobile($('phone').value)) { err.textContent = 'اكتب رقم موبايلك العراقي الصحيح: 11 رقم يبدي بـ 07، مثل 0770 123 4567'; $('phone').focus(); return; }
+      if (!$('city').value) { err.textContent = 'اختار محافظتك.'; $('city').focus(); return; }
+      const btn = $('loginBtn'); btn.disabled = true;
       try {
         const r = await call('/api/free', { method: 'POST', json: { name: $('name').value, phone: $('phone').value, goal: $('goal').value, city: $('city').value, source: SOURCE } });
         token = r.token; store.set('learn_token', token); await load(true);
@@ -267,7 +279,7 @@ section+section{margin-top:26px}
 
   // little per-device memory: lessons opened, corrections already seen, intro watched
   const mem = {
-    get(k, d) { try { return JSON.parse(store.get(k)) ?? d; } catch (e) { return d; } },
+    get(k, d) { try { const v = JSON.parse(store.get(k)); return v == null ? d : v; } catch (e) { return d; } },
     set(k, v) { store.set(k, JSON.stringify(v)); },
   };
   let tick = null;
