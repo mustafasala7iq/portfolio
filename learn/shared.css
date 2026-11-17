@@ -58,7 +58,7 @@ h1,h2,h3{font-family:var(--font-display);line-height:1.35;text-wrap:balance;marg
 textarea.input{min-height:90px;resize:vertical;line-height:1.6}
 .err{color:var(--red);font-weight:600;min-height:1.4em}
 
-.pill{display:inline-flex;align-items:center;gap:6px;padding:2px 10px 3px;border-radius:999px;font:700 .8rem/1.6 var(--font-display);background:var(--paper);border:1px solid var(--line)}
+.pill{white-space:nowrap;display:inline-flex;align-items:center;gap:6px;padding:2px 10px 3px;border-radius:999px;font:700 .8rem/1.6 var(--font-display);background:var(--paper);border:1px solid var(--line)}
 .pill.ok{background:var(--green-soft);border-color:#BFE6CF;color:var(--green)}
 .pill.wait{background:var(--yellow-soft);border-color:#F2DE92;color:var(--gold)}
 .pill.bad{background:var(--red-soft);border-color:#F5C6C1;color:var(--red)}
