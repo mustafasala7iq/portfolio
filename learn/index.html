@@ -73,6 +73,10 @@ section+section{margin-top:26px}
 .fbnote .fb-ic{font-size:1.6rem}
 .fbnote .go{margin-inline-start:auto;font-weight:900}
 #mtn{max-width:330px;margin-inline:auto}
+.chps{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:12px}
+.chp{padding:4px 12px 6px;border-radius:999px;font:800 .8rem/1.4 var(--font-display);border:1.5px solid var(--line-2);background:#fff;color:var(--muted)}
+.chp.cur{background:var(--yellow);border-color:var(--black);color:var(--black)}
+.chp.done{background:var(--green-soft);border-color:#BFE6CF;color:var(--green)}
 .hero{position:relative;overflow:hidden}
 .hero .inner{position:relative;z-index:1}
 .hero::before{content:"";position:absolute;width:300px;height:300px;inset-inline-end:-90px;top:-70px;border-radius:50%;border:44px solid rgba(255,255,255,.28)}
@@ -171,6 +175,7 @@ section+section{margin-top:26px}
     </section>
     <section id="mtnSec">
       <div class="sec-h"><h2>🏔️ رحلتك</h2><span class="muted small" id="mtnMeta"></span></div>
+      <div class="chps" id="chPills" hidden></div>
       <div id="mtn"></div>
     </section>
     <section id="upSec" hidden>
@@ -293,7 +298,14 @@ section+section{margin-top:26px}
     $('introBody').innerHTML = intro.map(([t, u]) => `<div class="stack"><h4 style="margin:0;font-family:var(--font-display)">${t}</h4>${frame(u)}</div>`).join('');
 
     const box = $('days'); box.innerHTML = '';
-    [...d.days].reverse().forEach((day, i) => box.appendChild(dayCard(day, i === 0)));
+    const all = [...d.days].reverse(), SHOW = 7;
+    all.slice(0, SHOW).forEach((day, i) => box.appendChild(dayCard(day, i === 0)));
+    if (all.length > SHOW) {
+      const more = document.createElement('button'); more.type = 'button'; more.className = 'btn ghost';
+      more.textContent = `عرض كل الأيام (${all.length})`;
+      more.onclick = () => { more.remove(); all.slice(SHOW).forEach(day => box.appendChild(dayCard(day, false))); };
+      box.appendChild(more);
+    }
     $('daysH').textContent = '📚 كل الأيام';
     $('daysSec').hidden = d.days.length < 2;          // on the first day the "today" card is the whole list
 
@@ -380,7 +392,13 @@ section+section{margin-top:26px}
       const state = complete ? 'done' : x.lecture === curLecture ? 'cur' : open ? 'open' : 'locked';
       return { n: x.lecture, title: x.title, day: x.number, state, item: d.days.find(y => y.number === x.number) };
     });
-    $('mtnMeta').textContent = `${doneCount} من ${camps.length} محطات مكتملة`;
+    const chs = Object.keys(d.chapters).map(Number).filter(c => [...d.days, ...d.upcoming].some(x => x.chapter === c)).sort();
+    $('mtnMeta').textContent = `${doneCount} من ${camps.length} محطات`;
+    $('chPills').innerHTML = chs.map(c => {
+      const st = c < ch ? 'done' : c === ch ? 'cur' : 'todo';
+      return `<span class="chp ${st}">${st === 'done' ? '✓ ' : st === 'todo' ? '🔒 ' : ''}${esc(d.chapters[String(c)].ar)} · <span class="en">${esc(d.chapters[String(c)].name)}</span></span>`;
+    }).join('');
+    $('chPills').hidden = chs.length < 2;
     drawMountain($('mtn'), {
       chapter: ch, camps, onCamp: c => {
         if (c.state === 'locked') { toast(d.trial ? '🔒 هذا الدرس للمشتركين. اشترك حتى يفتحلك.' : `🔒 هذا الدرس ينفتح باليوم ${c.day}`); return; }
