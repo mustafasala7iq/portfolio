@@ -23,7 +23,7 @@
 
   // camps: [{n, title, state: 'done'|'open'|'cur'|'locked', day}]
   window.drawMountain = function (box, { chapter, camps, onCamp }) {
-    const total = camps.length, H = total > 8 ? 760 : 620, K = H / 540;
+    const total = camps.length, H = total > 8 ? 680 : 560, K = H / 540;
     const P = points(total, H), short = SHORT[chapter] || [];
     box.innerHTML = '';
     const svg = el('svg', { viewBox: `0 0 400 ${H}`, class: 'mtn-svg', role: 'img', 'aria-label': 'رحلتك: ' + total + ' محطات من الأسفل للقمة' });

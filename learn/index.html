@@ -72,7 +72,20 @@ section+section{margin-top:26px}
 .fbnote{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;margin-bottom:18px;border-radius:16px;background:var(--green-soft);border:2px solid var(--green);color:var(--ink)}
 .fbnote .fb-ic{font-size:1.6rem}
 .fbnote .go{margin-inline-start:auto;font-weight:900}
-#mtn{max-width:440px;margin-inline:auto}
+#mtn{max-width:330px;margin-inline:auto}
+.hero{position:relative;overflow:hidden}
+.hero .inner{position:relative;z-index:1}
+.hero::before{content:"";position:absolute;width:300px;height:300px;inset-inline-end:-90px;top:-70px;border-radius:50%;border:44px solid rgba(255,255,255,.28)}
+.hero::after{content:"";position:absolute;inset-block:0;inset-inline-end:0;width:55%;opacity:.5;
+  background-image:radial-gradient(rgba(11,11,11,.22) 1.6px,transparent 1.8px);background-size:16px 16px;
+  -webkit-mask-image:linear-gradient(to left,#000,transparent);mask-image:linear-gradient(to left,#000,transparent)}
+.tip{padding:16px 18px;margin-bottom:18px;display:flex;flex-direction:column;gap:8px;background:var(--yellow-wash);border-color:#F2DE92;box-shadow:none}
+.tip-h{display:flex;align-items:center;gap:10px}
+.tip-h b{font:900 1.05rem/1.3 var(--font-display)}
+.tip-x{margin-inline-start:auto;border:1.5px solid var(--black);background:#fff;border-radius:999px;padding:4px 12px 6px;font:800 .82rem/1 var(--font-display)}
+.tip-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.tip-steps li{display:flex;gap:10px;align-items:flex-start}
+.tip-steps span{flex:none;width:24px;height:24px;border-radius:50%;background:var(--black);color:var(--yellow);display:grid;place-items:center;font:900 .8rem/1 var(--font-display);margin-top:3px}
 .mtn-svg{direction:ltr;display:block;width:100%;height:auto;border-radius:22px;border:2px solid var(--black);box-shadow:0 5px 0 var(--black);font-family:var(--font-body);background:#fff}
 .mtn-sky{fill:var(--yellow-wash)} .mtn-sun{fill:var(--yellow);opacity:.9} .mtn-far{fill:#D9D6CB}
 .mtn-main{fill:var(--black)} .mtn-snow{fill:#fff} .mtn-shade{fill:#2b2b2b}
@@ -141,11 +154,16 @@ section+section{margin-top:26px}
   </div></div>
   <main><div class="inner">
     <button type="button" class="fbnote" id="fbNote" hidden></button>
+    <div class="tip card" id="tip" hidden>
+      <div class="tip-h"><b>👋 شلون تبدي؟</b><button type="button" class="tip-x" id="tipX" aria-label="سكّر">فهمت ✓</button></div>
+      <ol class="tip-steps">
+        <li><span>1</span>اضغط <b>ابدي درس اليوم</b></li>
+        <li><span>2</span>شوف الفيديو، وبعده انزل للملزمة والعب ألعابها</li>
+        <li><span>3</span>بآخر الدرس اسمع الفويس، وسجّل صوتك وارسله</li>
+      </ol>
+      <div class="muted small">كل يوم ينفتح درس جديد الساعة 5 العصر، والمدرب يرد على واجبك هنا.</div>
+    </div>
     <section id="todaySec"><div class="today card" id="today"></div></section>
-    <section id="mtnSec">
-      <div class="sec-h"><h2>🏔️ رحلتك</h2><span class="muted small" id="mtnMeta"></span></div>
-      <div id="mtn"></div>
-    </section>
     <section id="introSec" hidden>
       <details class="card day" id="introBox"><summary>
         <div class="dnum">🎬</div>
@@ -157,6 +175,10 @@ section+section{margin-top:26px}
     <section id="daysSec">
       <div class="sec-h"><h2 id="daysH">📚 كل الأيام</h2></div>
       <div class="days" id="days"></div>
+    </section>
+    <section id="mtnSec">
+      <div class="sec-h"><h2>🏔️ رحلتك</h2><span class="muted small" id="mtnMeta"></span></div>
+      <div id="mtn"></div>
     </section>
     <section id="upSec" hidden>
       <div class="sec-h"><h2 id="upH">🔒 الجاي</h2></div>
@@ -267,6 +289,8 @@ section+section{margin-top:26px}
       $('heroMeta').innerHTML = miss ? `<span class="pill">🎙️ عندك ${miss} ${miss === 1 ? 'واجب ناقص' : 'واجبات ناقصة'}</span>` : `<span class="pill">✅ ما عندك واجبات ناقصة</span>`;
     }
     renderFeedbackNote();
+    $('tip').hidden = !!mem.get('tip_done', false);
+    $('tipX').onclick = () => { mem.set('tip_done', true); $('tip').hidden = true; };
     renderToday();
     renderMountain();
 
@@ -321,8 +345,7 @@ section+section{margin-top:26px}
         (d.missing.length ? step(false, false, `🎙️ سلّم الواجبات الناقصة (${d.missing.length})`) : step(true, false, '🎙️ كل واجباتك مسلّمة'));
     } else {
       steps = step(opened.has(day.number), false, day.kind === 'homework' || day.kind === 'capstone_work' ? '🎧 اسمع فويس الواجب' : '🎬 شوف الفيديو والملزمة') +
-        (hw ? step(!!sent, false, hw.type === 'link' ? '🎥 سلّم فيديو التحدي' : '🎙️ سجّل الواجب وارسله') : '') +
-        (hw ? step(!!fixed, sent && !fixed, fixed ? '👨‍🏫 وصلك تصحيح المدرب' : '👨‍🏫 تصحيح المدرب') : '');
+        (hw ? step(!!sent, false, hw.type === 'link' ? '🎥 سلّم فيديو التحدي' : '🎙️ سجّل الواجب وارسله') : '');
     }
     const btn = d.finished ? 'راجع الدرس' : !opened.has(day.number) ? 'ابدي درس اليوم' : (hw && !sent ? 'كمّل وسلّم الواجب' : 'افتح الدرس');
     $('today').innerHTML = `
