@@ -188,7 +188,7 @@ tr:last-child td{border-bottom:0}
         <td>${flag} <span class="num">${s.missing}</span></td>
         <td class="small">${s.last ? when(s.last) : '<span class="muted">ماكو</span>'}</td>
         <td><div class="row">${s.missing ? `<a class="btn sm y" href="${wa}" target="_blank" rel="noopener">ذكّره واتساب</a>` : ''}
-          <button class="btn sm ghost rm" data-id="${s.id}" data-name="${esc(s.name)}">حذف</button></div></td></tr>`;
+          ${r.admin ? `<button class="btn sm ghost rm" data-id="${s.id}" data-name="${esc(s.name)}">حذف</button>` : ''}</div></td></tr>`;
     }).join('') || '<tr><td colspan="5" class="muted">ماكو طلاب بعد.</td></tr>';
     $('stBody').querySelectorAll('.rm').forEach(b => b.onclick = async () => {
       if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'متأكد؟ اضغط مرة ثانية'; b.classList.add('rec'); return; }
