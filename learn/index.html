@@ -297,8 +297,8 @@ section+section{margin-top:26px}
   const chap = n => (data.chapters[String(n)] || {});
   function dayLabel(d) {
     if (d.kind === 'intro') return { k: 'اليوم الأول', t: 'البداية: المقدمة وشرح واجب المحاكاة', en: false };
-    if (d.kind === 'lecture') return { k: `${chap(d.chapter).ar || ''} · المحاضرة ${d.lecture}`, t: d.title, en: true };
-    if (d.kind === 'homework') return { k: `واجب B · المحاضرة ${d.lecture}`, t: d.title, en: true };
+    if (d.kind === 'lecture') return { k: `${chap(d.chapter).ar || ''} · المحاضرة ${d.lecture} + واجب المحاكاة A`, t: d.title, en: true };
+    if (d.kind === 'homework') return { k: `المحاضرة ${d.lecture} · ${d.title}`, t: 'واجب المحاكاة B 🎙️', en: false };
     if (d.kind === 'rest') return { k: 'يوم مراجعة', t: 'ماكو شي جديد اليوم', en: false };
     if (d.kind === 'capstone') return { k: `${chap(d.chapter).ar || ''} · التحدي النهائي`, t: d.title, en: true };
     return { k: 'التحدي النهائي', t: d.last ? 'آخر يوم لتسليم فيديو التحدي' : 'يوم تسجيل فيديو التحدي', en: false };
