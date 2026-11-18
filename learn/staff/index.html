@@ -240,9 +240,14 @@ tr:last-child td{border-bottom:0}
         <td>${esc(l.goal || '')}</td><td>${esc(l.city || '')}</td><td class="en small">${esc(l.source || '')}</td>
         <td>${l.homework ? '✅' : '—'}</td><td class="small">${when(l.created_at)}</td>
         <td><div class="row"><a class="btn sm y" href="https://wa.me/${l.phone}?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">واتساب</a>
-          <button class="btn sm ghost pw" data-id="${l.id}" data-name="${esc(l.name)}" data-phone="${esc(l.phone)}" data-email="${esc(l.email || '')}">باسورد جديد</button></div></td></tr>`;
+          <button class="btn sm ghost pw" data-id="${l.id}" data-name="${esc(l.name)}" data-phone="${esc(l.phone)}" data-email="${esc(l.email || '')}">باسورد جديد</button>
+          <button class="btn sm ghost rm" data-id="${l.id}" data-name="${esc(l.name)}">حذف</button></div></td></tr>`;
     }).join('') || '<tr><td colspan="7" class="muted">ماكو أحد بعد.</td></tr>';
     $('leadBody').querySelectorAll('.pw').forEach(newPassword);
+    $('leadBody').querySelectorAll('.rm').forEach(b => b.onclick = async () => {
+      if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'متأكد؟ اضغط مرة ثانية'; b.classList.add('rec'); return; }
+      try { await call('/api/staff/remove', { method: 'POST', json: { id: +b.dataset.id }, token }); toast('انحذف ' + b.dataset.name); loadLeads(); } catch (x) { out(x); }
+    });
     $('leadBody').querySelectorAll('.lead-st').forEach(sel => sel.onchange = async () => {
       try { await call('/api/staff/lead', { method: 'POST', json: { id: +sel.dataset.id, status: sel.value }, token }); toast('انحفظت الحالة'); } catch (x) { out(x); }
     });
