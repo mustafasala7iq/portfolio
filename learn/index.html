@@ -86,6 +86,7 @@ section+section{margin-top:26px}
 .links span{color:var(--muted)}
 .act{margin-bottom:18px;border-color:var(--black)}
 .pre{margin-bottom:12px;background:var(--yellow-wash);border-color:#F2DE92}
+.pre-ok{text-align:center;align-items:center;line-height:1.7}.pre-ok-ic{font-size:2.4rem;line-height:1}.pre-ok-t{font-family:var(--font-display);font-size:1.35rem}.pre-ok-go{font-weight:700}
 .tip{padding:16px 18px;margin-bottom:18px;display:flex;flex-direction:column;gap:8px;background:var(--yellow-wash);border-color:#F2DE92;box-shadow:none}
 .tip-h{display:flex;align-items:center;gap:10px}
 .tip-h b{font:900 1.05rem/1.3 var(--font-display)}
@@ -170,7 +171,7 @@ section+section{margin-top:26px}
     <button type="button" class="fbnote" id="fbNote" hidden></button>
     <div class="card pad stack pre" id="preBox" hidden></div>
     <form class="card pad stack act" id="actBox" hidden>
-      <b style="font-family:var(--font-display)">🔑 اشتركت؟ فعّل الكورس الكامل بالكود</b>
+      <b style="font-family:var(--font-display)" id="actTitle">🔑 اشتركت؟ فعّل الكورس الكامل بالكود</b>
       <div class="row"><input class="input en" id="actCode" placeholder="TA-XXXXX" autocapitalize="characters" style="flex:1;min-width:0"><button class="btn">فعّل</button></div>
       <div class="err small" id="actErr"></div>
     </form>
@@ -336,7 +337,12 @@ section+section{margin-top:26px}
     box.hidden = !d.trial;
     if (!d.trial) return;
     if (d.preorder) {
-      box.innerHTML = `<b style="font-family:var(--font-display)">✅ حجزك مثبّت بسعر الإطلاق</b><div class="muted small">نتواصل وياك يوم الإطلاق على واتساب حتى تكمل الدفع وتستلم الكود.</div>`;
+      box.classList.add('pre-ok');
+      box.innerHTML = `<div class="pre-ok-ic">🎉</div>
+        <b class="pre-ok-t">تم حجز مقعدك بنجاح!</b>
+        <div>مبروك ${esc(d.name)}، خطوتك الأولى نحو إنكليزي أقوى صارت. مقعدك محجوز بسعر الإطلاق، وما تحتاج تدفع هسة.</div>
+        <div>📲 يوم 13 ديسمبر نتواصل وياك على واتساب حتى تكمل الدفع ويوصلك كود التفعيل.</div>
+        <div class="pre-ok-go">ولحد ذاك الوقت لا توكف 💪 درسك الأول المجاني جاهز تحت، ابدي بيه هسة 👇</div>`;
       return;
     }
     box.innerHTML = `<b style="font-family:var(--font-display)">🎟️ عجبك الدرس؟ احجز مقعدك بسعر الإطلاق</b>
@@ -345,7 +351,7 @@ section+section{margin-top:26px}
       <button type="button" class="btn y" id="preGo">احجز</button></div><div class="err small" id="preErr"></div>`;
     $('preGo').onclick = async () => {
       if (!$('prePay').value) { $('preErr').textContent = 'اختار شلون تحب تدفع.'; return; }
-      try { await call('/api/activate', { method: 'POST', json: { preorder: true, pay: $('prePay').value }, token }); data.preorder = true; renderPre(); toast('✅ انحجز مقعدك'); }
+      try { await call('/api/activate', { method: 'POST', json: { preorder: true, pay: $('prePay').value }, token }); data.preorder = true; renderPre(); $('heroMeta').innerHTML = ''; $('actTitle').textContent = '🔑 وصلك كود التفعيل؟ اكتبه هنا'; box.scrollIntoView({ behavior: 'smooth', block: 'center' }); toast('✅ انحجز مقعدك'); }
       catch (x) { $('preErr').textContent = x.message; }
     };
   }
@@ -358,10 +364,11 @@ section+section{margin-top:26px}
     $('hello').textContent = `أهلاً ${d.name} 👋`;
     const miss = d.missing.length;
     $('actBox').hidden = !d.trial;
+    $('actTitle').textContent = d.preorder ? '🔑 وصلك كود التفعيل؟ اكتبه هنا' : '🔑 اشتركت؟ فعّل الكورس الكامل بالكود';
     renderPre();
     if (d.trial) {
       $('heroTag').textContent = 'هذا درسك المجاني: المقدمة، وشرح المحاكاة، والمحاضرة الأولى ويا واجبها.';
-      $('heroMeta').innerHTML = d.sales ? `<a class="btn sm" href="${esc(d.sales)}" target="_blank" rel="noopener">اشترك بالكورس الكامل ←</a>` : '';
+      $('heroMeta').innerHTML = d.sales && !d.preorder ? `<a class="btn sm" href="${esc(d.sales)}" target="_blank" rel="noopener">اشترك بالكورس الكامل ←</a>` : '';
     } else {
       $('heroTag').textContent = d.finished ? 'خلصت الكورس! 🎉 تكدر ترجع لأي درس بأي وقت.' : `انت باليوم ${d.day} من ${d.total}`;
       $('heroMeta').innerHTML = miss ? `<span class="pill">🎙️ عندك ${miss} ${miss === 1 ? 'واجب ناقص' : 'واجبات ناقصة'}</span>` : `<span class="pill">✅ ما عندك واجبات ناقصة</span>`;
