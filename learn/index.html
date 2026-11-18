@@ -85,6 +85,7 @@ section+section{margin-top:26px}
 .links a{color:var(--ink);font-weight:700}
 .links span{color:var(--muted)}
 .act{margin-bottom:18px;border-color:var(--black)}
+.sent-box{background:var(--yellow-wash);border:1px solid #F2DE92;border-radius:14px;padding:14px;color:var(--ink,#111);font-size:1rem;line-height:1.8}
 .pre{margin-bottom:12px;background:var(--yellow-wash);border-color:#F2DE92}
 .pre-ok{text-align:center;align-items:center;line-height:1.7}.pre-ok-ic{font-size:2.4rem;line-height:1}.pre-ok-t{font-family:var(--font-display);font-size:1.35rem}.pre-ok-go{font-weight:700}
 .tip{padding:16px 18px;margin-bottom:18px;display:flex;flex-direction:column;gap:8px;background:var(--yellow-wash);border-color:#F2DE92;box-shadow:none}
@@ -251,7 +252,7 @@ section+section{margin-top:26px}
       l: `<span>عندك حساب؟ <a href="#" data-go="login">سجّل دخول</a></span>` },
   };
   function setMode(m) {
-    mode = m; const M = MODES[m];
+    mode = m; const M = MODES[m]; $('loginBtn').hidden = false;
     $('loginTitle').textContent = M.t; $('loginSub').textContent = M.s; $('loginBtn').textContent = M.b;
     $('loginLinks').innerHTML = M.l; $('loginErr').textContent = '';
     document.querySelectorAll('#loginForm [data-m]').forEach(f => {
@@ -312,7 +313,12 @@ section+section{margin-top:26px}
           err.innerHTML = WA ? `راسلنا على <a href="${WA}" target="_blank" rel="noopener">واتساب</a> حتى نطلعلك باسورد جديد.` : x.message;
           return;
         }
-        $('loginSub').textContent = '📩 إذا هذا الإيميل عنده حساب، وصلك رابط هسة. شوف البريد، وإذا ما لكيته شوف الـ Spam. الرابط يشتغل 30 دقيقة.';
+        $('loginTitle').textContent = '📩 شوف إيميلك';
+        $('loginSub').textContent = '';
+        document.querySelectorAll('#loginForm [data-m]').forEach(f => f.hidden = true);
+        btn.hidden = true;
+        err.innerHTML = `<div class="sent-box">دزّينا رابط تغيير الباسورد على <b class="en">${esc(v('email'))}</b> إذا عنده حساب.<br>
+          افتح البريد، وإذا ما لكيته شوف الـ <b>Spam</b>. الرابط يشتغل 30 دقيقة.</div>`;
         return;
       }
       if ($('pw').value.length < 6) return fail('الباسورد لازم يكون 6 أحرف أو أكثر.', 'pw');
