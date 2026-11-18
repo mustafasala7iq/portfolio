@@ -56,7 +56,7 @@ tr:last-child td{border-bottom:0}
   <nav class="tabs" role="tablist">
     <button role="tab" data-t="hw" aria-selected="true">الواجبات<span class="n" id="nHw">0</span></button>
     <button role="tab" data-t="st">الطلاب</button>
-    <button role="tab" data-t="leads">المسجلين مجاناً</button>
+    <button role="tab" data-t="leads">المسجلين والحجوزات</button>
     <button role="tab" data-t="codes">أكواد التفعيل</button>
     <button role="tab" data-t="lib">الفيديوهات</button>
   </nav>
@@ -73,7 +73,7 @@ tr:last-child td{border-bottom:0}
   </section>
 
   <section id="t-leads" hidden class="stack">
-    <div class="hd"><h2 style="font-size:1.15rem">المسجلين بالدرس المجاني</h2><div class="row"><span class="muted small" id="leadCount"></span><button class="btn sm ghost" id="leadCsv">⬇︎ Excel (CSV)</button></div></div>
+    <div class="hd"><h2 style="font-size:1.15rem">المسجلين والحجوزات</h2><div class="row"><span class="muted small" id="leadCount"></span><button class="btn sm ghost" id="leadCsv">⬇︎ Excel (CSV)</button></div></div>
     <p class="muted small" style="margin:0">رابط الدرس المجاني: <b class="en" id="freeLink"></b>. حط بعده <span class="en">?src=</span> واسم المصدر حتى تعرف منين إجه كل واحد، مثل <span class="en">/learn/free?src=ig-ad1</span></p>
     <div class="tbl-wrap"><table><thead><tr><th>الاسم</th><th>الهدف</th><th>المحافظة</th><th>المصدر</th><th>واجب</th><th>سجّل</th><th></th></tr></thead><tbody id="leadBody"></tbody></table></div>
   </section>
@@ -225,18 +225,24 @@ tr:last-child td{border-bottom:0}
   async function loadLeads() {
     let r; try { r = await call('/api/staff/leads', { token }); } catch (x) { return out(x); }
     leads = r.leads;
-    $('leadCount').textContent = leads.length + ' شخص';
+    $('leadCount').textContent = `${leads.length} شخص · ${leads.filter(l => l.preorder).length} حجز`;
     $('leadBody').innerHTML = leads.map(l => {
       const text = `هلا ${l.name} 👋 شلون شفت الدرس المجاني بكورس مصطفى صلاح؟`;
-      return `<tr><td><b>${esc(l.name)}</b><div class="muted small en" style="text-align:right">+${esc(l.phone)}</div><div class="muted small en" style="text-align:right">${esc(l.email || '')}</div></td>
+      const st = { new: 'جديد', contacted: 'تواصلنا', paid: 'دفع ✅', lost: 'ما يريد' };
+      return `<tr><td>${l.preorder ? '<span class="pill wait">🎟️ حجز</span> ' : ''}<b>${esc(l.name)}</b>
+        ${l.pay ? `<div class="small">💵 ${esc(l.pay)}</div>` : ''}
+        <select class="input lead-st" data-id="${l.id}" style="min-height:34px;padding:2px 30px 2px 8px;font-size:.85rem;margin-top:4px">${Object.entries(st).map(([k, t]) => `<option value="${k}" ${l.status === k ? 'selected' : ''}>${t}</option>`).join('')}</select><div class="muted small en" style="text-align:right">+${esc(l.phone)}</div><div class="muted small en" style="text-align:right">${esc(l.email || '')}</div></td>
         <td>${esc(l.goal || '')}</td><td>${esc(l.city || '')}</td><td class="en small">${esc(l.source || '')}</td>
         <td>${l.homework ? '✅' : '—'}</td><td class="small">${when(l.created_at)}</td>
         <td><a class="btn sm y" href="https://wa.me/${l.phone}?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">واتساب</a></td></tr>`;
     }).join('') || '<tr><td colspan="7" class="muted">ماكو أحد بعد.</td></tr>';
+    $('leadBody').querySelectorAll('.lead-st').forEach(sel => sel.onchange = async () => {
+      try { await call('/api/staff/lead', { method: 'POST', json: { id: +sel.dataset.id, status: sel.value }, token }); toast('انحفظت الحالة'); } catch (x) { out(x); }
+    });
   }
   $('leadCsv').onclick = () => {
-    const rows = [['name', 'phone', 'email', 'goal', 'city', 'source', 'homework', 'signed_up']].concat(
-      leads.map(l => [l.name, '+' + l.phone, l.email || '', l.goal || '', l.city || '', l.source || '', l.homework, l.created_at]));
+    const rows = [['name', 'phone', 'email', 'goal', 'city', 'source', 'preorder', 'pay', 'status', 'homework', 'signed_up']].concat(
+      leads.map(l => [l.name, '+' + l.phone, l.email || '', l.goal || '', l.city || '', l.source || '', l.preorder ? 'yes' : '', l.pay || '', l.status, l.homework, l.created_at]));
     const csv = '\ufeff' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
     a.download = 'free-signups.csv'; document.body.appendChild(a); a.click(); a.remove();

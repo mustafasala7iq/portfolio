@@ -85,6 +85,7 @@ section+section{margin-top:26px}
 .links a{color:var(--ink);font-weight:700}
 .links span{color:var(--muted)}
 .act{margin-bottom:18px;border-color:var(--black)}
+.pre{margin-bottom:12px;background:var(--yellow-wash);border-color:#F2DE92}
 .tip{padding:16px 18px;margin-bottom:18px;display:flex;flex-direction:column;gap:8px;background:var(--yellow-wash);border-color:#F2DE92;box-shadow:none}
 .tip-h{display:flex;align-items:center;gap:10px}
 .tip-h b{font:900 1.05rem/1.3 var(--font-display)}
@@ -150,6 +151,8 @@ section+section{margin-top:26px}
         <select class="input" id="goal"><option value="">اختار</option><option>للشغل</option><option>للدراسة</option><option>للسفر</option><option>أريد أحچي بثقة</option><option>غيرها</option></select></div>
       <div class="field" data-m="free"><label for="city">المحافظة</label>
         <select class="input" id="city"><option value="">اختار محافظتك</option><option>البصرة</option><option>بغداد</option><option>أربيل</option><option>الأنبار</option><option>بابل</option><option>حلبجة</option><option>دهوك</option><option>ديالى</option><option>ذي قار</option><option>السليمانية</option><option>صلاح الدين</option><option>القادسية</option><option>كربلاء</option><option>كركوك</option><option>المثنى</option><option>ميسان</option><option>النجف</option><option>نينوى</option><option>واسط</option><option>خارج العراق</option></select></div>
+      <div class="field" data-m="pre"><label for="pay">شلون تحب تدفع يوم الإطلاق؟</label>
+        <select class="input" id="pay"><option value="">اختار</option><option>كاش ويا المندوب</option><option>حوالة إلكترونية</option></select></div>
       <div class="err small" id="loginErr" role="alert"></div>
       <button class="btn y" id="loginBtn">دخول</button>
       <div class="links small" id="loginLinks"></div>
@@ -165,6 +168,7 @@ section+section{margin-top:26px}
   </div></div>
   <main><div class="inner">
     <button type="button" class="fbnote" id="fbNote" hidden></button>
+    <div class="card pad stack pre" id="preBox" hidden></div>
     <form class="card pad stack act" id="actBox" hidden>
       <b style="font-family:var(--font-display)">🔑 اشتركت؟ فعّل الكورس الكامل بالكود</b>
       <div class="row"><input class="input en" id="actCode" placeholder="TA-XXXXX" autocapitalize="characters" style="flex:1;min-width:0"><button class="btn">فعّل</button></div>
@@ -230,6 +234,7 @@ section+section{margin-top:26px}
   const SOURCE = params.get('src') || params.get('utm_source') || (document.referrer ? new URL(document.referrer).hostname : '') || 'direct';
   const WA = window.SUPPORT_WA ? 'https://wa.me/' + window.SUPPORT_WA : null;
   // new visitors sign up first; a device that already had an account opens on "log in"
+  const PRE = params.has('preorder');
   let mode = params.has('free') ? 'free' : (params.has('login') || store.get('has_account') ? 'login' : 'act');
   const MODES = {
     login: { t: 'سجّل دخول', s: 'أهلاً بيك مرة ثانية 👋 ادخل بإيميلك والباسورد.', b: 'دخول',
@@ -243,7 +248,15 @@ section+section{margin-top:26px}
     mode = m; const M = MODES[m];
     $('loginTitle').textContent = M.t; $('loginSub').textContent = M.s; $('loginBtn').textContent = M.b;
     $('loginLinks').innerHTML = M.l; $('loginErr').textContent = '';
-    document.querySelectorAll('#loginForm [data-m]').forEach(f => { f.hidden = !f.dataset.m.split(' ').includes(m); });
+    document.querySelectorAll('#loginForm [data-m]').forEach(f => {
+      const ms = f.dataset.m.split(' ');
+      f.hidden = !(ms.includes(m) || (PRE && m === 'free' && ms.includes('pre')));
+    });
+    if (PRE && m === 'free') {
+      $('loginTitle').textContent = 'احجز مقعدك بسعر الإطلاق 🎟️';
+      $('loginSub').textContent = 'سجّل حجزك هسة بدون دفع، ونتواصل وياك يوم الإطلاق حتى تدفع بسعر الحجز. وبنفس الوقت شوف الدرس الأول مجاناً.';
+      $('loginBtn').textContent = 'احجز مقعدي';
+    }
     $('pw').autocomplete = m === 'login' ? 'current-password' : 'new-password';
     $('loginLinks').querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); setMode(a.dataset.go); });
   }
@@ -268,12 +281,13 @@ section+section{margin-top:26px}
     if ($('pw').value.length < 6) return fail(mode === 'login' ? 'اكتب الباسورد.' : 'الباسورد لازم يكون 6 أحرف أو أكثر.', 'pw');
     if (mode === 'act' && !v('code')) return fail('اكتب كود التفعيل.', 'code');
     if (mode === 'free' && !v('city')) return fail('اختار محافظتك.', 'city');
+    if (mode === 'free' && PRE && !v('pay')) return fail('اختار شلون تحب تدفع.', 'pay');
     const btn = $('loginBtn'); btn.disabled = true;
     try {
       const body = { email: v('email'), password: $('pw').value };
       const r = mode === 'login' ? await call('/api/login', { method: 'POST', json: body })
         : await call('/api/register', { method: 'POST', json: { ...body, name: v('name'), phone: v('phone'), free: mode === 'free',
-            code: v('code'), goal: v('goal'), city: v('city'), source: SOURCE } });
+            code: v('code'), goal: v('goal'), city: v('city'), source: SOURCE, preorder: PRE && mode === 'free', pay: v('pay') } });
       token = r.token; store.set('learn_token', token); store.set('has_account', '1');
       await load(true);
     } catch (x) { err.textContent = x.message; }
@@ -317,6 +331,25 @@ section+section{margin-top:26px}
     catch (x) { $('actErr').textContent = x.message; }
   };
 
+  function renderPre() {
+    const d = data, box = $('preBox');
+    box.hidden = !d.trial;
+    if (!d.trial) return;
+    if (d.preorder) {
+      box.innerHTML = `<b style="font-family:var(--font-display)">✅ حجزك مثبّت بسعر الإطلاق</b><div class="muted small">نتواصل وياك يوم الإطلاق على واتساب حتى تكمل الدفع وتستلم الكود.</div>`;
+      return;
+    }
+    box.innerHTML = `<b style="font-family:var(--font-display)">🎟️ عجبك الدرس؟ احجز مقعدك بسعر الإطلاق</b>
+      <div class="muted small">بدون دفع هسة. نتواصل وياك يوم الإطلاق.</div>
+      <div class="row"><select class="input" id="prePay" style="flex:1;min-width:0"><option value="">شلون تحب تدفع؟</option><option>كاش ويا المندوب</option><option>حوالة إلكترونية</option></select>
+      <button type="button" class="btn y" id="preGo">احجز</button></div><div class="err small" id="preErr"></div>`;
+    $('preGo').onclick = async () => {
+      if (!$('prePay').value) { $('preErr').textContent = 'اختار شلون تحب تدفع.'; return; }
+      try { await call('/api/activate', { method: 'POST', json: { preorder: true, pay: $('prePay').value }, token }); data.preorder = true; renderPre(); toast('✅ انحجز مقعدك'); }
+      catch (x) { $('preErr').textContent = x.message; }
+    };
+  }
+
   function render(first) {
     const d = data;
     show('app');
@@ -325,6 +358,7 @@ section+section{margin-top:26px}
     $('hello').textContent = `أهلاً ${d.name} 👋`;
     const miss = d.missing.length;
     $('actBox').hidden = !d.trial;
+    renderPre();
     if (d.trial) {
       $('heroTag').textContent = 'هذا درسك المجاني: المقدمة، وشرح المحاكاة، والمحاضرة الأولى ويا واجبها.';
       $('heroMeta').innerHTML = d.sales ? `<a class="btn sm" href="${esc(d.sales)}" target="_blank" rel="noopener">اشترك بالكورس الكامل ←</a>` : '';
