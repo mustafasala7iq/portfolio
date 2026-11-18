@@ -1632,3 +1632,257 @@ img {
     border-left: 0;
   }
 }
+
+
+/* ========================================
+   Pre-order page
+   ======================================== */
+.cta-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem 1.25rem;
+}
+
+.cta-center {
+  justify-content: center;
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 1.8rem;
+  border-radius: 60px;
+  border: 1.5px solid rgba(255, 241, 49, 0.55);
+  color: var(--yellow);
+  font-weight: 600;
+  font-size: 1rem;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+
+.btn-outline:hover {
+  background: rgba(255, 241, 49, 0.08);
+}
+
+.hero .btn-outline {
+  animation: fadeInUp 0.6s ease 0.55s forwards;
+  opacity: 0;
+}
+
+.price-cta,
+.price-card .hero-cta,
+.faq-cta .hero-cta {
+  animation: none;
+  opacity: 1;
+}
+
+/* Price card */
+.price-card {
+  max-width: 620px;
+  margin: 1.5rem auto 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 241, 49, 0.25);
+  border-radius: 24px;
+  padding: 2rem 1.5rem;
+}
+
+.price-old {
+  color: var(--gray-400);
+  font-size: 1.15rem;
+  text-decoration: line-through;
+  text-decoration-color: rgba(255, 255, 255, 0.6);
+}
+
+.price-new {
+  color: var(--yellow);
+  font-size: clamp(2.2rem, 7vw, 3.2rem);
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.price-note {
+  color: var(--gray-200);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+/* Values still to be filled in by Mustafa */
+.placeholder {
+  display: inline-block;
+  white-space: nowrap;
+  line-height: 1.4;
+  margin: 2px 0;
+  outline: 2px dashed currentColor;
+  outline-offset: 2px;
+  border-radius: 6px;
+  padding: 0 0.3em;
+}
+
+.countdown {
+  margin: 1.5rem 0;
+}
+
+.cd-label {
+  color: var(--gray-400);
+  font-size: 0.9rem;
+  margin-bottom: 0.6rem;
+}
+
+.cd-boxes {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.cd-box {
+  min-width: 78px;
+  background: rgba(255, 241, 49, 0.08);
+  border: 1px solid rgba(255, 241, 49, 0.25);
+  border-radius: 14px;
+  padding: 0.6rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cd-box span {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--yellow);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.cd-box small {
+  color: var(--gray-400);
+  font-size: 0.8rem;
+}
+
+.cd-open {
+  color: var(--yellow);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.price-lines {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.75rem;
+  text-align: start;
+}
+
+.price-lines li {
+  position: relative;
+  padding-inline-start: 1.6rem;
+  color: var(--gray-200);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.price-lines li::before {
+  content: '✓';
+  position: absolute;
+  inset-inline-start: 0;
+  color: var(--yellow);
+  font-weight: 700;
+}
+
+/* 3-step flow */
+.steps-3 {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 1024px) and (min-width: 641px) {
+  .steps-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .steps-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .steps-3 .step-card p {
+    font-size: 0.78rem;
+  }
+}
+
+.faq-link {
+  color: var(--yellow);
+  border-bottom: 1px dashed rgba(255, 241, 49, 0.5);
+}
+
+.faq-cta {
+  margin-top: 2.5rem;
+}
+
+/* Sticky reserve button, phones only */
+.sticky-cta {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sticky-cta {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999;
+    padding: 0.6rem 1rem calc(0.6rem + env(safe-area-inset-bottom));
+    background: rgba(16, 16, 16, 0.94);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 241, 49, 0.15);
+  }
+
+  .sticky-cta .hero-cta {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    animation: none;
+    opacity: 1;
+    padding: 0.85rem 1rem;
+  }
+
+  body {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+
+  .hero .cta-group {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-outline {
+    font-size: 0.9rem;
+    padding: 0.8rem 1.4rem;
+  }
+
+  .cd-box {
+    min-width: 68px;
+  }
+
+  .price-card {
+    padding: 1.6rem 1.1rem;
+  }
+}
+
+.sticky-cta {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+.sticky-cta.is-hidden {
+  transform: translateY(110%);
+  opacity: 0;
+  pointer-events: none;
+}
