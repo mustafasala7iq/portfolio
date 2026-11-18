@@ -142,9 +142,9 @@ section+section{margin-top:26px}
         <input class="input" id="name" autocomplete="name" placeholder="مثلاً: علي حسن"></div>
       <div class="field" data-m="act free"><label for="phone">رقم الموبايل</label>
         <input class="input en" id="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="07xx xxx xxxx" maxlength="16"></div>
-      <div class="field" data-m="login act free"><label for="email">الإيميل</label>
+      <div class="field" data-m="login act free forgot"><label for="email">الإيميل</label>
         <input class="input en" id="email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" placeholder="name@gmail.com"></div>
-      <div class="field" data-m="login act free"><label for="pw">الباسورد</label>
+      <div class="field" data-m="login act free reset"><label for="pw">الباسورد</label>
         <input class="input en" id="pw" type="password" autocomplete="current-password" placeholder="6 أحرف أو أكثر"></div>
       <div class="field" data-m="act"><label for="code">كود التفعيل</label>
         <input class="input en" id="code" autocapitalize="characters" autocomplete="one-time-code" placeholder="TA-XXXXX"></div>
@@ -236,10 +236,15 @@ section+section{margin-top:26px}
   const WA = window.SUPPORT_WA ? 'https://wa.me/' + window.SUPPORT_WA : null;
   // new visitors sign up first; a device that already had an account opens on "log in"
   const PRE = params.has('preorder');
-  let mode = params.has('free') ? 'free' : (params.has('login') || store.get('has_account') ? 'login' : 'act');
+  const RESET = params.get('reset');
+  let mode = RESET ? 'reset' : params.has('free') ? 'free' : (params.has('login') || store.get('has_account') ? 'login' : 'act');
   const MODES = {
     login: { t: 'سجّل دخول', s: 'أهلاً بيك مرة ثانية 👋 ادخل بإيميلك والباسورد.', b: 'دخول',
-      l: `<a href="#" data-go="act">ما عندك حساب؟ سوّي حساب</a>${WA ? `<a href="${WA}" target="_blank" rel="noopener">نسيت الباسورد؟ راسلنا على واتساب</a>` : ''}` },
+      l: `<a href="#" data-go="act">ما عندك حساب؟ سوّي حساب</a><a href="#" data-go="forgot">نسيت الباسورد؟</a>` },
+    forgot: { t: 'نسيت الباسورد؟', s: 'اكتب إيميل حسابك، ونرسلك رابط تحط بيه باسورد جديد.', b: 'أرسل الرابط',
+      l: `<a href="#" data-go="login">رجوع لتسجيل الدخول</a>${WA ? `<a href="${WA}" target="_blank" rel="noopener">ما وصلك شي؟ راسلنا على واتساب</a>` : ''}` },
+    reset: { t: 'باسورد جديد 🔑', s: 'اكتب باسورد جديد لحسابك، وبعدها تدخل مباشرة.', b: 'احفظ وادخل',
+      l: `<a href="#" data-go="forgot">الرابط ما يشتغل؟ اطلب رابط جديد</a>` },
     act: { t: 'سوّي حسابك', s: 'اكتب معلوماتك وكود التفعيل اللي وصلك. بعدها تدخل بإيميلك والباسورد من موبايلك ولابتوبك.', b: 'سوّي الحساب وابدي الكورس',
       l: `<span>عندك حساب؟ <a href="#" data-go="login">سجّل دخول</a></span><span>ما عندك كود؟ <a href="/learn/free">جرّب الدرس الأول مجاناً</a></span>` },
     free: { t: 'درسك الأول مجاناً 🎁', s: 'سوّي حسابك، وشوف المقدمة والمحاضرة الأولى، وجرّب واجب المحاكاة.', b: 'ابدي الدرس المجاني',
@@ -259,6 +264,7 @@ section+section{margin-top:26px}
       $('loginBtn').textContent = 'احجز مقعدي';
     }
     $('pw').autocomplete = m === 'login' ? 'current-password' : 'new-password';
+    $('pw').placeholder = m === 'reset' ? 'الباسورد الجديد: 6 أحرف أو أكثر' : '6 أحرف أو أكثر';
     $('loginLinks').querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); setMode(a.dataset.go); });
   }
   setMode(mode);
@@ -274,6 +280,7 @@ section+section{margin-top:26px}
     const err = $('loginErr'), v = id => $(id).value.trim();
     err.textContent = '';
     const fail = (msg, id) => { err.textContent = msg; if (id) $(id).focus(); };
+    if (mode === 'forgot' || mode === 'reset') return forgotOrReset(err, v, fail);
     if (mode !== 'login') {
       if (!v('name')) return fail('اكتب اسمك.', 'name');
       if (!iraqiMobile(v('phone'))) return fail('اكتب رقم موبايلك العراقي الصحيح: 11 رقم يبدي بـ 07، مثل 0770 123 4567', 'phone');
@@ -294,6 +301,29 @@ section+section{margin-top:26px}
     } catch (x) { err.textContent = x.message; }
     finally { btn.disabled = false; }
   };
+  async function forgotOrReset(err, v, fail) {
+    const btn = $('loginBtn'); btn.disabled = true;
+    try {
+      if (mode === 'forgot') {
+        if (!/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(v('email'))) return fail('اكتب إيميلك صح، مثل name@gmail.com', 'email');
+        try { await call('/api/forgot', { method: 'POST', json: { email: v('email') } }); }
+        catch (x) {
+          if (x.status !== 503) throw x;
+          err.innerHTML = WA ? `راسلنا على <a href="${WA}" target="_blank" rel="noopener">واتساب</a> حتى نطلعلك باسورد جديد.` : x.message;
+          return;
+        }
+        $('loginSub').textContent = '📩 إذا هذا الإيميل عنده حساب، وصلك رابط هسة. شوف البريد، وإذا ما لكيته شوف الـ Spam. الرابط يشتغل 30 دقيقة.';
+        return;
+      }
+      if ($('pw').value.length < 6) return fail('الباسورد لازم يكون 6 أحرف أو أكثر.', 'pw');
+      const r = await call('/api/reset', { method: 'POST', json: { token: RESET, password: $('pw').value } });
+      history.replaceState(null, '', location.pathname);
+      token = r.token; store.set('learn_token', token); store.set('has_account', '1');
+      toast('✅ تغيّر الباسورد');
+      await load(true);
+    } catch (x) { err.textContent = x.message; }
+    finally { btn.disabled = false; }
+  }
   $('logout').onclick = async () => {
     try { await call('/api/logout', { method: 'POST', token }); } catch (e) {}
     store.set('learn_token', null); token = null; setMode('login'); show('login');
@@ -549,7 +579,7 @@ section+section{margin-top:26px}
   $('lessonBack').onclick = () => closeLesson(false);
   addEventListener('popstate', () => closeLesson(true));
 
-  if (token) load(true); else show('login');
+  if (token && !RESET) load(true); else show('login');
 })();
 </script>
 </body>
