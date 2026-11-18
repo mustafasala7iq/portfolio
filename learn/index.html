@@ -143,7 +143,7 @@ section+section{margin-top:26px}
         <input class="input" id="name" autocomplete="name" placeholder="مثلاً: علي حسن"></div>
       <div class="field" data-m="act free"><label for="phone">رقم الموبايل</label>
         <input class="input en" id="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="07xx xxx xxxx" maxlength="16"></div>
-      <div class="field" data-m="login act free forgot"><label for="email">الإيميل</label>
+      <div class="field" data-m="login act free forgot"><label for="email" id="emailLabel">الإيميل</label>
         <input class="input en" id="email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" placeholder="name@gmail.com"></div>
       <div class="field" data-m="login act free reset"><label for="pw">الباسورد</label>
         <input class="input en" id="pw" type="password" autocomplete="current-password" placeholder="6 أحرف أو أكثر"></div>
@@ -240,9 +240,9 @@ section+section{margin-top:26px}
   const RESET = params.get('reset');
   let mode = RESET ? 'reset' : params.has('free') ? 'free' : (params.has('login') || store.get('has_account') ? 'login' : 'act');
   const MODES = {
-    login: { t: 'سجّل دخول', s: 'أهلاً بيك مرة ثانية 👋 ادخل بإيميلك والباسورد.', b: 'دخول',
+    login: { t: 'سجّل دخول', s: 'أهلاً بيك مرة ثانية 👋 ادخل بإيميلك أو رقم موبايلك، والباسورد.', b: 'دخول',
       l: `<a href="#" data-go="act">ما عندك حساب؟ سوّي حساب</a><a href="#" data-go="forgot">نسيت الباسورد؟</a>` },
-    forgot: { t: 'نسيت الباسورد؟', s: 'اكتب إيميل حسابك، ونرسلك رابط تحط بيه باسورد جديد.', b: 'أرسل الرابط',
+    forgot: { t: 'نسيت الباسورد؟', s: 'اكتب إيميلك أو رقم موبايلك اللي سجلت بيه، ونرسلك رابط على إيميل حسابك تحط بيه باسورد جديد.', b: 'أرسل الرابط',
       l: `<a href="#" data-go="login">رجوع لتسجيل الدخول</a>${WA ? `<a href="${WA}" target="_blank" rel="noopener">ما وصلك شي؟ راسلنا على واتساب</a>` : ''}` },
     reset: { t: 'باسورد جديد 🔑', s: 'اكتب باسورد جديد لحسابك، وبعدها تدخل مباشرة.', b: 'احفظ وادخل',
       l: `<a href="#" data-go="forgot">الرابط ما يشتغل؟ اطلب رابط جديد</a>` },
@@ -254,6 +254,11 @@ section+section{margin-top:26px}
   function setMode(m) {
     mode = m; const M = MODES[m]; $('loginBtn').hidden = false;
     $('loginTitle').textContent = M.t; $('loginSub').textContent = M.s; $('loginBtn').textContent = M.b;
+    const either = m === 'login' || m === 'forgot';             // these two take the email or the mobile number
+    $('emailLabel').textContent = either ? 'الإيميل أو رقم الموبايل' : 'الإيميل';
+    $('email').type = either ? 'text' : 'email';
+    $('email').inputMode = either ? 'text' : 'email';
+    $('email').placeholder = either ? 'name@gmail.com أو 07xx xxx xxxx' : 'name@gmail.com';
     $('loginLinks').innerHTML = M.l; $('loginErr').textContent = '';
     document.querySelectorAll('#loginForm [data-m]').forEach(f => {
       const ms = f.dataset.m.split(' ');
@@ -286,7 +291,9 @@ section+section{margin-top:26px}
       if (!v('name')) return fail('اكتب اسمك.', 'name');
       if (!iraqiMobile(v('phone'))) return fail('اكتب رقم موبايلك العراقي الصحيح: 11 رقم يبدي بـ 07، مثل 0770 123 4567', 'phone');
     }
-    if (!/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(v('email'))) return fail('اكتب إيميلك صح، مثل name@gmail.com', 'email');
+    const emailOk = /^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(v('email'));
+    if (mode === 'login' ? !(emailOk || iraqiMobile(v('email'))) : !emailOk)
+      return fail(mode === 'login' ? 'اكتب إيميلك أو رقم موبايلك اللي سجلت بيه.' : 'اكتب إيميلك صح، مثل name@gmail.com', 'email');
     if ($('pw').value.length < 6) return fail(mode === 'login' ? 'اكتب الباسورد.' : 'الباسورد لازم يكون 6 أحرف أو أكثر.', 'pw');
     if (mode === 'act' && !v('code')) return fail('اكتب كود التفعيل.', 'code');
     if (mode === 'free' && !v('city')) return fail('اختار محافظتك.', 'city');
@@ -306,8 +313,10 @@ section+section{margin-top:26px}
     const btn = $('loginBtn'); btn.disabled = true;
     try {
       if (mode === 'forgot') {
-        if (!/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(v('email'))) return fail('اكتب إيميلك صح، مثل name@gmail.com', 'email');
-        try { await call('/api/forgot', { method: 'POST', json: { email: v('email') } }); }
+        if (!(/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(v('email')) || iraqiMobile(v('email'))))
+          return fail('اكتب إيميلك أو رقم موبايلك اللي سجلت بيه.', 'email');
+        let r;
+        try { r = await call('/api/forgot', { method: 'POST', json: { email: v('email') } }); }
         catch (x) {
           if (x.status !== 503) throw x;
           err.innerHTML = WA ? `راسلنا على <a href="${WA}" target="_blank" rel="noopener">واتساب</a> حتى نطلعلك باسورد جديد.` : x.message;
@@ -317,7 +326,13 @@ section+section{margin-top:26px}
         $('loginSub').textContent = '';
         document.querySelectorAll('#loginForm [data-m]').forEach(f => f.hidden = true);
         btn.hidden = true;
-        err.innerHTML = `<div class="sent-box">دزّينا رابط تغيير الباسورد على <b class="en">${esc(v('email'))}</b> إذا عنده حساب.<br>
+        if (r.no_email) {
+          $('loginTitle').textContent = 'نسيت الباسورد؟';
+          err.innerHTML = `<div class="sent-box">حسابك ما بيه إيميل، فما نكدر نرسلك رابط. ${WA ? `راسلنا على <a href="${WA}" target="_blank" rel="noopener">واتساب</a>` : 'راسلنا على واتساب'} ونطلعلك باسورد جديد.</div>`;
+          return;
+        }
+        const where = r.to ? `على إيميل حسابك <b class="en" dir="ltr">${esc(r.to)}</b>` : `إذا <b class="en" dir="ltr">${esc(v('email'))}</b> عنده حساب`;
+        err.innerHTML = `<div class="sent-box">دزّينا رابط تغيير الباسورد ${where}.<br>
           افتح البريد، وإذا ما لكيته شوف الـ <b>Spam</b>. الرابط يشتغل 30 دقيقة.</div>`;
         return;
       }
