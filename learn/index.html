@@ -296,6 +296,7 @@ section+section{margin-top:26px}
 
   const chap = n => (data.chapters[String(n)] || {});
   function dayLabel(d) {
+    if (d.kind === 'intro') return { k: 'اليوم الأول', t: 'البداية: المقدمة وشرح واجب المحاكاة', en: false };
     if (d.kind === 'lecture') return { k: `${chap(d.chapter).ar || ''} · المحاضرة ${d.lecture}`, t: d.title, en: true };
     if (d.kind === 'homework') return { k: `واجب B · المحاضرة ${d.lecture}`, t: d.title, en: true };
     if (d.kind === 'rest') return { k: 'يوم مراجعة', t: 'ماكو شي جديد اليوم', en: false };
@@ -391,6 +392,17 @@ section+section{margin-top:26px}
     const hw = day.homework, sent = hw && hw.submissions.length, fixed = hw && hw.submissions.some(s => s.feedback);
     const step = (ok, wait, t) => `<li class="${ok ? 'ok' : wait ? 'wait' : ''}"><span class="ic">${ok ? '✓' : wait ? '⏳' : ''}</span>${t}</li>`;
     let steps = '';
+    if (day.kind === 'intro') {
+      const seen = opened.has(day.number);
+      $('today').innerHTML = `
+        <div class="t-k">${d.trial ? '🎁 درسك المجاني' : 'اليوم 1 · البداية'}</div>
+        <h2 class="t-title">أهلاً بيك بالكورس 👋</h2>
+        <ol class="steps">${step(seen, false, '🎬 شوف فيديو المقدمة (فوق)')}${step(seen, false, '🎙️ شوف شلون تسوي واجب المحاكاة (تحت)')}</ol>
+        <button type="button" class="btn y t-go">↑ شوف المقدمة</button>
+        <div class="t-next muted small" id="nextOpen"></div>`;
+      $('today').querySelector('.t-go').onclick = () => { const op = mem.get('opened', []); if (!op.includes(1)) { op.push(1); mem.set('opened', op); } $('introSec').scrollIntoView({ behavior: 'smooth' }); };
+      return;
+    }
     if (day.kind === 'rest') {
       steps = step(opened.has(day.number), false, '📖 راجع الدرس والعب ألعابه') +
         (d.missing.length ? step(false, false, `🎙️ سلّم الواجبات الناقصة (${d.missing.length})`) : step(true, false, '🎙️ كل واجباتك مسلّمة'));
@@ -417,7 +429,7 @@ section+section{margin-top:26px}
     if (h >= 12) {
       const at = new Date(data.next_open), now = new Date();
       const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toDateString() === at.toDateString();
-      el.textContent = `⏱️ اليوم الجاي ينفتح ${tomorrow ? 'غداً' : 'اليوم'} الساعة ${data.send_hour % 12 || 12} العصر`;
+      el.textContent = `⏱️ ${data.day === 1 ? 'أول محاضرة تنفتح' : 'اليوم الجاي ينفتح'} ${tomorrow ? 'غداً' : 'اليوم'} الساعة ${data.send_hour % 12 || 12} العصر`;
       return;
     }
     el.textContent = '⏱️ اليوم الجاي ينفتح بعد ' + (h ? `${h} ساعة و` : '') + `${m} دقيقة`;
@@ -478,6 +490,7 @@ section+section{margin-top:26px}
   let dirty = false;
   addEventListener('message', e => { if (e.data && e.data.lessonChanged) dirty = true; });
   function openLesson(day, L) {
+    if (!day.lesson) { $('introSec').scrollIntoView({ behavior: 'smooth' }); return; }      // the intro day lives on this page
     const ov = $('lesson');
     const op = mem.get('opened', []); if (!op.includes(day.number)) { op.push(day.number); mem.set('opened', op); }
     mem.set('intro_seen', true); dirty = true;
