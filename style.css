@@ -1877,3 +1877,12 @@ img {
     padding: 1.6rem 1.1rem;
   }
 }
+
+.sticky-cta {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+.sticky-cta.is-hidden {
+  transform: translateY(110%);
+  opacity: 0;
+  pointer-events: none;
+}

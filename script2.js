@@ -89,3 +89,17 @@ revealElements.forEach(el => revealObserver.observe(el));
   tick();
   timer = setInterval(tick, 15000);
 })();
+
+// Hide the sticky phone button while another booking button is on screen
+(function () {
+  var sticky = document.getElementById('stickyCta');
+  if (!sticky || !('IntersectionObserver' in window)) return;
+  var visible = new Set();
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { e.isIntersecting ? visible.add(e.target) : visible.delete(e.target); });
+    sticky.classList.toggle('is-hidden', visible.size > 0);
+  });
+  document.querySelectorAll('a.hero-cta').forEach(function (a) {
+    if (!sticky.contains(a)) io.observe(a);
+  });
+})();
