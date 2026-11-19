@@ -130,6 +130,9 @@ section+section{margin-top:26px}
 .chev{flex:none;color:var(--muted);font-size:1.3rem;line-height:1}
 .row-more{all:unset;box-sizing:border-box;cursor:pointer;width:100%;text-align:center;padding:13px;font:800 .9rem/1 var(--font-display);color:var(--ink-2)}
 .wide{width:100%}
+.start-vids{padding:16px;display:grid;gap:16px}
+@media (min-width:640px){.start-vids{grid-template-columns:1fr 1fr}}
+.start-vids .t-v{margin:0}
 .fsteps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
 .fstep{display:flex;gap:14px;padding:18px;align-items:flex-start}
 .fn{flex:none;width:34px;height:34px;border-radius:50%;background:var(--black);color:var(--yellow);display:grid;place-items:center;font:900 1rem/1 var(--font-display)}
@@ -222,6 +225,10 @@ section+section{margin-top:26px}
       <section id="daysSec">
         <div class="sec-h"><h2>كل الأيام</h2></div>
         <div class="rows card" id="days"></div>
+      </section>
+      <section id="startSec" hidden>
+        <div class="sec-h"><h2>🎬 فيديوهات البداية</h2></div>
+        <div class="card start-vids" id="startVids"></div>
       </section>
       <button type="button" class="btn ghost wide" id="mtnToggle">🏔️ شوف رحلتك</button>
       <div id="mtnBox" class="stack" hidden><div class="sec-h"><h2>رحلتك</h2><span class="muted small" id="mtnMeta"></span></div><div class="chps" id="chPills" hidden></div><div id="mtn"></div></div>
@@ -471,6 +478,7 @@ section+section{margin-top:26px}
     requestAnimationFrame(() => { $('progBar').style.width = Math.max(2, Math.round(100 * (d.finished ? 1 : d.day / d.total))) + '%'; });
     renderToday();
     renderDays();
+    renderStart(today);
     $('mtnBox').hidden = true; $('mtnToggle').textContent = '🏔️ شوف رحلتك';
     if (d.next_open) { countdown(); tick = setInterval(countdown, 30000); }
   }
@@ -521,6 +529,14 @@ section+section{margin-top:26px}
       ${missLine}
       <div class="t-next muted small" id="nextOpen"></div>`;
     $('today').querySelector('.t-go').onclick = () => openLesson(day, L);
+  }
+
+  // ---- the welcome video and the imitation how-to stay on the page after day 1 ----
+  function renderStart(today) {
+    const d = data, vids = [...d.intro.map(u => ['المقدمة', u]), ...d.howto.map(u => ['شلون تسوي واجب المحاكاة', u])];
+    $('startSec').hidden = today.number === 1 || !vids.length;       // day 1 shows the intro in the card above
+    if ($('startSec').hidden) return;
+    $('startVids').innerHTML = vids.map(([t, u]) => `<div class="t-v"><b>${t}</b>${frame(u)}</div>`).join('');
   }
 
   // ---- all days: one short row each, newest first ----
