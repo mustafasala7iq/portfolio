@@ -1891,7 +1891,7 @@ img {
    Reviews (real Instagram comments)
    ======================================== */
 .reviews-section {
-  background: var(--black);
+  background: var(--dark);
   position: relative;
 }
 
