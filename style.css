@@ -1927,10 +1927,8 @@ img {
   font-size: 0.95rem;
 }
 
-.review-card figcaption span {
-  color: var(--gray-400);
-  font-weight: 400;
-  margin-right: 0.35rem;
+.reviews-more {
+  display: none;
 }
 
 .reviews-note {
@@ -1946,4 +1944,18 @@ img {
 @media (max-width: 600px) {
   .reviews { grid-template-columns: 1fr; }
   .review-card blockquote { font-size: 1rem; }
+  .reviews:not(.is-open) .review-card:nth-child(n+3) { display: none; }
+  .reviews-more {
+    display: inline-block;
+    margin-top: 1.25rem;
+    padding: 0.7rem 1.75rem;
+    background: transparent;
+    color: var(--yellow);
+    border: 1px solid var(--yellow);
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
 }

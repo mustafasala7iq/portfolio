@@ -103,3 +103,15 @@ revealElements.forEach(el => revealObserver.observe(el));
     if (!sticky.contains(a)) io.observe(a);
   });
 })();
+
+// Reviews: show all on phones when "عرض المزيد" is tapped
+(function () {
+  var btn = document.querySelector('.reviews-more');
+  var list = document.querySelector('.reviews');
+  if (!btn || !list) return;
+  btn.addEventListener('click', function () {
+    var open = list.classList.toggle('is-open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.textContent = open ? 'عرض أقل' : 'عرض المزيد';
+  });
+})();
