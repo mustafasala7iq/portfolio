@@ -137,6 +137,10 @@ section+section{margin-top:26px}
 .fb-body h3{font-size:1.15rem;font-weight:900}
 .fb-body p{margin:0}
 .fstep .pre{margin:0;background:none;border:0;box-shadow:none;padding:0}
+.pre-done{padding:18px;display:flex;flex-direction:column;gap:6px;background:var(--yellow-wash);border-color:#F2DE92;line-height:1.8}
+.pre-done p{margin:0}
+.pre-done .pre-ok-t{font:900 1.2rem/1.4 var(--font-display)}
+.pre-done .pre-ok-go{font-weight:700}
 .actd{padding:14px 18px}
 .actd summary{cursor:pointer;font:800 .95rem/1.4 var(--font-display);list-style:none}
 .actd summary::-webkit-details-marker{display:none}
@@ -225,12 +229,13 @@ section+section{margin-top:26px}
 
     <!-- free lesson: three steps, nothing else -->
     <div id="freeView" hidden>
+      <div class="card pre-done" id="preDone" hidden></div>
       <ol class="fsteps">
         <li class="card fstep"><span class="fn">1</span><div class="fb-body"><h3>شوف الفيديوين</h3><div class="intro-grid" id="fIntro"></div></div></li>
         <li class="card fstep"><span class="fn">2</span><div class="fb-body"><h3>المحاضرة الأولى وواجبها</h3>
           <p class="muted">فيديو المحاضرة، والملزمة وألعابها، وبالآخر تسجّل صوتك.</p>
           <button type="button" class="btn y" id="fLesson">افتح الدرس ←</button></div></li>
-        <li class="card fstep"><span class="fn">3</span><div class="fb-body" id="preBox"></div></li>
+        <li class="card fstep" id="preStep"><span class="fn">3</span><div class="fb-body" id="preBox"></div></li>
       </ol>
       <details class="actd card">
         <summary id="actTitle">🔑 وصلك كود التفعيل؟</summary>
@@ -428,13 +433,12 @@ section+section{margin-top:26px}
     const d = data, box = $('preBox');
     box.hidden = !d.trial;
     if (!d.trial) return;
+    $('preStep').hidden = !!d.preorder;
+    $('preDone').hidden = !d.preorder;
     if (d.preorder) {
-      box.classList.add('pre-ok');
-      box.innerHTML = `<div class="pre-ok-ic">🎉</div>
-        <b class="pre-ok-t">تم حجز مقعدك بنجاح!</b>
-        <div>مبروك ${esc(d.name)}، خطوتك الأولى نحو إنكليزي أقوى صارت. مقعدك محجوز بسعر الإطلاق، وما تحتاج تدفع هسة.</div>
-        <div>📲 يوم 13 ديسمبر نتواصل وياك على واتساب حتى تكمل الدفع ويوصلك كود التفعيل.</div>
-        <div class="pre-ok-go">ولحد ذاك الوقت لا توكف 💪 درسك الأول المجاني جاهز بالخطوة 2 فوك 👆</div>`;
+      $('preDone').innerHTML = `<b class="pre-ok-t">🎉 تم حجز مقعدك بنجاح!</b>
+        <p>مقعدك محجوز بسعر الإطلاق. يوم 13 ديسمبر نتواصل وياك على واتساب حتى تكمل الدفع ويوصلك كود التفعيل.</p>
+        <p class="pre-ok-go">ولحد ذاك الوقت، ابدي بدرسك المجاني 👇</p>`;
       return;
     }
     box.innerHTML = `<h3>عجبك؟ احجز مقعدك</h3>
@@ -443,7 +447,7 @@ section+section{margin-top:26px}
       <button type="button" class="btn y" id="preGo">احجز</button></div><div class="err small" id="preErr" style="min-height:0"></div>`;
     $('preGo').onclick = async () => {
       if (!$('prePay').value) { $('preErr').textContent = 'اختار شلون تحب تدفع.'; return; }
-      try { await call('/api/activate', { method: 'POST', json: { preorder: true, pay: $('prePay').value }, token }); data.preorder = true; px('Lead'); renderPre(); $('heroMeta').innerHTML = ''; $('actTitle').textContent = '🔑 وصلك كود التفعيل؟ اكتبه هنا'; box.scrollIntoView({ behavior: 'smooth', block: 'center' }); toast('✅ انحجز مقعدك'); }
+      try { await call('/api/activate', { method: 'POST', json: { preorder: true, pay: $('prePay').value }, token }); data.preorder = true; px('Lead'); renderPre(); $('heroTag').textContent = 'درسك المجاني 🎁'; $('heroMeta').innerHTML = ''; $('actTitle').textContent = '🔑 وصلك كود التفعيل؟ اكتبه هنا'; $('preDone').scrollIntoView({ behavior: 'smooth', block: 'center' }); toast('✅ انحجز مقعدك'); }
       catch (x) { $('preErr').textContent = x.message; }
     };
   }
@@ -479,7 +483,7 @@ section+section{margin-top:26px}
   // ---- free lesson: 1 intro, 2 the first lecture, 3 reserve / subscribe ----
   function renderFree() {
     const d = data;
-    $('heroTag').textContent = 'درسك المجاني 🎁 3 خطوات بسيطة';
+    $('heroTag').textContent = d.preorder ? 'درسك المجاني 🎁' : 'درسك المجاني 🎁 3 خطوات بسيطة';
     $('fIntro').innerHTML = [...d.intro.map(u => ['المقدمة', u]), ...d.howto.map(u => ['شلون تسوي واجب المحاكاة', u])]
       .map(([t, u], i) => `<div class="t-v"><span class="muted small">${i + 1}. ${t}</span>${frame(u)}</div>`).join('') || '<div class="muted small">⏳ الفيديو راح ينزل قريباً.</div>';
     const lec = d.days.find(x => x.kind === 'lecture');
