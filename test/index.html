@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>اختبر مستواك بالإنكليزي ببلاش | مصطفى صلاح</title>
+  <meta name="description" content="اختبار مستوى إنكليزي مجاني بـ 15 دقيقة: قراءة وقواعد واستماع، وتطلعلك نتيجتك من A1 لحد C2." />
+  <link rel="canonical" href="https://mustafasalah.net/test/" />
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png" />
+  <meta name="theme-color" content="#101010" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://mustafasalah.net/test/" />
+  <meta property="og:site_name" content="Mustafa Salah" />
+  <meta property="og:title" content="اعرف مستواك بالإنكليزي ببلاش بـ 15 دقيقة" />
+  <meta property="og:description" content="قراءة وقواعد واستماع، وتطلعلك نتيجتك من A1 لحد C2 ويّا شرح بسيط." />
+  <meta property="og:image" content="https://mustafasalah.net/og-image.jpg" />
+  <meta property="og:locale" content="ar_IQ" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="../learn/config.js"></script>
+  <style>
+    :root {
+      --yellow: #FFF131; --black: #101010; --dark: #0a0a0a; --white: #fff;
+      --g200: #e0e0e0; --g400: #9e9e9e; --g800: #2a2a2a;
+      --ok: #4ade80; --bad: #f87171;
+      --font: 'IBM Plex Sans Arabic', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { font-family: var(--font); background: var(--black); color: var(--white); min-height: 100vh; line-height: 1.7; }
+    a { color: inherit; }
+    .wrap { max-width: 680px; margin: 0 auto; padding: 20px 16px 48px; }
+    header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+    .brand { color: var(--yellow); font-weight: 700; font-size: 1.15rem; text-decoration: none; }
+    .timer { font-variant-numeric: tabular-nums; direction: ltr; font-weight: 700; font-size: 1.05rem; padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,.15); }
+    .timer.low { color: var(--black); background: var(--yellow); border-color: var(--yellow); }
+    .card { background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.08); border-radius: 18px; padding: 24px 20px; }
+    h1 { font-size: clamp(1.7rem, 6vw, 2.4rem); line-height: 1.35; margin-bottom: 12px; }
+    h1 .hl, .hl { color: var(--yellow); }
+    h2 { font-size: 1.3rem; margin-bottom: 10px; }
+    p.lead { color: var(--g200); font-size: 1.05rem; margin-bottom: 18px; }
+    .facts { list-style: none; display: grid; gap: 10px; margin: 18px 0 22px; }
+    .facts li { display: flex; gap: 10px; align-items: flex-start; color: var(--g200); }
+    .facts li b { color: var(--white); }
+    .facts .ic { flex: none; width: 28px; height: 28px; border-radius: 8px; background: rgba(255,241,49,.12); color: var(--yellow); display: grid; place-items: center; font-size: .95rem; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; font-size: 1.05rem; font-weight: 700; padding: 14px 28px; border-radius: 999px; border: none; cursor: pointer; text-decoration: none; background: var(--yellow); color: var(--black); min-height: 52px; }
+    .btn:disabled { opacity: .45; cursor: default; }
+    .btn.ghost { background: transparent; color: var(--yellow); border: 1.5px solid rgba(255,241,49,.55); }
+    .btn.block { width: 100%; }
+    .muted { color: var(--g400); font-size: .9rem; }
+    .bar { height: 6px; border-radius: 99px; background: rgba(255,255,255,.08); overflow: hidden; margin-bottom: 18px; }
+    .bar > i { display: block; height: 100%; background: var(--yellow); width: 0; transition: width .3s; }
+    .qmeta { display: flex; justify-content: space-between; color: var(--g400); font-size: .85rem; margin-bottom: 10px; }
+    .passage { direction: ltr; text-align: left; background: rgba(255,255,255,.05); border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; color: var(--g200); font-size: 1.02rem; line-height: 1.65; }
+    .q { direction: ltr; text-align: left; font-size: 1.15rem; font-weight: 600; margin-bottom: 16px; line-height: 1.55; }
+    .q.ar { direction: rtl; text-align: right; }
+    .opts { display: grid; gap: 10px; }
+    .opt { direction: ltr; text-align: left; font-family: inherit; font-size: 1.02rem; color: var(--white); background: rgba(255,255,255,.04); border: 1.5px solid rgba(255,255,255,.12); border-radius: 12px; padding: 13px 16px; cursor: pointer; min-height: 50px; }
+    .opt:hover { border-color: rgba(255,241,49,.5); }
+    .opt[aria-checked="true"] { border-color: var(--yellow); background: rgba(255,241,49,.1); }
+    .next { margin-top: 18px; }
+    .play { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .play button { width: 64px; height: 64px; border-radius: 50%; border: none; background: var(--yellow); color: var(--black); cursor: pointer; display: grid; place-items: center; flex: none; }
+    .play button.on { animation: pulse 1s infinite; }
+    .play button:disabled { opacity: .4; cursor: default; animation: none; }
+    @keyframes pulse { 50% { box-shadow: 0 0 0 10px rgba(255,241,49,.15); } }
+    .field { display: grid; gap: 6px; margin-bottom: 14px; }
+    .field label { font-weight: 600; }
+    .input { font-family: inherit; font-size: 1.05rem; padding: 13px 14px; border-radius: 12px; border: 1.5px solid rgba(255,255,255,.15); background: rgba(255,255,255,.04); color: var(--white); min-height: 50px; width: 100%; }
+    .input:focus { outline: none; border-color: var(--yellow); }
+    .err { color: var(--bad); font-size: .92rem; min-height: 1.4em; }
+    .level { text-align: center; padding: 8px 0 4px; }
+    .level .big { font-size: 4.2rem; font-weight: 700; color: var(--yellow); line-height: 1; direction: ltr; }
+    .level .name { font-size: 1.3rem; font-weight: 700; margin-top: 8px; }
+    .scale { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 20px 0; direction: ltr; }
+    .scale span { text-align: center; font-size: .8rem; font-weight: 700; padding: 8px 0; border-radius: 8px; background: rgba(255,255,255,.06); color: var(--g400); }
+    .scale span.done { background: rgba(255,241,49,.25); color: var(--white); }
+    .scale span.me { background: var(--yellow); color: var(--black); }
+    .parts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 6px 0 18px; }
+    .parts div { background: rgba(255,255,255,.04); border-radius: 12px; padding: 12px; text-align: center; }
+    .parts b { display: block; font-size: 1.3rem; color: var(--yellow); direction: ltr; }
+    .stack > * + * { margin-top: 12px; }
+    .cta { margin-top: 22px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.08); }
+    .note { font-size: .82rem; color: var(--g400); margin-top: 14px; text-align: center; }
+    [hidden] { display: none !important; }
+    @media (max-width: 420px) { .card { padding: 20px 16px; } .level .big { font-size: 3.6rem; } }
+  </style>
+  <!-- Meta Pixel -->
+  <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1276107000741413');
+    fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none" alt=""
+    src="https://www.facebook.com/tr?id=1276107000741413&ev=PageView&noscript=1" /></noscript>
+  <!-- End Meta Pixel -->
+</head>
+
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="/">مصطفى صلاح</a>
+      <div class="timer" id="timer" hidden>15:00</div>
+    </header>
+
+    <!-- 1. Intro -->
+    <section class="card" id="sIntro">
+      <h1>اعرف مستواك بالإنكليزي <span class="hl">ببلاش</span></h1>
+      <p class="lead">اختبار قصير يطلعلك مستواك الحقيقي من A1 لحد C2، ويّا شرح شنو يعني وشنو خطوتك الجاية.</p>
+      <ul class="facts">
+        <li><span class="ic">⏱</span><span><b>15 دقيقة بالضبط.</b> العدّاد يبدي من تضغط "ابدي".</span></li>
+        <li><span class="ic">📖</span><span><b>القسم الأول:</b> قراءة وقواعد ومفردات.</span></li>
+        <li><span class="ic" id="icListen">🎧</span><span id="listenFact"><b>القسم الثاني:</b> استماع. شغّل الصوت أو البس سماعة.</span></li>
+        <li><span class="ic">📈</span><span>الأسئلة تبدي سهلة وتصعب شوية شوية. إذا ما تعرف الجواب، اختار اللي تحسه أقرب وكمّل.</span></li>
+      </ul>
+      <button class="btn block" id="startBtn">ابدي الاختبار</button>
+      <p class="note">ما تكدر ترجع لسؤال قبله، مثل الاختبارات الرسمية.</p>
+    </section>
+
+    <!-- 2. Part intro -->
+    <section class="card" id="sPart" hidden>
+      <h2 id="partTitle"></h2>
+      <p class="lead" id="partText"></p>
+      <button class="btn block" id="partGo">يلا</button>
+    </section>
+
+    <!-- 3. Question -->
+    <section class="card" id="sQ" hidden>
+      <div class="qmeta"><span id="qPart"></span><span id="qNum"></span></div>
+      <div class="bar"><i id="qBar"></i></div>
+      <div class="play" id="qPlay" hidden>
+        <button type="button" id="playBtn" aria-label="شغّل الصوت">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" aria-hidden="true"><path d="M3 10v4a1 1 0 0 0 1 1h3l4 4V5L7 9H4a1 1 0 0 0-1 1zm13.5 2A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>
+        </button>
+        <span class="muted" id="playNote">اضغط واسمع. تكدر تسمعها مرتين.</span>
+      </div>
+      <div class="passage" id="qPassage" hidden></div>
+      <div class="q" id="qText"></div>
+      <div class="opts" id="qOpts" role="radiogroup"></div>
+      <button class="btn block next" id="nextBtn" disabled>التالي</button>
+    </section>
+
+    <!-- 4. Lead form -->
+    <section class="card" id="sForm" hidden>
+      <h2>خلصت! 🎉 نتيجتك جاهزة</h2>
+      <p class="lead">اكتب اسمك ورقمك حتى نطلعلك النتيجة، ونكدر نرسلك نصايح تناسب مستواك.</p>
+      <form id="leadForm" novalidate>
+        <div class="field"><label for="fName">اسمك</label><input class="input" id="fName" autocomplete="name" maxlength="60" /></div>
+        <div class="field"><label for="fPhone">رقم الموبايل (واتساب)</label><input class="input" id="fPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07XX XXX XXXX" dir="ltr" maxlength="20" /></div>
+        <div class="err" id="fErr" role="alert"></div>
+        <button class="btn block" id="fBtn">شوف نتيجتي</button>
+      </form>
+    </section>
+
+    <!-- 5. Result -->
+    <section class="card" id="sResult" hidden>
+      <p class="muted" style="text-align:center" id="rHello"></p>
+      <div class="level">
+        <div class="big" id="rLevel"></div>
+        <div class="name" id="rName"></div>
+      </div>
+      <div class="scale" id="rScale"></div>
+      <div class="parts" id="rParts"></div>
+      <p class="lead" id="rText" style="margin-bottom:0"></p>
+      <div class="cta stack">
+        <p id="rCta"></p>
+        <a class="btn block" id="rBook" href="/?src=level-test">شوف كورس Speak 360</a>
+        <a class="btn ghost block" id="rFree" href="/learn/free?src=level-test">جرّب الدرس الأول مجاناً</a>
+        <a class="btn ghost block" id="rShare" target="_blank" rel="noopener">تحدّى صديقك 💪</a>
+      </div>
+      <p class="note">هذا اختبار تقريبي يعطيك فكرة عن مستواك، مو شهادة رسمية.</p>
+    </section>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+    var $ = function (id) { return document.getElementById(id); };
+    var LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    var TIME = 15 * 60;
+
+    // ---------- questions ----------
+    // r: reading & grammar (4 per level), l: listening (2 per level). a = index of the right option.
+    var R = [
+      { lv: 'A1', q: 'My sister ___ a teacher.', o: ['is', 'are', 'am', 'be'], a: 0 },
+      { lv: 'A1', q: 'I ___ coffee every morning.', o: ['drinks', 'drink', 'drinking', 'am drink'], a: 1 },
+      { lv: 'A1', q: 'The opposite of "cold" is ___.', o: ['tall', 'new', 'hot', 'slow'], a: 2 },
+      { lv: 'A1', p: "Hi, I'm Sara. I live in Basra with my parents and my two brothers.", q: 'How many brothers does Sara have?', o: ['One', 'Two', 'Three', 'Four'], a: 1 },
+
+      { lv: 'A2', q: 'We ___ to Erbil last summer.', o: ['go', 'gone', 'went', 'going'], a: 2 },
+      { lv: 'A2', q: 'Is there ___ milk in the fridge?', o: ['any', 'many', 'a', 'few'], a: 0 },
+      { lv: 'A2', q: 'She is ___ than her brother.', o: ['more tall', 'tallest', 'the taller', 'taller'], a: 3 },
+      { lv: 'A2', p: "The shop opens at 9 a.m. and closes at 6 p.m. It's closed on Fridays.", q: 'When can you NOT go to the shop?', o: ['Monday at 10 a.m.', 'Friday morning', 'Tuesday at 5 p.m.', 'Sunday at noon'], a: 1 },
+
+      { lv: 'B1', q: 'I ___ here since 2020.', o: ['live', 'am living', 'have lived', 'lived'], a: 2 },
+      { lv: 'B1', q: 'If it rains tomorrow, we ___ at home.', o: ['will stay', 'stay', 'would stay', 'stayed'], a: 0 },
+      { lv: 'B1', q: "Could you ___ the music down? I'm studying.", o: ['put', 'turn', 'take', 'give'], a: 1 },
+      { lv: 'B1', p: "Although the hotel was expensive, we didn't regret staying there because the service was excellent.", q: 'How did they feel about the hotel?', o: ['They were angry about the price', 'They left early', 'They were happy with it', "They didn't stay there"], a: 2 },
+
+      { lv: 'B2', q: 'By the time we arrived, the film ___.', o: ['started', 'has started', 'was starting', 'had already started'], a: 3 },
+      { lv: 'B2', q: 'I wish I ___ more time to study.', o: ['had', 'have', 'will have', 'having'], a: 0 },
+      { lv: 'B2', q: 'The meeting was ___ because the manager was ill.', o: ['called up', 'called off', 'called out', 'called on'], a: 1 },
+      { lv: 'B2', p: 'Despite repeated warnings, the company failed to deal with the problem, which eventually led to a sharp drop in sales.', q: 'Why did sales drop?', o: ['A new competitor appeared', 'There were too many warnings', 'The company ignored a problem', 'The sales staff left'], a: 2 },
+
+      { lv: 'C1', q: 'Hardly ___ the room when the phone rang.', o: ['I had entered', 'had I entered', 'I entered', 'did I entered'], a: 1 },
+      { lv: 'C1', q: 'His explanation was so ___ that nobody could follow it.', o: ['concise', 'candid', 'coherent', 'convoluted'], a: 3 },
+      { lv: 'C1', q: "It's high time we ___ a decision.", o: ['made', 'make', 'will make', 'have made'], a: 0 },
+      { lv: 'C1', p: "The minister's remarks were widely seen as an attempt to deflect attention from the government's own shortcomings.", q: 'What does the writer suggest the minister was doing?', o: ['Admitting the government\'s mistakes', 'Trying to avoid blame', 'Praising the government', 'Announcing a new policy'], a: 1 },
+
+      { lv: 'C2', q: 'Not until the results were published ___ how serious the problem was.', o: ['we realised', 'we did realise', 'did we realise', 'had realised we'], a: 2 },
+      { lv: 'C2', q: "The novel's ending is deliberately ___, leaving readers to draw their own conclusions.", o: ['ambiguous', 'unanimous', 'meticulous', 'gregarious'], a: 0 },
+      { lv: 'C2', q: 'She took the harsh criticism ___ her stride.', o: ['on', 'at', 'with', 'in'], a: 3 },
+      { lv: 'C2', p: 'His apology, while ostensibly sincere, did little to placate those who felt the damage had already been done.', q: 'What does this mean?', o: ['People accepted his apology fully', 'Many people were still upset', 'He refused to apologise', 'The damage was repaired'], a: 1 }
+    ];
+    var L = [
+      { lv: 'A1', s: 'I have two cats and one dog.', q: 'What does the speaker have?', o: ['Two dogs and a cat', 'Two cats and a dog', 'Three cats', 'One cat and one dog'], a: 1 },
+      { lv: 'A1', s: "What time is it? It's half past seven.", q: 'What time is it?', o: ['7:15', '6:30', '7:30', '8:30'], a: 2 },
+      { lv: 'A2', s: "Sorry I'm late. The bus didn't come, so I had to walk.", q: 'Why was the speaker late?', o: ['There was no bus, so they walked', 'They woke up late', 'Their car broke down', 'They missed the train'], a: 0 },
+      { lv: 'A2', s: 'Can I have a large coffee with no sugar, please?', q: 'What did the speaker order?', o: ['A small coffee with sugar', 'A large tea with no sugar', 'A large coffee with no sugar', 'A large coffee with milk and sugar'], a: 2 },
+      { lv: 'B1', s: 'I was going to call you last night, but my phone ran out of battery.', q: "Why didn't the speaker call?", o: ['They forgot', 'Their phone battery died', 'They were too busy', "They didn't have the number"], a: 1 },
+      { lv: 'B1', s: 'The doctor told me to cut down on sugar and get more exercise.', q: 'What did the doctor say?', o: ['Eat more sugar', 'Stop exercising', 'Take some medicine', 'Eat less sugar and exercise more'], a: 3 },
+      { lv: 'B2', s: "If I'd known the traffic would be this bad, I'd have left an hour earlier.", q: 'What happened?', o: ['The speaker left too late', 'The speaker left very early', 'There was no traffic', 'The speaker will leave tomorrow'], a: 0 },
+      { lv: 'B2', s: "Our flight's been delayed, so we might as well grab something to eat.", q: 'What does the speaker suggest?', o: ['Cancelling the trip', 'Running to the gate', 'Eating while they wait', 'Going back home'], a: 2 },
+      { lv: 'C1', s: 'Frankly, the proposal raises more questions than it answers.', q: 'What does the speaker think of the proposal?', o: ["It's excellent", "It's unclear and incomplete", "It's too short", "It's already approved"], a: 1 },
+      { lv: 'C1', s: "She's not one to beat around the bush, so expect some honest feedback.", q: 'What is she like?', o: ['She avoids giving answers', 'She is very shy', 'She speaks directly', 'She likes gardening'], a: 2 },
+      { lv: 'C2', s: 'Had it not been for her timely intervention, the negotiations would have collapsed altogether.', q: 'What does the speaker mean?', o: ['Her help saved the negotiations', 'The negotiations collapsed', 'She arrived too late', 'She ended the negotiations'], a: 0 },
+      { lv: 'C2', s: 'The evidence, compelling as it may seem, is far from conclusive.', q: 'What does the speaker mean?', o: ['The evidence proves everything', 'There is no evidence at all', 'The evidence is weak and boring', "It looks strong but doesn't prove it"], a: 3 }
+    ];
+
+    var INFO = {
+      A1: ['مبتدئ', 'تعرف كلمات وجمل بسيطة. هسه أهم شي تبني الأساس: جمل المحادثة اليومية والقواعد الأساسية، وتسمع هواي حتى أذنك تتعود.'],
+      A2: ['أساسي', 'تكدر تحچي عن نفسك وعن أمورك اليومية بجمل بسيطة، بس تتوقف من تطول المحادثة. تحتاج جمل جاهزة أكثر وتمرين حچي يومي.'],
+      B1: ['متوسط', 'تفهم الفكرة العامة وتكدر تحچي بمواضيع تعرفها، بس تفكر بالعربي قبل لا تحچي. خطوتك الجاية الطلاقة والثقة.'],
+      B2: ['فوق المتوسط', 'تحچي بطلاقة مقبولة وتفهم أغلب الكلام. الخطوة الجاية دقة أكثر، ومفردات أقوى، وتحچي بدون تردد بالشغل والمقابلات.'],
+      C1: ['متقدم', 'تستخدم الإنكليزي بمرونة بالشغل والدراسة. ركّز على الأسلوب والتعابير اللي يستخدمها أهل اللغة حتى توصل للإتقان.'],
+      C2: ['متمكن', 'مستواك قريب من مستوى المتحدث الأصلي. عاشت إيدك 👏 حافظ عليه بالقراءة والاستماع المستمر.']
+    };
+
+    // ---------- speech: same voice picking as the course workbook ----------
+    var synth = window.speechSynthesis, canSpeak = !!(synth && window.SpeechSynthesisUtterance), voice = null;
+    function score(v) {
+      var n = (v.name || '') + ' ' + (v.voiceURI || ''), s = 0;
+      if (/natural|neural|online|premium|enhanced/i.test(n)) s += 60;
+      if (/Google US English|Google UK English Female/i.test(n)) s += 45;
+      if (/\b(Aria|Jenny|Ava|Emma|Michelle|Sonia|Libby|Samantha|Allison|Susan|Serena|Karen|Moira|Tessa|Victoria|Zira|Joanna|Salli|Kendra|Nicky)\b/i.test(n)) s += 30;
+      if (/\b(David|Mark|Fred|Alex|Daniel|Guy|George|Ryan|Christopher|Eric|Tom|Albert|Bad|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Junior|Ralph|Kathy|Princess)\b/i.test(n)) s -= 40;
+      if (/compact|espeak/i.test(n)) s -= 30;
+      if (/^en[-_]US/i.test(v.lang)) s += 8; else if (/^en[-_]GB/i.test(v.lang)) s += 5;
+      if (v.localService === false) s += 3;
+      return s;
+    }
+    function pickVoice() {
+      if (!canSpeak) return;
+      var vs = []; try { vs = synth.getVoices() || []; } catch (e) {}
+      vs = vs.filter(function (v) { return /^en([-_]|$)/i.test(v.lang); });
+      voice = vs.sort(function (a, b) { return score(b) - score(a); })[0] || null;
+    }
+    if (canSpeak) { pickVoice(); try { synth.onvoiceschanged = pickVoice; } catch (e) {} }
+
+    function speak(text, onend) {
+      try {
+        synth.cancel();
+        var u = new SpeechSynthesisUtterance(text);
+        u.lang = (voice && voice.lang) || 'en-US'; u.rate = 0.9;
+        if (voice) u.voice = voice;
+        u.onend = u.onerror = function () { if (onend) onend(); };
+        synth.speak(u);
+      } catch (e) { if (onend) onend(); }
+    }
+
+    // ---------- state ----------
+    var params = new URLSearchParams(location.search);
+    var SOURCE = params.get('src') || params.get('utm_source') || 'direct';
+    var useListening = canSpeak;
+    var parts = [{ key: 'r', title: 'القسم الأول: قراءة وقواعد', text: 'اختار الجواب الصح لكل سؤال. بعض الأسئلة بيها فقرة قصيرة، اقرأها أول.', items: R }];
+    if (useListening) parts.push({ key: 'l', title: 'القسم الثاني: استماع 🎧', text: 'شغّل الصوت أو البس سماعة. اضغط زر الصوت، اسمع الجملة، واختار الجواب. تكدر تسمع كل جملة مرتين بس.', items: L });
+    var total = parts.reduce(function (n, p) { return n + p.items.length; }, 0);
+    var answers = []; // {lv, part, ok}
+    var pi = 0, qi = 0, done = 0, chosen = -1, left = TIME, tick = null, finished = false, result = null;
+
+    if (!useListening) {
+      $('listenFact').innerHTML = '<b>ملاحظة:</b> متصفحك ما يدعم الصوت، فراح يكون الاختبار قراءة وقواعد بس.';
+      $('icListen').textContent = 'ℹ️';
+    }
+
+    function show(id) {
+      ['sIntro', 'sPart', 'sQ', 'sForm', 'sResult'].forEach(function (s) { $(s).hidden = s !== id; });
+      window.scrollTo(0, 0);
+    }
+    function px(ev, data, custom) { try { if (window.fbq) fbq(custom ? 'trackCustom' : 'track', ev, data || {}); } catch (e) {} }
+
+    function fmt(s) { var m = Math.floor(s / 60), x = s % 60; return (m < 10 ? '0' : '') + m + ':' + (x < 10 ? '0' : '') + x; }
+    function startTimer() {
+      var t = $('timer'); t.hidden = false; t.textContent = fmt(left);
+      var end = Date.now() + left * 1000;
+      tick = setInterval(function () {
+        left = Math.max(0, Math.round((end - Date.now()) / 1000));
+        t.textContent = fmt(left); t.classList.toggle('low', left <= 60);
+        if (left <= 0) finish();
+      }, 500);
+    }
+
+    $('startBtn').onclick = function () {
+      // unlock speech on iOS: speaking needs to start from a tap
+      if (canSpeak) { try { var u = new SpeechSynthesisUtterance(' '); u.volume = 0; synth.speak(u); } catch (e) {} }
+      px('StartLevelTest', { source: SOURCE }, true);
+      startTimer();
+      partIntro();
+    };
+
+    function partIntro() {
+      var p = parts[pi];
+      $('partTitle').textContent = p.title; $('partText').textContent = p.text;
+      show('sPart');
+    }
+    $('partGo').onclick = function () { qi = 0; showQ(); };
+
+    var plays = 0;
+    function showQ() {
+      var p = parts[pi], it = p.items[qi];
+      chosen = -1; $('nextBtn').disabled = true;
+      $('qPart').textContent = p.key === 'r' ? 'قراءة وقواعد' : 'استماع';
+      $('qNum').textContent = 'سؤال ' + (done + 1) + ' من ' + total;
+      $('qBar').style.width = (done / total * 100) + '%';
+      $('qPassage').hidden = !it.p; $('qPassage').textContent = it.p || '';
+      $('qText').textContent = it.q;
+      $('qPlay').hidden = p.key !== 'l';
+      if (p.key === 'l') {
+        plays = 0; $('playBtn').disabled = false; $('playBtn').classList.remove('on');
+        $('playNote').textContent = 'اضغط واسمع. تكدر تسمعها مرتين.';
+      }
+      var box = $('qOpts'); box.innerHTML = '';
+      it.o.forEach(function (txt, i) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'opt'; b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', 'false');
+        b.textContent = txt;
+        b.onclick = function () {
+          chosen = i;
+          [].forEach.call(box.children, function (c) { c.setAttribute('aria-checked', String(c === b)); });
+          $('nextBtn').disabled = false;
+        };
+        box.appendChild(b);
+      });
+      show('sQ');
+    }
+
+    $('playBtn').onclick = function () {
+      var it = parts[pi].items[qi], btn = this;
+      if (plays >= 2) return;
+      plays++; btn.classList.add('on'); btn.disabled = true;
+      speak(it.s, function () {
+        btn.classList.remove('on');
+        if (plays < 2) { btn.disabled = false; $('playNote').textContent = 'تكدر تسمعها مرة ثانية.'; }
+        else $('playNote').textContent = 'خلصت مرات الاستماع. اختار جوابك.';
+      });
+    };
+
+    $('nextBtn').onclick = function () {
+      if (chosen < 0 || finished) return;
+      var it = parts[pi].items[qi];
+      answers.push({ lv: it.lv, part: parts[pi].key, ok: chosen === it.a });
+      done++; qi++;
+      if (canSpeak) { try { synth.cancel(); } catch (e) {} }
+      if (qi < parts[pi].items.length) return showQ();
+      pi++;
+      if (pi < parts.length) return partIntro();
+      finish();
+    };
+
+    // ---------- scoring ----------
+    // A level counts as passed when at least half of its questions are right.
+    // The result is the last level passed in a row, starting from A1.
+    function scoreTest() {
+      var per = {}, right = { r: 0, l: 0 }, count = { r: 0, l: 0 };
+      LEVELS.forEach(function (lv) { per[lv] = { ok: 0, n: 0 }; });
+      parts.forEach(function (p) { p.items.forEach(function (it) { per[it.lv].n++; count[p.key]++; }); });
+      answers.forEach(function (a) { if (a.ok) { per[a.lv].ok++; right[a.part]++; } });
+      var level = 'A1', passed = 0;
+      for (var i = 0; i < LEVELS.length; i++) {
+        var s = per[LEVELS[i]];
+        if (s.n && s.ok / s.n >= 0.5) { level = LEVELS[i]; passed = i + 1; } else break;
+      }
+      return { level: level, passed: passed, score: right.r + right.l, total: total, right: right, count: count };
+    }
+
+    function finish() {
+      if (finished) return;
+      finished = true;
+      clearInterval(tick); $('timer').hidden = true;
+      if (canSpeak) { try { synth.cancel(); } catch (e) {} }
+      result = scoreTest();
+      show('sForm');
+      setTimeout(function () { try { $('fName').focus(); } catch (e) {} }, 50);
+    }
+
+    // ---------- lead form ----------
+    function iraqiPhone(v) {
+      var d = (v || '').replace(/\D/g, '').replace(/^00/, '');
+      if (/^07\d{9}$/.test(d)) return d;
+      if (/^9647\d{9}$/.test(d)) return '0' + d.slice(3);
+      if (/^7\d{9}$/.test(d)) return '0' + d;
+      return null;
+    }
+    $('leadForm').onsubmit = function (e) {
+      e.preventDefault();
+      var name = $('fName').value.trim(), phone = iraqiPhone($('fPhone').value), err = $('fErr');
+      err.textContent = '';
+      if (!name) { err.textContent = 'اكتب اسمك.'; $('fName').focus(); return; }
+      if (!phone) { err.textContent = 'اكتب رقم موبايلك العراقي الصحيح (11 رقم يبدي بـ 07).'; $('fPhone').focus(); return; }
+      var btn = $('fBtn'); btn.disabled = true; btn.textContent = 'لحظة...';
+      var api = (window.LEARN_API || '').replace(/\/$/, '');
+      var body = JSON.stringify({ name: name, phone: phone, level: result.level, score: result.score, total: result.total, source: SOURCE });
+      var go = function () { showResult(name); };
+      if (!api) return go();
+      var timer = setTimeout(go, 6000); // never keep people waiting on a slow network
+      fetch(api + '/api/level-test', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body })
+        .then(function (r) {
+          if (r.status === 400) return r.json().then(function (d) { throw d; });
+          return null;
+        })
+        .then(function () { clearTimeout(timer); go(); })
+        .catch(function (d) {
+          clearTimeout(timer);
+          if (d && d.message && (d.error === 'phone' || d.error === 'name')) {
+            err.textContent = d.message; btn.disabled = false; btn.textContent = 'شوف نتيجتي'; return;
+          }
+          go();
+        });
+    };
+
+    var shown = false;
+    function showResult(name) {
+      if (shown) return; shown = true;
+      var r = result, info = INFO[r.level];
+      px('Lead', { content_name: 'level_test', content_category: r.level });
+      $('rHello').textContent = 'هلا ' + name + '، مستواك هو';
+      $('rLevel').textContent = r.level;
+      $('rName').textContent = info[0];
+      $('rScale').innerHTML = LEVELS.map(function (lv, i) {
+        var cls = lv === r.level ? 'me' : (i < LEVELS.indexOf(r.level) ? 'done' : '');
+        return '<span class="' + cls + '">' + lv + '</span>';
+      }).join('');
+      var pp = '<div><b>' + r.right.r + '/' + r.count.r + '</b>قراءة وقواعد</div>';
+      if (r.count.l) pp += '<div><b>' + r.right.l + '/' + r.count.l + '</b>استماع</div>';
+      $('rParts').innerHTML = pp;
+      $('rParts').style.gridTemplateColumns = r.count.l ? '1fr 1fr' : '1fr';
+      $('rText').textContent = info[1];
+      var high = LEVELS.indexOf(r.level) >= 3;
+      $('rCta').innerHTML = high
+        ? 'تريد تحچي بثقة أكثر بالشغل والمقابلات؟ <b class="hl">Speak 360</b> بيه فصل كامل للإنكليزي بالشغل والمقابلات.'
+        : '<b class="hl">Speak 360</b> مصمم بالضبط حتى ينقلك من هذا المستوى للحچي بثقة، بـ 3 أشهر ودرس كل يوم.';
+      var src = encodeURIComponent('level-test-' + r.level);
+      $('rBook').href = '/?src=' + src;
+      $('rFree').href = '/learn/free?src=' + src;
+      var msg = 'طلع مستواي بالإنكليزي ' + r.level + ' 💪 تحدّاني وشوف مستواك ببلاش: https://mustafasalah.net/test/?src=share';
+      $('rShare').href = 'https://wa.me/?text=' + encodeURIComponent(msg);
+      show('sResult');
+    }
+  })();
+  </script>
+</body>
+
+</html>
