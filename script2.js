@@ -77,6 +77,7 @@ revealElements.forEach(el => revealObserver.observe(el));
     var left = launch - Date.now();
     if (left <= 0) {
       box.innerHTML = '<div class="cd-open">التسجيل مفتوح هسة</div>';
+      document.documentElement.classList.add('launched');
       clearInterval(timer);
       return;
     }
