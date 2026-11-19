@@ -197,7 +197,7 @@ section+section{margin-top:26px}
         <select class="input" id="goal"><option value="">اختار</option><option>للشغل</option><option>للدراسة</option><option>للسفر</option><option>أريد أحچي بثقة</option><option>غيرها</option></select></div>
       <div class="field" data-m="free"><label for="city">المحافظة</label>
         <select class="input" id="city"><option value="">اختار محافظتك</option><option>البصرة</option><option>بغداد</option><option>أربيل</option><option>الأنبار</option><option>بابل</option><option>حلبجة</option><option>دهوك</option><option>ديالى</option><option>ذي قار</option><option>السليمانية</option><option>صلاح الدين</option><option>القادسية</option><option>كربلاء</option><option>كركوك</option><option>المثنى</option><option>ميسان</option><option>النجف</option><option>نينوى</option><option>واسط</option><option>خارج العراق</option></select></div>
-      <div class="field" data-m="pre"><label for="pay">شلون تحب تدفع يوم الإطلاق؟</label>
+      <div class="field" data-m="pre"><label for="pay">شلون تحب تدفع؟</label>
         <select class="input" id="pay"><option value="">اختار</option><option>كاش ويا المندوب</option><option>حوالة إلكترونية</option></select></div>
       <div class="err small" id="loginErr" role="alert"></div>
       <button class="btn y" id="loginBtn">دخول</button>
@@ -311,7 +311,7 @@ section+section{margin-top:26px}
     });
     if (PRE && m === 'free') {
       $('loginTitle').textContent = 'احجز مقعدك بسعر الإطلاق 🎟️';
-      $('loginSub').textContent = 'سجّل حجزك هسة بدون دفع، ونتواصل وياك يوم الإطلاق حتى تدفع بسعر الحجز. وبنفس الوقت شوف الدرس الأول مجاناً.';
+      $('loginSub').textContent = 'سجّل حجزك هسة بدون دفع، ونتواصل وياك بأسرع وقت حتى نثبّت حجزك. وبنفس الوقت شوف الدرس الأول مجاناً.';
       $('loginBtn').textContent = 'احجز مقعدي';
     }
     $('pw').autocomplete = m === 'login' ? 'current-password' : 'new-password';
@@ -437,12 +437,12 @@ section+section{margin-top:26px}
     $('preDone').hidden = !d.preorder;
     if (d.preorder) {
       $('preDone').innerHTML = `<b class="pre-ok-t">🎉 تم حجز مقعدك بنجاح!</b>
-        <p>مقعدك محجوز بسعر الإطلاق. يوم 13 ديسمبر نتواصل وياك على واتساب حتى تكمل الدفع ويوصلك كود التفعيل.</p>
+        <p>مقعدك محجوز بسعر الإطلاق. راح نتواصل وياك على واتساب بأسرع وقت حتى نثبّت حجزك.</p>
         <p class="pre-ok-go">ولحد ذاك الوقت، ابدي بدرسك المجاني 👇</p>`;
       return;
     }
     box.innerHTML = `<h3>عجبك؟ احجز مقعدك</h3>
-      <p class="muted">بسعر الإطلاق، وبدون دفع هسة. نتواصل وياك يوم 13 ديسمبر.</p>
+      <p class="muted">بسعر الإطلاق، وبدون دفع هسة. نتواصل وياك بأسرع وقت حتى نثبّت حجزك.</p>
       <div class="row"><select class="input" id="prePay" style="flex:1;min-width:0"><option value="">شلون تحب تدفع؟</option><option>كاش ويا المندوب</option><option>حوالة إلكترونية</option></select>
       <button type="button" class="btn y" id="preGo">احجز</button></div><div class="err small" id="preErr" style="min-height:0"></div>`;
     $('preGo').onclick = async () => {
