@@ -72,3 +72,8 @@ audio{width:100%;height:44px}
 .spin{display:inline-block;width:18px;height:18px;border:2.5px solid currentColor;border-inline-end-color:transparent;border-radius:50%;animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.pw-wrap{position:relative}
+.pw-wrap .input{padding-right:52px}
+.pw-eye{position:absolute;top:50%;right:6px;transform:translateY(-50%);width:42px;height:42px;display:grid;place-items:center;border:0;border-radius:10px;background:transparent;color:var(--muted);cursor:pointer}
+.pw-eye:hover,.pw-eye[aria-pressed="true"]{color:var(--ink)}
+.pw-eye:focus-visible{outline:2px solid var(--black);outline-offset:-2px}

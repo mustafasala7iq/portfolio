@@ -194,6 +194,8 @@ section+section{margin-top:26px}
         <input class="input en" id="email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" placeholder="name@gmail.com"></div>
       <div class="field" data-m="login act free reset"><label for="pw">الباسورد</label>
         <input class="input en" id="pw" type="password" autocomplete="current-password" placeholder="6 أحرف أو أكثر"></div>
+      <div class="field" data-m="act free reset"><label for="pw2">أكد الباسورد</label>
+        <input class="input en" id="pw2" type="password" autocomplete="new-password" placeholder="اكتبه مرة ثانية"></div>
       <div class="field" data-m="act"><label for="code">كود التفعيل</label>
         <input class="input en" id="code" autocapitalize="characters" autocomplete="one-time-code" placeholder="TA-XXXXX"></div>
       <div class="field" data-m="free"><label for="goal">ليش تتعلم إنكليزي؟</label>
@@ -323,6 +325,7 @@ section+section{margin-top:26px}
     }
     $('pw').autocomplete = m === 'login' ? 'current-password' : 'new-password';
     $('pw').placeholder = m === 'reset' ? 'الباسورد الجديد: 6 أحرف أو أكثر' : '6 أحرف أو أكثر';
+    $('pw2').value = '';
     $('loginLinks').querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); setMode(a.dataset.go); });
   }
   setMode(mode);
@@ -347,6 +350,7 @@ section+section{margin-top:26px}
     if (mode === 'login' ? !(emailOk || iraqiMobile(v('email'))) : !emailOk)
       return fail(mode === 'login' ? 'اكتب إيميلك أو رقم موبايلك اللي سجلت بيه.' : 'اكتب إيميلك صح، مثل name@gmail.com', 'email');
     if ($('pw').value.length < 6) return fail(mode === 'login' ? 'اكتب الباسورد.' : 'الباسورد لازم يكون 6 أحرف أو أكثر.', 'pw');
+    if (mode !== 'login' && $('pw2').value !== $('pw').value) return fail('الباسوردين مو نفس الشي. اكتبهن مرة ثانية.', 'pw2');
     if (mode === 'act' && !v('code')) return fail('اكتب كود التفعيل.', 'code');
     if (mode === 'free' && !v('city')) return fail('اختار محافظتك.', 'city');
     if (mode === 'free' && PRE && !v('pay')) return fail('اختار شلون تحب تدفع.', 'pay');
@@ -390,6 +394,7 @@ section+section{margin-top:26px}
         return;
       }
       if ($('pw').value.length < 6) return fail('الباسورد لازم يكون 6 أحرف أو أكثر.', 'pw');
+      if ($('pw2').value !== $('pw').value) return fail('الباسوردين مو نفس الشي. اكتبهن مرة ثانية.', 'pw2');
       const r = await call('/api/reset', { method: 'POST', json: { token: RESET, password: $('pw').value } });
       history.replaceState(null, '', location.pathname);
       token = r.token; store.set('learn_token', token); store.set('has_account', '1');

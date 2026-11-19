@@ -126,5 +126,22 @@
     return { reset };
   }
 
-  window.Learn = { API, store, esc, call, fileUrl, toast, when, recorder };
+  // show / hide password: an eye button inside every password field
+  const EYE = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const EYE_OFF = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6C3.9 8.3 2 12 2 12s3.6 7 10 7c1.9 0 3.5-.5 4.9-1.3"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+  function eyes(root) {
+    (root || document).querySelectorAll('input[type="password"]:not([data-eye])').forEach(inp => {
+      inp.dataset.eye = '1';
+      const wrap = document.createElement('div'); wrap.className = 'pw-wrap';
+      inp.parentNode.insertBefore(wrap, inp); wrap.appendChild(inp);
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'pw-eye';
+      const set = shown => { inp.type = shown ? 'text' : 'password'; b.innerHTML = shown ? EYE_OFF : EYE;
+        b.setAttribute('aria-label', shown ? 'اخفي الباسورد' : 'اظهر الباسورد'); b.setAttribute('aria-pressed', shown); };
+      b.onclick = () => { set(inp.type === 'password'); inp.focus(); };
+      set(false); wrap.appendChild(b);
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => eyes()); else eyes();
+
+  window.Learn = { API, store, esc, call, fileUrl, toast, when, recorder, eyes };
 })();
