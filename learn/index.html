@@ -123,6 +123,19 @@ section+section{margin-top:26px}
 .lesson-bar b{font:800 .95rem/1.3 var(--font-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .lesson iframe{flex:1;width:100%;border:0;background:var(--paper)}
 </style>
+  <!-- Meta Pixel -->
+  <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1276107000741413');
+    fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none" alt=""
+    src="https://www.facebook.com/tr?id=1276107000741413&ev=PageView&noscript=1" /></noscript>
+  <!-- End Meta Pixel -->
 </head>
 <body>
 <header class="bar"><div class="inner">
@@ -237,6 +250,14 @@ section+section{margin-top:26px}
   const WA = window.SUPPORT_WA ? 'https://wa.me/' + window.SUPPORT_WA : null;
   // new visitors sign up first; a device that already had an account opens on "log in"
   const PRE = params.has('preorder');
+  // Meta Pixel events. Purchase carries the course price (39,000 IQD until launch, then 49,000).
+  function px(ev) {
+    try {
+      if (!window.fbq) return;
+      if (ev === 'Purchase') fbq('track', 'Purchase', { value: Date.now() < Date.UTC(2026, 11, 13, 14) ? 39000 : 49000, currency: 'IQD' });
+      else fbq('track', ev);
+    } catch (e) { /* never block the page */ }
+  }
   const RESET = params.get('reset');
   let mode = RESET ? 'reset' : params.has('free') ? 'free' : (params.has('login') || store.get('has_account') ? 'login' : 'act');
   const MODES = {
@@ -305,6 +326,7 @@ section+section{margin-top:26px}
         : await call('/api/register', { method: 'POST', json: { ...body, name: v('name'), phone: v('phone'), free: mode === 'free',
             code: v('code'), goal: v('goal'), city: v('city'), source: SOURCE, preorder: PRE && mode === 'free', pay: v('pay') } });
       token = r.token; store.set('learn_token', token); store.set('has_account', '1');
+      if (mode !== 'login') px(PRE && mode === 'free' ? 'Lead' : mode === 'act' ? 'Purchase' : 'CompleteRegistration');
       await load(true);
     } catch (x) { err.textContent = x.message; }
     finally { btn.disabled = false; }
@@ -379,7 +401,7 @@ section+section{margin-top:26px}
 
   $('actBox').onsubmit = async e => {
     e.preventDefault(); $('actErr').textContent = '';
-    try { await call('/api/activate', { method: 'POST', json: { code: $('actCode').value }, token }); toast('🎉 انفتحلك الكورس الكامل'); load(true); }
+    try { await call('/api/activate', { method: 'POST', json: { code: $('actCode').value }, token }); px('Purchase'); toast('🎉 انفتحلك الكورس الكامل'); load(true); }
     catch (x) { $('actErr').textContent = x.message; }
   };
 
@@ -402,7 +424,7 @@ section+section{margin-top:26px}
       <button type="button" class="btn y" id="preGo">احجز</button></div><div class="err small" id="preErr"></div>`;
     $('preGo').onclick = async () => {
       if (!$('prePay').value) { $('preErr').textContent = 'اختار شلون تحب تدفع.'; return; }
-      try { await call('/api/activate', { method: 'POST', json: { preorder: true, pay: $('prePay').value }, token }); data.preorder = true; renderPre(); $('heroMeta').innerHTML = ''; $('actTitle').textContent = '🔑 وصلك كود التفعيل؟ اكتبه هنا'; box.scrollIntoView({ behavior: 'smooth', block: 'center' }); toast('✅ انحجز مقعدك'); }
+      try { await call('/api/activate', { method: 'POST', json: { preorder: true, pay: $('prePay').value }, token }); data.preorder = true; px('Lead'); renderPre(); $('heroMeta').innerHTML = ''; $('actTitle').textContent = '🔑 وصلك كود التفعيل؟ اكتبه هنا'; box.scrollIntoView({ behavior: 'smooth', block: 'center' }); toast('✅ انحجز مقعدك'); }
       catch (x) { $('preErr').textContent = x.message; }
     };
   }

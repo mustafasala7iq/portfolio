@@ -142,3 +142,16 @@ window.LAUNCH_AT = Date.UTC(2026, 11, 13, 14, 0, 0);
     btn.textContent = open ? 'عرض أقل' : 'عرض المزيد';
   });
 })();
+
+// Meta Pixel: count clicks on booking and free-lesson buttons
+(function () {
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a');
+    if (!a || !window.fbq) return;
+    try {
+      if (a.classList.contains('hero-cta')) fbq('trackCustom', 'ClickReserve');
+      else if (a.classList.contains('js-src')) fbq('trackCustom', 'ClickFreeLesson');
+      else if (a.href.indexOf('wa.me') !== -1) fbq('track', 'Contact');
+    } catch (err) { /* never block the click */ }
+  });
+})();
