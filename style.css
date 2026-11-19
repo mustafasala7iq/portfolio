@@ -1812,7 +1812,8 @@ img {
   }
 
   .steps-3 .step-card p {
-    font-size: 0.78rem;
+    font-size: 0.9rem;
+    line-height: 1.55;
   }
 }
 
@@ -1958,4 +1959,56 @@ img {
     font-weight: 600;
     cursor: pointer;
   }
+}
+
+/* ========================================
+   Compact contact row
+   ======================================== */
+.contact-lead {
+  color: var(--gray-200);
+  font-size: 1.05rem;
+  margin-bottom: 1.5rem;
+}
+
+.contact-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.contact-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: var(--transition);
+}
+
+.contact-pill:hover {
+  border-color: var(--yellow);
+  color: var(--yellow);
+}
+
+.contact-pill-main {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: var(--black);
+  font-weight: 700;
+}
+
+.contact-pill-main:hover {
+  color: var(--black);
+  box-shadow: var(--shadow-glow);
+}
+
+@media (max-width: 600px) {
+  .contact-row { flex-direction: column; align-items: stretch; }
+  .contact-pill { justify-content: center; }
 }
