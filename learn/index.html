@@ -231,9 +231,9 @@ section+section{margin-top:26px}
     <div id="freeView" hidden>
       <div class="card pre-done" id="preDone" hidden></div>
       <ol class="fsteps">
-        <li class="card fstep"><span class="fn">1</span><div class="fb-body"><h3>شوف الفيديوين</h3><div class="intro-grid" id="fIntro"></div></div></li>
+        <li class="card fstep"><span class="fn">1</span><div class="fb-body"><h3>شوف المقدمة</h3><div class="intro-grid" id="fIntro"></div></div></li>
         <li class="card fstep"><span class="fn">2</span><div class="fb-body"><h3>المحاضرة الأولى وواجبها</h3>
-          <p class="muted">فيديو المحاضرة، والملزمة وألعابها، وبالآخر تسجّل صوتك.</p>
+          <p class="muted">فيديو المحاضرة، والملزمة وألعابها، وشرح واجب المحاكاة، وبالآخر تسجّل صوتك.</p>
           <button type="button" class="btn y" id="fLesson">افتح الدرس ←</button></div></li>
         <li class="card fstep" id="preStep"><span class="fn">3</span><div class="fb-body" id="preBox"></div></li>
       </ol>
@@ -484,8 +484,7 @@ section+section{margin-top:26px}
   function renderFree() {
     const d = data;
     $('heroTag').textContent = d.preorder ? 'درسك المجاني 🎁' : 'درسك المجاني 🎁 3 خطوات بسيطة';
-    $('fIntro').innerHTML = [...d.intro.map(u => ['المقدمة', u]), ...d.howto.map(u => ['شلون تسوي واجب المحاكاة', u])]
-      .map(([t, u], i) => `<div class="t-v"><span class="muted small">${i + 1}. ${t}</span>${frame(u)}</div>`).join('') || '<div class="muted small">⏳ الفيديو راح ينزل قريباً.</div>';
+    $('fIntro').innerHTML = d.intro.map(frame).join('') || '<div class="muted small">⏳ الفيديو راح ينزل قريباً.</div>';
     const lec = d.days.find(x => x.kind === 'lecture');
     $('fLesson').onclick = () => lec && openLesson(lec, dayLabel(lec));
     $('actTitle').textContent = d.preorder ? '🔑 وصلك كود التفعيل؟ اكتبه هنا' : '🔑 اشتركت ووصلك كود؟';
@@ -497,14 +496,17 @@ section+section{margin-top:26px}
     const d = data, day = d.days[d.days.length - 1], L = dayLabel(day);
     const miss = d.missing.length;
     const missLine = miss ? `<div class="t-miss">⚠️ عندك ${miss} ${miss === 1 ? 'واجب ناقص' : 'واجبات ناقصة'}، تلكاها بالقائمة تحت</div>` : '';
-    if (day.kind === 'intro') {
+    if (day.number === 1 && day.kind === 'lecture') {     // day 1: the welcome video, then the first lecture
+      const sent1 = day.homework && day.homework.submissions.length;
       $('today').innerHTML = `
         <div class="t-k">اليوم 1 · البداية</div>
         <h2 class="t-title">أهلاً بيك بالكورس 👋</h2>
-        <div class="muted">شوف هالفيديوين بالترتيب:</div>
-        ${d.intro.map(u => `<div class="t-v"><b>1. المقدمة</b>${frame(u)}</div>`).join('')}
-        ${d.howto.map(u => `<div class="t-v"><b>2. شلون تسوي واجب المحاكاة</b>${frame(u)}</div>`).join('')}
+        ${d.intro.length ? `<div class="t-v"><b>1. شوف المقدمة</b>${d.intro.map(frame).join('')}</div>` : ''}
+        <div class="t-v"><b>${d.intro.length ? '2. ' : ''}ابدي أول محاضرة: <span class="en" dir="ltr">${esc(day.title)}</span></b></div>
+        <button type="button" class="btn y t-go">${sent1 ? 'افتح الدرس' : 'ابدي الدرس'} ←</button>
+        <div class="t-hint">${sent1 ? '✅ سلّمت واجب اليوم' : 'محاضرة ← ملزمة ← شرح الواجب ← تسجّل صوتك'}</div>
         <div class="t-next muted small" id="nextOpen"></div>`;
+      $('today').querySelector('.t-go').onclick = () => openLesson(day, L);
       return;
     }
     const hw = day.homework, sent = hw && hw.submissions.length;
@@ -568,10 +570,10 @@ section+section{margin-top:26px}
     if (h >= 12) {
       const at = new Date(data.next_open), now = new Date();
       const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toDateString() === at.toDateString();
-      el.textContent = `⏱️ ${data.day === 1 ? 'أول محاضرة تنفتح' : 'اليوم الجاي ينفتح'} ${tomorrow ? 'غداً' : 'اليوم'} الساعة ${data.send_hour % 12 || 12} العصر`;
+      el.textContent = `⏱️ اليوم الجاي ينفتح ${tomorrow ? 'غداً' : 'اليوم'} الساعة ${data.send_hour % 12 || 12} العصر`;
       return;
     }
-    el.textContent = `⏱️ ${data.day === 1 ? 'أول محاضرة تنفتح' : 'اليوم الجاي ينفتح'} بعد ` + (h ? `${h} ساعة و` : '') + `${m} دقيقة`;
+    el.textContent = `⏱️ اليوم الجاي ينفتح بعد ` + (h ? `${h} ساعة و` : '') + `${m} دقيقة`;
   }
 
   // ---- the mountain: one camp per lecture of the current chapter ----
