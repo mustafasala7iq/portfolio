@@ -571,7 +571,7 @@ section+section{margin-top:26px}
       el.textContent = `⏱️ ${data.day === 1 ? 'أول محاضرة تنفتح' : 'اليوم الجاي ينفتح'} ${tomorrow ? 'غداً' : 'اليوم'} الساعة ${data.send_hour % 12 || 12} العصر`;
       return;
     }
-    el.textContent = '⏱️ اليوم الجاي ينفتح بعد ' + (h ? `${h} ساعة و` : '') + `${m} دقيقة`;
+    el.textContent = `⏱️ ${data.day === 1 ? 'أول محاضرة تنفتح' : 'اليوم الجاي ينفتح'} بعد ` + (h ? `${h} ساعة و` : '') + `${m} دقيقة`;
   }
 
   // ---- the mountain: one camp per lecture of the current chapter ----
