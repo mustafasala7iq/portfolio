@@ -1886,3 +1886,64 @@ img {
   opacity: 0;
   pointer-events: none;
 }
+
+/* ========================================
+   Reviews (real Instagram comments)
+   ======================================== */
+.reviews-section {
+  background: var(--black);
+  position: relative;
+}
+
+.reviews {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-top: 2rem;
+  text-align: right;
+}
+
+.review-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-right: 3px solid var(--yellow);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.review-card blockquote {
+  color: var(--gray-100);
+  font-size: 1.05rem;
+  line-height: 1.9;
+}
+
+.review-card figcaption {
+  color: var(--yellow);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.review-card figcaption span {
+  color: var(--gray-400);
+  font-weight: 400;
+  margin-right: 0.35rem;
+}
+
+.reviews-note {
+  margin-top: 1.5rem;
+  color: var(--gray-400);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 900px) {
+  .reviews { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 600px) {
+  .reviews { grid-template-columns: 1fr; }
+  .review-card blockquote { font-size: 1rem; }
+}
