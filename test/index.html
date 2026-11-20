@@ -378,19 +378,26 @@
     };
 
     // ---------- scoring ----------
-    // A level counts as passed when at least half of its questions are right.
-    // The result is the last level passed in a row, starting from A1.
+    // Every option set has 4 choices, so luck alone gets about 1 in 4 right. Two rules keep lucky
+    // guesses from lifting the result:
+    //  1) a level counts as passed with at least 2/3 of its questions right (4 of 6), in a row from A1;
+    //  2) the overall score caps the result: C2 needs 90%, C1 75%, B2 60%, B1 45%, A2 30%.
+    // The result is the lower of the two.
+    var PASS = 2 / 3, CAP = { A1: 0, A2: 0.30, B1: 0.45, B2: 0.60, C1: 0.75, C2: 0.90 };
     function scoreTest() {
       var per = {}, right = { r: 0, l: 0 }, count = { r: 0, l: 0 };
       LEVELS.forEach(function (lv) { per[lv] = { ok: 0, n: 0 }; });
       parts.forEach(function (p) { p.items.forEach(function (it) { per[it.lv].n++; count[p.key]++; }); });
       answers.forEach(function (a) { if (a.ok) { per[a.lv].ok++; right[a.part]++; } });
-      var level = 'A1', passed = 0;
+      var byLevels = 0;                                     // how many levels passed in a row
       for (var i = 0; i < LEVELS.length; i++) {
         var s = per[LEVELS[i]];
-        if (s.n && s.ok / s.n >= 0.5) { level = LEVELS[i]; passed = i + 1; } else break;
+        if (s.n && s.ok / s.n >= PASS - 1e-9) byLevels = i + 1; else break;
       }
-      return { level: level, passed: passed, score: right.r + right.l, total: total, right: right, count: count };
+      var pct = total ? (right.r + right.l) / total : 0, byScore = 1;
+      LEVELS.forEach(function (lv, i) { if (pct >= CAP[lv] - 1e-9) byScore = i + 1; });
+      var passed = Math.max(1, Math.min(byLevels, byScore));
+      return { level: LEVELS[passed - 1], passed: passed, score: right.r + right.l, total: total, right: right, count: count };
     }
 
     function finish() {
