@@ -2012,3 +2012,41 @@ img {
   .contact-row { flex-direction: column; align-items: stretch; }
   .contact-pill { justify-content: center; }
 }
+
+/* ========================================
+   Level test strip (links to /test)
+   ======================================== */
+.test-strip {
+  background: var(--black);
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.test-strip-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  background: rgba(255, 241, 49, 0.06);
+  border: 1px solid rgba(255, 241, 49, 0.25);
+  border-radius: 20px;
+  padding: 1.75rem 2rem;
+}
+
+.test-strip-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.test-strip-box p {
+  color: var(--gray-200);
+}
+
+@media (max-width: 640px) {
+  .test-strip-box {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    padding: 1.5rem 1.25rem;
+  }
+}
