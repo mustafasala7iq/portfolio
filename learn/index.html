@@ -114,6 +114,7 @@ section+section{margin-top:26px}
 #paidView[hidden],#freeView[hidden]{display:none}
 .today .t-title{margin-top:2px}
 .t-hint{text-align:center;color:var(--muted);font-weight:600;margin-top:2px}
+.t-daily{text-align:center;font-weight:700;font-size:.92rem;color:var(--ink-2)}
 .t-miss{text-align:center;font-weight:700;color:var(--red);font-size:.92rem}
 .t-v{display:flex;flex-direction:column;gap:8px;margin-top:8px}
 .t-v b{font-family:var(--font-display)}
@@ -419,6 +420,11 @@ section+section{margin-top:26px}
   }
 
   const chap = n => (data.chapters[String(n)] || {});
+  // every homework of a day: its own (imitation / review / challenge) + the Daily English clip
+  const hwsOf = day => [day.homework, day.daily].filter(Boolean);
+  const doneCount = day => hwsOf(day).filter(h => h.submissions.length).length;
+  const dailyLine = day => day.daily ? `<div class="t-daily">🎧 + الواجب الثاني: <span class="en" dir="ltr">${esc(day.daily.title)}</span></div>` : '';
+
   function dayLabel(d) {
     if (d.kind === 'intro') return { k: 'اليوم الأول', t: 'البداية: المقدمة وشرح واجب المحاكاة', en: false };
     if (d.kind === 'lecture') return { k: `${chap(d.chapter).ar || ''} · المحاضرة ${d.lecture} + واجب المحاكاة A`, t: d.title, en: true };
@@ -512,19 +518,20 @@ section+section{margin-top:26px}
     const miss = d.missing.length;
     const missLine = miss ? `<div class="t-miss">⚠️ عندك ${miss} ${miss === 1 ? 'واجب ناقص' : 'واجبات ناقصة'}، تلكاها بالقائمة تحت</div>` : '';
     if (day.number === 1 && day.kind === 'lecture') {     // day 1: the welcome video, then the first lecture
-      const sent1 = day.homework && day.homework.submissions.length;
+      const sent1 = hwsOf(day).length && doneCount(day) === hwsOf(day).length;
       $('today').innerHTML = `
         <div class="t-k">اليوم 1 · البداية</div>
         <h2 class="t-title">أهلاً بيك بالكورس 👋</h2>
         ${d.intro.length ? `<div class="t-v"><b>1. شوف المقدمة</b>${d.intro.map(frame).join('')}</div>` : ''}
         <div class="t-v"><b>${d.intro.length ? '2. ' : ''}ابدي أول محاضرة: <span class="en" dir="ltr">${esc(day.title)}</span></b></div>
         <button type="button" class="btn y t-go">${sent1 ? 'افتح الدرس' : 'ابدي الدرس'} ←</button>
-        <div class="t-hint">${sent1 ? '✅ سلّمت واجب اليوم' : 'محاضرة ← ملزمة ← شرح الواجب ← تسجّل صوتك'}</div>
+        <div class="t-hint">${sent1 ? '✅ سلّمت واجبات اليوم' : 'محاضرة ← ملزمة ← شرح الواجب ← تسجّل صوتك'}</div>
+        ${dailyLine(day)}
         <div class="t-next muted small" id="nextOpen"></div>`;
       $('today').querySelector('.t-go').onclick = () => openLesson(day, L);
       return;
     }
-    const hw = day.homework, sent = hw && hw.submissions.length;
+    const all = hwsOf(day), done = doneCount(day), sent = all.length && done === all.length;
     const hint = day.kind === 'lecture' ? 'فيديو ← ملزمة ← واجب' : day.kind === 'homework' ? 'اسمع الفويس، وسجّل صوتك وارسله'
       : day.kind === 'review' ? (day.final ? 'فويس بجمل من كل الكورس: قلّده وسجّل صوتك' : 'فويس بجمل من كل الفصل: قلّده وسجّل صوتك')
       : day.kind === 'capstone' ? 'شوف فيديو التحدي، وسجّل فيديوك' : 'سلّم فيديو التحدي';
@@ -533,7 +540,8 @@ section+section{margin-top:26px}
       <h2 class="t-title ${L.en ? 'en' : ''}" ${L.en ? 'dir="ltr"' : ''}>${esc(L.t)}</h2>
       <div class="t-sub">${esc(L.k)}</div>
       <button type="button" class="btn y t-go">${sent ? 'افتح الدرس' : 'ابدي الدرس'} ←</button>
-      <div class="t-hint">${sent ? '✅ سلّمت واجب اليوم' : hint}</div>
+      <div class="t-hint">${sent ? '✅ سلّمت واجبات اليوم' : done ? `سلّمت ${done} من ${all.length}، باقي واجب` : hint}</div>
+      ${dailyLine(day)}
       ${missLine}
       <div class="t-next muted small" id="nextOpen"></div>`;
     $('today').querySelector('.t-go').onclick = () => openLesson(day, L);
@@ -561,9 +569,9 @@ section+section{margin-top:26px}
     }
   }
   function dayRow(day) {
-    const L = dayLabel(day), hw = day.homework;
-    const st = !hw ? '' : !hw.submissions.length ? '<span class="st bad">ناقص</span>'
-      : hw.submissions.some(s => s.feedback) ? '<span class="st ok">✓ مصحّح</span>' : '<span class="st wait">⏳</span>';
+    const L = dayLabel(day), all = hwsOf(day), done = doneCount(day);
+    const st = !all.length ? '' : done < all.length ? `<span class="st bad">${done ? `${done}/${all.length}` : 'ناقص'}</span>`
+      : all.every(h => h.submissions.some(s => s.feedback)) ? '<span class="st ok">✓ مصحّح</span>' : '<span class="st wait">⏳</span>';
     const b = document.createElement('button'); b.type = 'button'; b.className = 'drow';
     b.innerHTML = `<span class="dn">${day.number}</span><span class="dt"><b class="${L.en ? 'en' : ''}">${esc(L.t)}</b></span>${st}<span class="chev">‹</span>`;
     b.onclick = () => openLesson(day, L);
@@ -574,7 +582,7 @@ section+section{margin-top:26px}
   function renderFeedbackNote() {
     const seen = new Set(mem.get('fb_seen', []));
     const fresh = [];
-    data.days.forEach(day => [...(day.homework ? day.homework.submissions : []), ...(day.notes || [])].forEach(s => { if (s.feedback && !seen.has(s.id)) fresh.push({ s, day }); }));
+    data.days.forEach(day => [...hwsOf(day).flatMap(h => h.submissions), ...(day.notes || [])].forEach(s => { if (s.feedback && !seen.has(s.id)) fresh.push({ s, day }); }));
     const n = $('fbNote');
     if (!fresh.length) { n.hidden = true; return; }
     const last = fresh[fresh.length - 1];
