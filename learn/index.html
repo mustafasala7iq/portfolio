@@ -571,11 +571,11 @@ section+section{margin-top:26px}
   function renderFeedbackNote() {
     const seen = new Set(mem.get('fb_seen', []));
     const fresh = [];
-    data.days.forEach(day => (day.homework ? day.homework.submissions : []).forEach(s => { if (s.feedback && !seen.has(s.id)) fresh.push({ s, day }); }));
+    data.days.forEach(day => [...(day.homework ? day.homework.submissions : []), ...(day.notes || [])].forEach(s => { if (s.feedback && !seen.has(s.id)) fresh.push({ s, day }); }));
     const n = $('fbNote');
     if (!fresh.length) { n.hidden = true; return; }
     const last = fresh[fresh.length - 1];
-    n.innerHTML = `<span class="fb-ic">👨‍🏫</span><span><b>${fresh.length === 1 ? 'وصلك تصحيح جديد' : `وصلتك ${fresh.length} تصحيحات جديدة`}</b><br><span class="small">على واجب اليوم ${last.day.number}. اضغط حتى تسمعه</span></span><span class="go">←</span>`;
+    n.innerHTML = `<span class="fb-ic">👨‍🏫</span><span><b>${fresh.length === 1 ? 'وصلك تصحيح جديد' : `وصلتك ${fresh.length} تصحيحات جديدة`}</b><br><span class="small">${last.s.note ? 'رد على ملاحظتك' : 'على واجب'} باليوم ${last.day.number}. اضغط حتى تشوفه</span></span><span class="go">←</span>`;
     n.hidden = false;
     n.onclick = () => {
       const all = mem.get('fb_seen', []); fresh.forEach(f => all.push(f.s.id)); mem.set('fb_seen', all.slice(-500));
