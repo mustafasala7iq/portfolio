@@ -75,13 +75,13 @@ tr:last-child td{border-bottom:0}
 
   <section id="t-st" hidden>
     <div class="hd" style="margin-bottom:12px"><h2 style="font-size:1.15rem">الطلاب</h2><span class="muted small" id="stCount"></span></div>
-    <div class="tbl-wrap"><table><thead><tr><th>الطالب</th><th>اليوم</th><th>ناقص</th><th>آخر تسليم</th><th></th></tr></thead><tbody id="stBody"></tbody></table></div>
+    <div class="tbl-wrap"><table><thead><tr><th>الطالب</th><th>اليوم</th><th>ناقص</th><th>الكويزات</th><th>آخر تسليم</th><th></th></tr></thead><tbody id="stBody"></tbody></table></div>
   </section>
 
   <section id="t-leads" hidden class="stack">
     <div class="hd"><h2 style="font-size:1.15rem">المسجلين والحجوزات</h2><div class="row"><span class="muted small" id="leadCount"></span><button class="btn sm ghost" id="leadCsv">⬇︎ Excel (CSV)</button></div></div>
     <p class="muted small" style="margin:0">رابط الدرس المجاني: <b class="en" id="freeLink"></b>. حط بعده <span class="en">?src=</span> واسم المصدر حتى تعرف منين إجه كل واحد، مثل <span class="en">/learn/free?src=ig-ad1</span></p>
-    <div class="tbl-wrap"><table><thead><tr><th>الاسم</th><th>الهدف</th><th>المحافظة</th><th>المصدر</th><th>واجب</th><th>سجّل</th><th></th></tr></thead><tbody id="leadBody"></tbody></table></div>
+    <div class="tbl-wrap"><table><thead><tr><th>الاسم</th><th>الهدف</th><th>المحافظة</th><th>المصدر</th><th>واجب</th><th>الكويز</th><th>سجّل</th><th></th></tr></thead><tbody id="leadBody"></tbody></table></div>
   </section>
 
   <section id="t-lvl" hidden class="stack">
@@ -192,6 +192,14 @@ tr:last-child td{border-bottom:0}
   }
 
   // ---------- students ----------
+  // quiz + lesson game scores: the average, and every lecture when opened
+  function quizCell(q) {
+    if (!q || !q.count) return '<span class="muted">ما حل بعد</span>';
+    const tone = q.avg >= 80 ? 'ok' : q.avg >= 50 ? 'wait' : '';
+    return `<details><summary><span class="pill ${tone}">${q.avg}%</span> <span class="small">${q.count} محاضرة</span></summary>
+      <div class="small stack" style="gap:2px;margin-top:6px">${q.items.map(i => `<div><span class="en">${esc(i.key)}</span> · ${i.quiz ? `الكويز ${esc(i.quiz)}` : ''}${i.quiz && i.game != null ? ' · ' : ''}${i.game != null ? `اللعبة ${i.game}/3 ★` : ''}${i.tries > 2 ? ` <span class="muted">(${i.tries} محاولات)</span>` : ''}</div>`).join('')}</div></details>`;
+  }
+
   async function loadSt() {
     let r; try { r = await call('/api/staff/students', { token }); } catch (x) { return out(x); }
     $('stCount').textContent = r.students.length + ' طالب';
@@ -204,6 +212,7 @@ tr:last-child td{border-bottom:0}
           <div class="muted small">📱 ${s.devices.length ? s.devices.map(esc).join('، ') : 'ماكو جهاز داخل'}</div></td>
         <td class="num">${s.finished ? 'خلص 🎉' : s.day + '/' + r.total_days}</td>
         <td>${flag} <span class="num">${s.missing}</span></td>
+        <td>${quizCell(s.quizzes)}</td>
         <td class="small">${s.last ? when(s.last) : '<span class="muted">ماكو</span>'}</td>
         <td><div class="row">${s.missing ? `<a class="btn sm y" href="${wa}" target="_blank" rel="noopener">ذكّره واتساب</a>` : ''}
           <button class="btn sm ghost dv" data-id="${s.id}" data-name="${esc(s.name)}">تصفير الأجهزة</button>
@@ -211,7 +220,7 @@ tr:last-child td{border-bottom:0}
           ${r.admin ? `<button class="btn sm ghost rm" data-id="${s.id}" data-name="${esc(s.name)}">حذف</button>
             <span class="row" style="gap:6px"><input class="input en sd-n" type="number" min="1" max="${r.total_days}" placeholder="يوم" style="width:76px;min-height:38px;padding:4px 8px">
             <button class="btn sm ghost sd" data-id="${s.id}" data-name="${esc(s.name)}">⏩ انقله لهذا اليوم</button></span>` : ''}</div></td></tr>`;
-    }).join('') || '<tr><td colspan="5" class="muted">ماكو طلاب بعد.</td></tr>';
+    }).join('') || '<tr><td colspan="6" class="muted">ماكو طلاب بعد.</td></tr>';
     $('stBody').querySelectorAll('.dv').forEach(b => b.onclick = async () => {
       try { await call('/api/staff/devices', { method: 'POST', json: { id: +b.dataset.id }, token }); toast('📱 انطلع ' + b.dataset.name + ' من كل الأجهزة، هسه يكدر يدخل من جديد'); loadSt(); } catch (x) { out(x); }
     });
@@ -279,11 +288,11 @@ tr:last-child td{border-bottom:0}
         ${l.pay ? `<div class="small">💵 ${esc(l.pay)}</div>` : ''}
         <select class="input lead-st" data-id="${l.id}" style="min-height:34px;padding:2px 30px 2px 8px;font-size:.85rem;margin-top:4px">${Object.entries(st).map(([k, t]) => `<option value="${k}" ${l.status === k ? 'selected' : ''}>${t}</option>`).join('')}</select><div class="muted small en" style="text-align:right">+${esc(l.phone)}</div><div class="muted small en" style="text-align:right">${esc(l.email || '')}</div></td>
         <td>${esc(l.goal || '')}</td><td>${esc(l.city || '')}</td><td class="en small">${esc(l.source || '')}</td>
-        <td>${l.homework ? '✅' : '—'}</td><td class="small">${when(l.created_at)}</td>
+        <td>${l.homework ? '✅' : '—'}</td><td>${quizCell(l.quizzes)}</td><td class="small">${when(l.created_at)}</td>
         <td><div class="row"><a class="btn sm y" href="https://wa.me/${l.phone}?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">واتساب</a>
           <button class="btn sm ghost pw" data-id="${l.id}" data-name="${esc(l.name)}" data-phone="${esc(l.phone)}" data-email="${esc(l.email || '')}">باسورد جديد</button>
           <button class="btn sm ghost rm" data-id="${l.id}" data-name="${esc(l.name)}">حذف</button></div></td></tr>`;
-    }).join('') || '<tr><td colspan="7" class="muted">ماكو أحد بعد.</td></tr>';
+    }).join('') || '<tr><td colspan="8" class="muted">ماكو أحد بعد.</td></tr>';
     $('leadBody').querySelectorAll('.pw').forEach(newPassword);
     $('leadBody').querySelectorAll('.rm').forEach(b => b.onclick = async () => {
       if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'متأكد؟ اضغط مرة ثانية'; b.classList.add('rec'); return; }

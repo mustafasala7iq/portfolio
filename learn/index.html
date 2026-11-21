@@ -153,76 +153,89 @@ section+section{margin-top:26px}
 .lesson-body{flex:1;overflow:auto;padding-block:18px 40px}
 .lesson-body .stack{gap:10px}
 .lesson-body b{font-family:var(--font-display)}
-/* home v2 */
-.prog{height:10px!important;background:rgba(255,255,255,.75)!important;max-width:none!important}
-.prog i{background:var(--black)!important}
+/* single page v3 */
+.hero .inner{padding-block:20px 22px}
+.hero h1{font-size:clamp(1.35rem,5vw,1.8rem)}
+.jr{margin-top:14px;display:flex;flex-direction:column;gap:6px}
+.jr-bar{display:flex;gap:4px;height:12px}
+.jr-seg{position:relative;border-radius:99px;background:rgba(255,255,255,.75);overflow:hidden}
+.jr-seg i{position:absolute;top:0;bottom:0;right:0;background:var(--black);border-radius:99px}
+.jr-seg.cur{outline:2px solid var(--black);outline-offset:1px}
+.jr-lab{display:flex;gap:4px;font:700 .85rem/1.3 var(--font-display)}
+.jr-lab span{text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jr-lab span.cur{font-weight:900}
+.jr-go{all:unset;box-sizing:border-box;cursor:pointer;align-self:flex-start;min-height:44px;display:inline-flex;align-items:center;font:800 1rem/1 var(--font-display);text-decoration:underline;text-underline-offset:5px}
+.mtn-card{padding:16px;margin-bottom:18px}
+#paidView{display:flex;flex-direction:column;gap:14px}
+#paidView[hidden]{display:none}
 .intro-top{padding:16px;display:flex;flex-direction:column;gap:10px}
-.intro-top h2{font-size:1.15rem;font-weight:900}
-.dcard{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;min-height:64px;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
-.dcard:focus-visible{outline:3px solid var(--black);outline-offset:2px}
-.dcard .d-ic{flex:none;width:44px;height:44px;border-radius:50%;background:var(--yellow-soft);display:grid;place-items:center;font-size:1.3rem}
-.dcard .d-tx{flex:1;min-width:0;display:flex;flex-direction:column}
-.dcard .d-k{font:700 .9rem/1.4 var(--font-display);color:var(--muted)}
-.dcard .d-t{font:800 1.05rem/1.4 var(--font-display);direction:ltr;text-align:right;unicode-bidi:isolate}
-.dcard .d-ok{flex:none;font:800 .9rem/1 var(--font-display);color:var(--green)}
-.all-link{all:unset;box-sizing:border-box;cursor:pointer;align-self:flex-start;min-height:44px;display:inline-flex;align-items:center;font:800 1rem/1 var(--font-display);color:var(--ink);text-decoration:underline;text-underline-offset:5px}
+.intro-top h2{font-size:1.1rem;font-weight:900}
+/* today: compact */
+.today2{padding:14px 16px;display:flex;flex-direction:column;gap:10px;border:2px solid var(--black);box-shadow:0 4px 0 var(--black)}
+.t2-top{display:flex;align-items:center;gap:12px}
+.t2-tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.t2-k{font:800 .9rem/1.4 var(--font-display);color:var(--gold)}
+.t2-t{font:900 1.15rem/1.35 var(--font-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t2-t.en{direction:ltr;text-align:right;unicode-bidi:isolate}
+.t2-go{flex:none;min-height:48px;padding:0 18px 2px}
+.t2-tasks{display:flex;flex-wrap:wrap;gap:8px}
+.tk{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:4px 12px;border-radius:12px;background:var(--paper);border:1px solid var(--line);font:700 .95rem/1.3 var(--font-display);color:var(--ink-2)}
+.tk.ok{background:var(--green-soft);border-color:#BFE6CF;color:var(--green)}
+.tk svg{flex:none;width:18px;height:18px}
+.t2-next{color:var(--muted);font-size:1rem}
+.resume{all:unset;box-sizing:border-box;cursor:pointer;width:100%;min-height:48px;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;background:var(--card);border:1px dashed var(--line-2);font:700 1rem/1.4 var(--font-display);color:var(--ink)}
+.resume svg{flex:none;width:20px;height:20px}
+.resume .rs-t{flex:1;min-width:0;display:flex;flex-direction:column}
+.resume .rs-t > span{color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .miss-line{all:unset;box-sizing:border-box;cursor:pointer;width:100%;min-height:44px;display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;background:var(--yellow-wash);color:var(--ink-2);font:600 1rem/1.5 var(--font-body)}
 .miss-line .go{margin-inline-start:auto;font-weight:800}
 .logout-link{all:unset;box-sizing:border-box;cursor:pointer;display:block;margin:36px auto 0;min-height:44px;padding:10px 16px;color:var(--muted);font:600 1rem/1.5 var(--font-body);text-decoration:underline;text-underline-offset:4px}
-.t-next{font-size:1rem!important}
-.drow{min-height:56px}
-.dt b{font-size:1rem}
-/* bottom navigation */
-body.has-nav main .inner{padding-bottom:110px}
-.bnav{position:fixed;inset:auto 0 0 0;z-index:60;display:flex;background:var(--black);padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -2px 0 var(--yellow)}
-.bnav button{all:unset;box-sizing:border-box;cursor:pointer;flex:1;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#bbb;font:800 .95rem/1.2 var(--font-display)}
-.bnav button span{font-size:1.25rem;line-height:1}
-.bnav button[aria-current="page"]{color:var(--yellow)}
-.bnav button:focus-visible{outline:3px solid var(--yellow);outline-offset:-4px}
-/* WhatsApp help, bottom left on every page */
-.wa-help{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:110;display:inline-flex;align-items:center;gap:6px;min-height:48px;padding:0 16px 2px;border-radius:999px;background:#1FA855;color:#fff;font:800 1rem/1 var(--font-display);text-decoration:none;box-shadow:0 6px 18px rgba(0,0,0,.25)}
-body.has-nav .wa-help{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
-body.in-lesson .wa-help{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
-/* my lessons */
-.page-h{font-size:1.5rem;font-weight:900;margin-bottom:14px}
-.tabs{display:flex;gap:6px;padding:5px;border-radius:16px;background:var(--line);margin-bottom:18px}
-.tabs button{all:unset;box-sizing:border-box;cursor:pointer;flex:1;min-height:46px;display:grid;place-items:center;border-radius:12px;font:800 1.02rem/1 var(--font-display);color:var(--ink-2)}
-.tabs button[aria-selected="true"]{background:var(--card);color:var(--black);box-shadow:var(--shadow)}
-.tabs button:focus-visible{outline:3px solid var(--black);outline-offset:-3px}
-.chg{border-radius:18px;background:var(--card);border:1px solid var(--line);margin-bottom:14px;overflow:hidden}
-.chg > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 16px;min-height:64px}
+/* the two lists */
+.lsec{margin-top:10px}
+.lsec-h{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+.lsec-h h2{font-size:1.25rem;font-weight:900}
+.lsec-h .muted{font-size:.95rem}
+#secHw .lsec-h h2::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--gold);margin-inline-end:8px;vertical-align:middle}
+#secLec .lsec-h h2::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--black);margin-inline-end:8px;vertical-align:middle}
+.chg{border-radius:16px;background:var(--card);border:1px solid var(--line);margin-bottom:10px;overflow:hidden}
+.chg > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:64px}
 .chg > summary::-webkit-details-marker{display:none}
-.chg .cg-t{flex:1;min-width:0;display:flex;flex-direction:column}
-.chg .cg-t b{font:900 1.05rem/1.4 var(--font-display)}
-.chg .cg-t span{color:var(--muted);font-size:.95rem}
-.chg .cg-ch{flex:none;color:var(--muted);font:700 .9rem/1 var(--font-display)}
-.chg[open] .cg-ch .c, .chg:not([open]) .cg-ch .o{display:none}
+.chg > summary:focus-visible{outline:3px solid var(--black);outline-offset:-3px}
+.cg-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.cg-t b{font:900 1.02rem/1.35 var(--font-display)}
+.cg-p{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.95rem}
+.cg-bar{flex:1;max-width:160px;height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.cg-bar i{display:block;height:100%;background:var(--green);border-radius:99px}
+.cg-p svg{flex:none;width:16px;height:16px}
+.cg-ch{flex:none;width:22px;height:22px;color:var(--muted);transition:transform .2s}
+.chg[open] .cg-ch{transform:rotate(180deg)}
 .chg.locked > summary{color:var(--muted)}
 .lrows{border-top:1px solid var(--line)}
 .lrow{all:unset;box-sizing:border-box;cursor:pointer;width:100%;position:relative;display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:64px;border-bottom:1px solid var(--line)}
 .lrow:last-child{border-bottom:0}
 .lrow:focus-visible{outline:3px solid var(--black);outline-offset:-3px}
-.lrow .ln{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--paper);border:1.5px solid var(--line-2);font:900 1rem/1 var(--font-display)}
+.lrow .ln{flex:none;width:38px;height:38px;display:grid;place-items:center;background:var(--paper);border:1.5px solid var(--line-2);font:900 .98rem/1 var(--font-display)}
+#secLec .lrow .ln{border-radius:50%}
+#secHw .lrow .ln{border-radius:10px}
+.lrow .ln svg{width:18px;height:18px}
 .lrow .lt{flex:1;min-width:0;display:flex;flex-direction:column}
-.lrow .lt b{font:800 1.02rem/1.4 var(--font-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow .lt b{font:800 1rem/1.4 var(--font-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lrow .lt b.en{direction:ltr;text-align:right;unicode-bidi:isolate}
-.lrow .lt span{font-size:.95rem;color:var(--muted)}
-.lrow .lsub{display:flex;gap:8px;align-items:baseline;white-space:nowrap;overflow:hidden;min-width:0}
+.lrow .lsub{display:flex;gap:8px;align-items:baseline;white-space:nowrap;overflow:hidden;min-width:0;font-size:.95rem;color:var(--muted)}
 .lrow .lsub > span{flex:none}
-.lrow .lsub .e{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;text-align:right;unicode-bidi:isolate}
-.lrow .lgo{flex:none;color:var(--muted);font-size:1.3rem}
+.lrow .lsub .e{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;text-align:right;direction:ltr;unicode-bidi:isolate}
+.lrow .score{flex:none;font:800 .9rem/1 var(--font-display);padding:6px 9px;border-radius:99px;background:var(--yellow-soft);color:var(--gold)}
+.lrow .score.ok{background:var(--green-soft);color:var(--green)}
+.lrow .lgo{flex:none;width:18px;height:18px;color:var(--muted)}
 .lrow.done .ln{background:var(--green-soft);border-color:#BFE6CF;color:var(--green)}
-.lrow.done .lt span.st-t{color:var(--green);font-weight:700}
-.lrow.today{background:var(--yellow);border-bottom-color:var(--yellow)}
-.lrow.today .ln{background:var(--black);border-color:var(--black);color:var(--yellow)}
-.lrow.today .lt span{color:var(--black);font-weight:700}
+.lrow.today{background:var(--yellow-wash);box-shadow:inset -4px 0 0 var(--yellow)}
+.lrow.today .ln{background:var(--yellow);border-color:var(--black);color:var(--black)}
+.lrow.today .lsub > span:first-child{color:var(--black);font-weight:700}
 .lrow.locked{cursor:default;opacity:.55}
-.lrow.locked .ln{font-size:.95rem}
-.lrow .lbar{position:absolute;inset:auto 16px 4px 16px;height:3px;border-radius:3px;background:var(--line)}
+.lrow .lbar{position:absolute;inset:auto 66px 6px 16px;height:3px;border-radius:3px;background:var(--line)}
 .lrow .lbar i{display:block;height:100%;border-radius:3px;background:var(--black)}
-.hw-missed{margin-bottom:18px}
-.hw-missed h2{font-size:1.05rem;font-weight:900;margin-bottom:8px}
-.hw-missed .lrows{border:1px solid var(--line);border-radius:18px;background:var(--card);overflow:hidden}
+.st.todo{background:var(--line);color:var(--ink-2)}
+.row-more{min-height:48px}
 .lesson{position:fixed;inset:0;z-index:100;background:var(--paper);display:flex;flex-direction:column}
 .lesson-bar{flex:none;display:flex;align-items:center;gap:12px;background:var(--black);color:#fff;
   padding:calc(10px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));box-shadow:0 2px 0 var(--yellow)}
@@ -284,68 +297,52 @@ body.in-lesson .wa-help{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
 
 <div id="vApp" hidden>
   <div class="hero" id="hero"><div class="inner">
-    <h1 id="hello">أهلاً 👋</h1>
+    <h1 id="hello">أهلاً</h1>
     <div class="tag" id="heroTag"></div>
-    <div class="prog" id="prog"><i id="progBar"></i></div>
+    <div class="jr" id="journey" hidden></div>
     <div class="meta" id="heroMeta" hidden></div>
   </div></div>
   <main><div class="inner">
-    <!-- home -->
-    <div id="vHome">
-      <button type="button" class="fbnote" id="fbNote" hidden></button>
-      <div id="paidView" hidden>
-        <div class="card intro-top" id="introTop" hidden></div>
-        <div class="today card" id="today"></div>
-        <button type="button" class="dcard card" id="dailyCard" hidden></button>
-        <button type="button" class="all-link" id="allLink">كل المحاضرات ←</button>
-        <button type="button" class="miss-line" id="missLine" hidden></button>
-        <section id="daysSec">
-          <div class="sec-h"><h2>كل الأيام</h2></div>
-          <div class="rows card" id="days"></div>
-        </section>
-        <button type="button" class="btn ghost wide" id="mtnToggle">🏔️ شوف رحلتك</button>
-        <div id="mtnBox" class="stack" hidden><div class="sec-h"><h2>رحلتك</h2><span class="muted small" id="mtnMeta"></span></div><div class="chps" id="chPills" hidden></div><div id="mtn"></div></div>
-      </div>
+    <div id="mtnBox" class="card mtn-card" hidden><div class="sec-h"><h2>رحلتك</h2><span class="muted small" id="mtnMeta"></span></div><div class="chps" id="chPills" hidden></div><div id="mtn"></div></div>
+    <button type="button" class="fbnote" id="fbNote" hidden></button>
 
-      <!-- free lesson: three steps, nothing else -->
-      <div id="freeView" hidden>
-        <div class="card pre-done" id="preDone" hidden></div>
-        <ol class="fsteps">
-          <li class="card fstep"><span class="fn">1</span><div class="fb-body"><h3>شوف المقدمة</h3><div class="intro-grid" id="fIntro"></div></div></li>
-          <li class="card fstep"><span class="fn">2</span><div class="fb-body"><h3>المحاضرة الأولى وواجبها</h3>
-            <p class="muted">فيديو المحاضرة، والملزمة وألعابها، وشرح واجب المحاكاة، وبالآخر تسجّل صوتك.</p>
-            <button type="button" class="btn y" id="fLesson">افتح الدرس ←</button></div></li>
-          <li class="card fstep" id="preStep"><span class="fn">3</span><div class="fb-body" id="preBox"></div></li>
-        </ol>
-        <details class="actd card">
-          <summary id="actTitle">🔑 وصلك كود التفعيل؟</summary>
-          <form class="stack" id="actBox">
-            <div class="row"><input class="input en" id="actCode" placeholder="TA-XXXXX" autocapitalize="characters" style="flex:1;min-width:0"><button class="btn">فعّل</button></div>
-            <div class="err small" id="actErr"></div>
-          </form>
-        </details>
-      </div>
-      <button type="button" class="logout-link" id="logout">تسجيل الخروج</button>
+    <div id="paidView" hidden>
+      <div class="card intro-top" id="introTop" hidden></div>
+      <div class="today2 card" id="today"></div>
+      <button type="button" class="resume" id="resume" hidden></button>
+      <button type="button" class="miss-line" id="missLine" hidden></button>
+
+      <section class="lsec" id="secLec">
+        <div class="lsec-h"><h2>المحاضرات</h2><span class="muted" id="lecSum"></span></div>
+        <div id="lecList"></div>
+      </section>
+      <section class="lsec" id="secHw">
+        <div class="lsec-h"><h2>الواجبات</h2><span class="muted" id="hwSum"></span></div>
+        <div id="hwList"></div>
+      </section>
     </div>
 
-    <!-- my lessons: lectures | homework -->
-    <div id="vLessons" hidden>
-      <h1 class="page-h">دروسي</h1>
-      <div class="tabs" role="tablist">
-        <button type="button" role="tab" id="tLec" aria-selected="true" aria-controls="tabLec">المحاضرات</button>
-        <button type="button" role="tab" id="tHw" aria-selected="false" aria-controls="tabHw">الواجبات</button>
-      </div>
-      <div id="tabLec" role="tabpanel"></div>
-      <div id="tabHw" role="tabpanel" hidden></div>
+    <!-- free lesson: three steps, nothing else -->
+    <div id="freeView" hidden>
+      <div class="card pre-done" id="preDone" hidden></div>
+      <ol class="fsteps">
+        <li class="card fstep"><span class="fn">1</span><div class="fb-body"><h3>شوف المقدمة</h3><div class="intro-grid" id="fIntro"></div></div></li>
+        <li class="card fstep"><span class="fn">2</span><div class="fb-body"><h3>المحاضرة الأولى وواجبها</h3>
+          <p class="muted">فيديو المحاضرة، والملزمة، والكويز ولعبة الدرس، وشرح واجب المحاكاة، وبالآخر تسجّل صوتك.</p>
+          <button type="button" class="btn y" id="fLesson">افتح الدرس ←</button></div></li>
+        <li class="card fstep" id="preStep"><span class="fn">3</span><div class="fb-body" id="preBox"></div></li>
+      </ol>
+      <details class="actd card">
+        <summary id="actTitle">وصلك كود التفعيل؟</summary>
+        <form class="stack" id="actBox">
+          <div class="row"><input class="input en" id="actCode" placeholder="TA-XXXXX" autocapitalize="characters" style="flex:1;min-width:0"><button class="btn">فعّل</button></div>
+          <div class="err small" id="actErr"></div>
+        </form>
+      </details>
     </div>
+    <button type="button" class="logout-link" id="logout">تسجيل الخروج</button>
   </div></main>
-  <nav class="bnav" id="bnav" hidden aria-label="التنقل">
-    <button type="button" data-v="home" aria-current="page"><span aria-hidden="true">🏠</span>الرئيسية</button>
-    <button type="button" data-v="lessons"><span aria-hidden="true">📚</span>دروسي</button>
-  </nav>
 </div>
-
-<a class="wa-help" id="waHelp" target="_blank" rel="noopener" hidden><span aria-hidden="true">💬</span> مساعدة</a>
 
 <div class="lesson" id="lesson" hidden>
   <div class="lesson-bar"><button type="button" class="chip" id="lessonBack">→ رجوع</button><b id="lessonTitle"></b></div>
@@ -366,25 +363,20 @@ body.in-lesson .wa-help{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
   let data = null;
 
   function show(v) { $('vLogin').hidden = v !== 'login'; $('vApp').hidden = v !== 'app'; $('dayChip').hidden = v !== 'app'; if (v !== 'app') document.body.classList.remove('has-nav'); }
-  // help on WhatsApp, on every screen
-  if (window.SUPPORT_WA) { $('waHelp').href = `https://wa.me/${window.SUPPORT_WA}?text=${encodeURIComponent('هلا، عندي سؤال عن الكورس')}`; $('waHelp').hidden = false; }
-
-  // ---------- two screens: home | my lessons (lectures, homework) ----------
-  let view = 'home', tab = 'lec';
-  function setView(v, t) {
-    view = v; if (t) tab = t;
-    $('vHome').hidden = v !== 'home'; $('vLessons').hidden = v !== 'lessons'; $('hero').hidden = v !== 'home';
-    document.querySelectorAll('#bnav button').forEach(b => b.dataset.v === v ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
-    $('tLec').setAttribute('aria-selected', tab === 'lec'); $('tHw').setAttribute('aria-selected', tab === 'hw');
-    $('tabLec').hidden = tab !== 'lec'; $('tabHw').hidden = tab !== 'hw';
-    if (v === 'lessons' && data) renderLessons();
-    scrollTo(0, 0);
-  }
-  document.querySelectorAll('#bnav button').forEach(b => b.onclick = () => setView(b.dataset.v));
-  $('tLec').onclick = () => setView('lessons', 'lec');
-  $('tHw').onclick = () => setView('lessons', 'hw');
-  $('allLink').onclick = () => setView('lessons', 'lec');
-  $('missLine').onclick = () => setView('lessons', 'hw');
+  // small line icons (no emoji in the lists)
+  const IC = {
+    check: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    lock: '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7 9V6.5a3 3 0 016 0V9" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
+    ring: '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
+    back: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5L3 9l4 4M3.5 9H12a5 5 0 010 10h-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" transform="scale(-1,1) translate(-20,0)"/></svg>',
+    chev: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    go: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12 5l-5 5 5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  };
+  $('missLine').onclick = () => {                     // open the chapter with the first homework left behind
+    const t = data.tasks.find(x => x.open && !x.done && x.day < data.day);
+    const g = t && document.querySelector(`#hwList .chg[data-ch="${t.chapter}"]`);
+    if (g) { g.open = true; g.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  };
 
   // ---------- login / sign up ----------
   const params = new URLSearchParams(location.search);
@@ -536,9 +528,9 @@ body.in-lesson .wa-help{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
   function dayLabel(d) {
     if (d.kind === 'intro') return { k: 'اليوم الأول', t: 'البداية: المقدمة وشرح واجب المحاكاة', en: false };
     if (d.kind === 'lecture') return { k: `${chap(d.chapter).ar || ''} · المحاضرة ${d.lecture} + واجب المحاكاة A`, t: d.title, en: true };
-    if (d.kind === 'homework') return { k: `المحاضرة ${d.lecture} · ${d.title}`, t: `واجب المحاكاة ${d.homework ? d.homework.key.slice(-1) : 'B'} 🎙️`, en: false };
-    if (d.kind === 'review' && d.final) return { k: 'المراجعة النهائية', t: `مراجعة نهائية ${d.final} 🏁`, en: false };
-    if (d.kind === 'review') return { k: `${chap(d.chapter).ar || ''} · مراجعة الفصل`, t: `مراجعة الفصل ${d.review || ''} 🔁`, en: false };
+    if (d.kind === 'homework') return { k: `المحاضرة ${d.lecture} · ${d.title}`, t: `واجب المحاكاة ${d.homework ? d.homework.key.slice(-1) : 'B'}`, en: false };
+    if (d.kind === 'review' && d.final) return { k: 'المراجعة النهائية', t: `مراجعة نهائية ${d.final}`, en: false };
+    if (d.kind === 'review') return { k: `${chap(d.chapter).ar || ''} · مراجعة الفصل`, t: `مراجعة الفصل ${d.review || ''}`, en: false };
     if (d.kind === 'rest') return { k: 'يوم مراجعة', t: 'ماكو شي جديد اليوم', en: false };
     if (d.kind === 'capstone') return { k: `${chap(d.chapter).ar || ''} · التحدي النهائي`, t: d.title, en: true };
     return { k: 'التحدي النهائي', t: d.last ? 'آخر يوم لتسليم فيديو التحدي' : 'يوم تسجيل فيديو التحدي', en: false };
@@ -588,27 +580,43 @@ body.in-lesson .wa-help{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
     $('hello').textContent = `أهلاً ${d.name} 👋`;
     $('paidView').hidden = d.trial;
     $('freeView').hidden = !d.trial;
-    $('prog').hidden = d.trial;
-    $('bnav').hidden = d.trial; document.body.classList.toggle('has-nav', !d.trial);
+    $('journey').hidden = d.trial;
     renderFeedbackNote();
     clearInterval(tick);
-    if (d.trial) { setView('home'); return renderFree(); }
+    if (d.trial) return renderFree();
     const today = d.days[d.days.length - 1];
     const ch = d.chapters[String(today.chapter || 1)];
     $('heroTag').textContent = d.finished ? 'خلصت الكورس! 🎉 تكدر ترجع لأي درس بأي وقت.'
       : `اليوم ${d.day} من ${d.total}${ch ? ' · ' + ch.ar : ''}`;
-    requestAnimationFrame(() => { $('progBar').style.width = Math.max(2, Math.round(100 * (d.finished ? 1 : d.day / d.total))) + '%'; });
+    renderJourney();
     renderToday();
-    renderDays();
-    if (view === 'lessons') renderLessons();
-    $('mtnBox').hidden = true; $('mtnToggle').textContent = '🏔️ شوف رحلتك';
+    renderLists();
+    $('mtnBox').hidden = true;
     if (d.next_open) { countdown(); tick = setInterval(countdown, 30000); }
   }
-  $('mtnToggle').onclick = () => {
-    const open = $('mtnBox').hidden;
-    $('mtnBox').hidden = !open; $('mtnToggle').textContent = open ? 'سكّر الرحلة' : '🏔️ شوف رحلتك';
-    if (open) { renderMountain(); $('mtnBox').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-  };
+  // ---- the journey: one bar per stage of the course, the mountain of this chapter behind a link ----
+  function renderJourney() {
+    const d = data, today = d.days[d.days.length - 1], all = [...d.days, ...d.upcoming];
+    const stages = [1, 2, 3].map(c => {
+      const ds = d.lectures.filter(l => l.chapter === c && !l.intro).map(l => l.day);
+      return { c, label: chap(c).ar || `الفصل ${c}` , from: Math.min(...ds) };
+    });
+    const bounds = stages.map((st, i) => [st.from, i < 2 ? stages[i + 1].from - 1 : Math.max(...d.lectures.map(l => l.day)) + 3]);
+    stages.push({ c: 0, label: 'المراجعة النهائية' }); bounds.push([bounds[2][1] + 1, d.total]);
+    const pos = d.finished ? d.total : d.day;
+    $('journey').innerHTML = `<div class="jr-bar">${bounds.map(([a, b], i) => {
+        const len = b - a + 1, fill = Math.max(0, Math.min(len, pos - a + 1));
+        return `<span class="jr-seg ${pos >= a && pos <= b ? 'cur' : ''}" style="flex:${len}"><i style="width:${Math.round(100 * fill / len)}%"></i></span>`;
+      }).join('')}</div>
+      <div class="jr-lab">${bounds.map(([a, b], i) => `<span class="${pos >= a && pos <= b ? 'cur' : ''}" style="flex:${b - a + 1}">${esc(stages[i].label)}</span>`).join('')}</div>
+      <button type="button" class="jr-go" id="mtnToggle">${$('mtnBox').hidden ? 'شوف رحلتك' : 'سكّر الرحلة'}</button>`;
+    $('mtnToggle').onclick = () => {
+      const open = $('mtnBox').hidden;
+      $('mtnBox').hidden = !open; $('mtnToggle').textContent = open ? 'سكّر الرحلة' : 'شوف رحلتك';
+      if (open) { renderMountain(); $('mtnBox').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    };
+  }
+
 
   // ---- free lesson: 1 intro, 2 the first lecture, 3 reserve / subscribe ----
   function renderFree() {
@@ -621,60 +629,34 @@ body.in-lesson .wa-help{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
     renderPre();
   }
 
-  // ---- today: one card, one button, one line under it ----
+  // ---- today: one small card: what opened today, its tasks, one button ----
   function renderToday() {
     const d = data, day = d.days[d.days.length - 1], L = dayLabel(day);
-    // day 1 only: the welcome video above everything; after that it lives in "دروسي" as lecture 0
-    const intro = day.number === 1 && !d.finished && d.intro.length;
+    const intro = day.number === 1 && !d.finished && d.intro.length;      // day 1 only, then it is lecture 0 in the list
     $('introTop').hidden = !intro;
-    if (intro) {
-      $('introTop').innerHTML = `<h2>🎬 ابدي من هنا: المقدمة</h2>${d.intro.map(frame).join('')}`;
-      watch($('introTop'), 'INTRO');
-    }
+    if (intro) { $('introTop').innerHTML = `<h2>ابدي من هنا: المقدمة</h2>${d.intro.map(frame).join('')}`; watch($('introTop'), 'INTRO'); }
+    const lec = d.lectures.find(l => !l.intro && l.day === day.number);
+    const tasks = d.tasks.filter(t => t.day === day.number);
+    const label = t => t.quiz ? 'الكويز ولعبة الدرس' : t.daily ? 'إنكليزي اليوم' : t.title;
     $('today').innerHTML = `
-      <div class="t-k">${d.finished ? '🏆 خلصت الكورس' : `درس اليوم · اليوم ${day.number}`}</div>
-      <h2 class="t-title ${L.en ? 'en' : ''}" ${L.en ? 'dir="ltr"' : ''}>${esc(L.t)}</h2>
-      <div class="t-sub">${esc(L.k)}</div>
-      <button type="button" class="btn y t-go">${hwsOf(day).length && doneCount(day) === hwsOf(day).length ? 'افتح الدرس' : 'ابدي الدرس'} ←</button>
-      <div class="t-next muted" id="nextOpen"></div>`;
-    $('today').querySelector('.t-go').onclick = () => openLesson(day, L);
-    // the second homework of the day: its own small card
-    const dc = $('dailyCard'), dl = day.daily;
-    dc.hidden = !dl;
-    if (dl) {
-      const done = dl.submissions.length;
-      dc.innerHTML = `<span class="d-ic" aria-hidden="true">🎧</span>
-        <span class="d-tx"><span class="d-k">الواجب الثاني: إنكليزي اليوم${dl.secs ? ` · ~${dl.secs} ثانية` : ''}</span><span class="d-t">${esc(dl.title)}</span></span>
-        ${done ? '<span class="d-ok">✓ سلّمته</span>' : '<span class="chev" aria-hidden="true">‹</span>'}`;
-      dc.onclick = () => openLesson(day, L, '#lp-daily');
+      <div class="t2-top"><div class="t2-tx"><span class="t2-k">${d.finished ? 'خلصت الكورس' : `اليوم ${day.number} · ${lec ? 'محاضرة جديدة' : 'واجبات'}`}</span>
+        <span class="t2-t ${L.en ? 'en' : ''}">${esc(L.t)}</span></div>
+        <button type="button" class="btn y t2-go">${tasks.length && tasks.every(t => t.done) ? 'افتح' : 'ابدي'} ←</button></div>
+      <div class="t2-tasks">${tasks.map((t, i) => `<button type="button" class="tk ${t.done ? 'ok' : ''}" data-i="${i}">${t.done ? IC.check : IC.ring}${esc(label(t))}</button>`).join('')}</div>
+      <div class="t2-next" id="nextOpen"></div>`;
+    $('today').querySelector('.t2-go').onclick = () => openLesson(day, L);
+    $('today').querySelectorAll('.tk').forEach(b => b.onclick = () => openLesson(day, L, tasks[+b.dataset.i].daily ? '#lp-daily' : tasks[+b.dataset.i].quiz ? '#lp-test' : '#lp-hw'));
+    // back to where you stopped: the last lecture video you left half way
+    const half = d.lectures.filter(l => l.open && !l.done && l.pos > 5 && l.seen_at).sort((a, b) => b.seen_at.localeCompare(a.seen_at))[0];
+    $('resume').hidden = !half;
+    if (half) {
+      const mm = Math.floor(half.pos / 60), ss = String(half.pos % 60).padStart(2, '0');
+      $('resume').innerHTML = `${IC.back}<span class="rs-t"><b>كمّل من وين وكفت</b><span><span class="en">${esc(half.intro ? 'المقدمة' : half.title)}</span> · ${mm}:${ss}</span></span>`;
+      $('resume').onclick = () => half.intro ? openIntro() : openLesson({ number: half.day, lesson: half.lesson }, { t: half.title });
     }
-    // homework left behind: one calm line, it takes you to the homework list
     const miss = d.missing.length;
     $('missLine').hidden = !miss;
     if (miss) $('missLine').innerHTML = `<span>عندك ${miss} واجب فاتك، كمّلها براحتك</span><span class="go" aria-hidden="true">←</span>`;
-  }
-
-  // ---- all days: one short row each, newest first ----
-  function renderDays() {
-    const box = $('days'); box.innerHTML = '';
-    const all = [...data.days].reverse().slice(1), SHOW = 5;          // today is the big card above
-    $('daysSec').hidden = !all.length;
-    all.slice(0, SHOW).forEach(day => box.appendChild(dayRow(day)));
-    if (all.length > SHOW) {
-      const more = document.createElement('button'); more.type = 'button'; more.className = 'row-more';
-      more.textContent = `عرض كل الأيام (${all.length})`;
-      more.onclick = () => { more.remove(); all.slice(SHOW).forEach(day => box.appendChild(dayRow(day))); };
-      box.appendChild(more);
-    }
-  }
-  function dayRow(day) {
-    const L = dayLabel(day), all = hwsOf(day), done = doneCount(day);
-    const st = !all.length ? '' : done < all.length ? `<span class="st todo">${done ? `${done}/${all.length}` : 'ما خلصته'}</span>`
-      : all.every(h => h.submissions.some(s => s.feedback)) ? '<span class="st ok">✓ مصحّح</span>' : '<span class="st wait">⏳</span>';
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'drow';
-    b.innerHTML = `<span class="dn">${day.number}</span><span class="dt"><b class="${L.en ? 'en' : ''}">${esc(L.t)}</b></span>${st}<span class="chev">‹</span>`;
-    b.onclick = () => openLesson(day, L);
-    return b;
   }
 
   // ---- "a new correction" banner ----
@@ -696,15 +678,15 @@ body.in-lesson .wa-help{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
   function countdown() {
     const el = $('nextOpen'); if (!el || !data.next_open) return;
     const ms = new Date(data.next_open) - Date.now();
-    if (ms <= 0) { el.textContent = 'انفتح درس جديد 🎉'; clearInterval(tick); setTimeout(() => load(false), 1500); return; }
+    if (ms <= 0) { el.textContent = 'انفتح درس جديد'; clearInterval(tick); setTimeout(() => load(false), 1500); return; }
     const h = Math.floor(ms / 3600000), m = Math.floor(ms % 3600000 / 60000);
     if (h >= 12) {
       const at = new Date(data.next_open), now = new Date();
       const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toDateString() === at.toDateString();
-      el.textContent = `⏱️ اليوم الجاي ينفتح ${tomorrow ? 'غداً' : 'اليوم'} الساعة ${data.send_hour % 12 || 12} العصر`;
+      el.textContent = `اليوم الجاي ينفتح ${tomorrow ? 'غداً' : 'اليوم'} الساعة ${data.send_hour % 12 || 12} العصر`;
       return;
     }
-    el.textContent = `⏱️ اليوم الجاي ينفتح بعد ` + (h ? `${h} ساعة و` : '') + `${m} دقيقة`;
+    el.textContent = `اليوم الجاي ينفتح بعد ` + (h ? `${h} ساعة و` : '') + `${m} دقيقة`;
   }
 
   // ---- the mountain: one camp per lecture of the current chapter ----
@@ -712,13 +694,15 @@ body.in-lesson .wa-help{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
     const d = data, today = d.days[d.days.length - 1], ch = today.chapter || 1;
     const lec = [...d.days, ...d.upcoming].filter(x => x.chapter === ch && (x.kind === 'lecture' || x.kind === 'capstone'));
     const seenNums = new Set(); const list = lec.filter(x => !seenNums.has(x.lecture) && seenNums.add(x.lecture));
-    const curLecture = today.lecture;
+    const opened = d.lectures.filter(l => l.chapter === ch && l.open && !l.intro);
+    const curLecture = opened.length ? opened[opened.length - 1].lecture : today.lecture;
     let doneCount = 0;
     const camps = list.map(x => {
       const open = x.number <= d.day && !(d.trial && x.number > 1);
       const its = d.days.filter(y => y.chapter === ch && y.lecture === x.lecture);
       const hws = its.filter(y => y.homework);
-      const complete = open && its.length >= 3 && hws.every(y => y.homework.submissions.length);
+      const L = d.lectures.find(l => l.chapter === ch && l.lecture === x.lecture);
+      const complete = open && L && L.done && (!L.test || L.test.done) && hws.every(y => y.homework.submissions.length);
       if (complete) doneCount++;
       const state = complete ? 'done' : x.lecture === curLecture ? 'cur' : open ? 'open' : 'locked';
       return { n: x.lecture, title: x.title, day: x.number, state, item: d.days.find(y => y.number === x.number) };
@@ -751,72 +735,69 @@ body.in-lesson .wa-help{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
     if (days < 14) return `تفتح يوم ${name} الأسبوع الجاي`;
     return `تفتح بعد ${Math.round(days / 7)} أسابيع، يوم ${name}`;
   }
-  function chapterGroups(items, rowOf, open) {
-    const d = data, chs = [...new Set(items.map(x => x.chapter))].sort();
+  function chapterGroups(items, rowOf, kind) {
+    const chs = [...new Set(items.map(x => x.chapter))].sort();
     return chs.map(c => {
       const its = items.filter(x => x.chapter === c), done = its.filter(x => x.done).length;
       const locked = its.every(x => !x.open), ch = chap(c);
-      const g = document.createElement('details'); g.className = 'chg' + (locked ? ' locked' : ''); g.open = c === open;
-      g.innerHTML = `<summary><span class="cg-t"><b>${locked ? '🔒 ' : ''}${esc(ch.ar || '')} · <span class="en">${esc(ch.name || '')}</span></b>
-        <span>${locked ? 'مقفول لحد ما توصله' : `خلصت ${done} من ${its.length}`}</span></span>
-        <span class="cg-ch"><span class="o">سكّر ▴</span><span class="c">افتح ▾</span></span></summary><div class="lrows"></div>`;
-      // open items, then only the next few locked ones (a chapter has dozens of homework)
-      const box = g.querySelector('.lrows'), shut = its.filter(x => !x.open);
-      its.filter(x => x.open).forEach(x => box.appendChild(rowOf(x)));
-      shut.slice(0, locked ? shut.length : 3).forEach(x => box.appendChild(rowOf(x)));
-      if (!locked && shut.length > 3) {
-        const more = document.createElement('button'); more.type = 'button'; more.className = 'row-more';
-        more.textContent = `عرض الباقي (${shut.length - 3} تنفتح بعدين)`;
-        more.onclick = () => { more.remove(); shut.slice(3).forEach(x => box.appendChild(rowOf(x))); };
-        box.appendChild(more);
-      }
+      const g = document.createElement('details'); g.className = 'chg' + (locked ? ' locked' : ''); g.dataset.ch = c;
+      g.innerHTML = `<summary><span class="cg-t"><b>${esc(ch.ar || '')} · <span class="en">${esc(ch.name || '')}</span></b>
+        <span class="cg-p">${locked ? `${IC.lock}<span>بعده مقفول</span>` : `<span class="cg-bar"><i style="width:${Math.round(100 * done / its.length)}%"></i></span><span>${done} من ${its.length}</span>`}</span></span>
+        <span class="cg-ch">${IC.chev}</span></summary><div class="lrows"></div>`;
+      // fill on first open: a chapter can hold dozens of rows
+      g.addEventListener('toggle', () => {
+        if (!g.open || g.dataset.filled) return; g.dataset.filled = '1';
+        const box = g.querySelector('.lrows'), shut = its.filter(x => !x.open);
+        its.filter(x => x.open).forEach(x => box.appendChild(rowOf(x)));
+        shut.slice(0, locked ? shut.length : 3).forEach(x => box.appendChild(rowOf(x)));
+        if (!locked && shut.length > 3) {
+          const more = document.createElement('button'); more.type = 'button'; more.className = 'row-more';
+          more.textContent = `عرض الباقي (${shut.length - 3} ينفتحن بعدين)`;
+          more.onclick = () => { more.remove(); shut.slice(3).forEach(x => box.appendChild(rowOf(x))); };
+          box.appendChild(more);
+        }
+      });
       return g;
     });
   }
-  function lrow({ state, num, title, en, sub, sub2, bar, onOpen }) {
+  function lrow({ state, num, title, en, sub, sub2, bar, score, onOpen }) {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'lrow ' + state;
-    const circle = state === 'done' ? '✓' : state === 'locked' ? '🔒' : num;
+    const circle = state === 'done' ? IC.check : state === 'locked' ? IC.lock : num;
     b.innerHTML = `<span class="ln" aria-hidden="true">${circle}</span>
-      <span class="lt"><b class="${en ? 'en' : ''}">${esc(title)}</b><span class="lsub"><span class="${state === 'done' ? 'st-t' : ''}">${esc(sub)}</span>${sub2 ? `<span class="e" dir="ltr">${esc(sub2)}</span>` : ''}</span></span>
-      ${state === 'locked' ? '' : '<span class="lgo" aria-hidden="true">‹</span>'}
+      <span class="lt"><b class="${en ? 'en' : ''}">${esc(title)}</b><span class="lsub"><span>${esc(sub)}</span>${sub2 ? `<span class="e">${esc(sub2)}</span>` : ''}</span></span>
+      ${score ? `<span class="score ${score.ok ? 'ok' : ''}">${esc(score.t)}</span>` : ''}
+      ${state === 'locked' ? '' : `<span class="lgo">${IC.go}</span>`}
       ${bar ? `<span class="lbar" aria-hidden="true"><i style="width:${bar}%"></i></span>` : ''}`;
     if (state === 'locked') b.setAttribute('aria-disabled', 'true'); else b.onclick = onOpen;
     return b;
   }
-  function renderLessons() {
-    const d = data, today = d.days[d.days.length - 1], cur = today.chapter || 1;
-    // lectures
-    const todayLec = d.lectures.find(l => !l.intro && l.day === d.day);
-    const lastOpen = [...d.lectures].reverse().find(l => l.open && !l.intro);
-    const hi = todayLec || (lastOpen && !lastOpen.done ? lastOpen : null);
+  const scoreOf = t => {
+    if (!t || (t.game == null && !t.quiz)) return null;
+    const q = t.quiz;
+    return { t: q ? `الكويز ${q.best}/${q.total}` : `اللعبة ${t.game}/3`, ok: t.done };
+  };
+  function renderLists() {
+    const d = data, todayN = d.day;
     const lecRow = l => {
-      const state = !l.open ? 'locked' : l === hi ? 'today' : l.done ? 'done' : 'open';
-      const sub = state === 'locked' ? opensText(d.trial ? null : l.opens_on)
-        : state === 'today' ? (l === todayLec ? 'محاضرة اليوم' : 'آخر محاضرة انفتحت') : (l.ar || '');
+      const state = !l.open ? 'locked' : l.day === todayN && !l.intro ? 'today' : l.done ? 'done' : 'open';
+      const sub = state === 'locked' ? opensText(l.opens_on) : state === 'today' ? 'محاضرة اليوم' : state === 'done' ? 'شفتها' : l.pos > 5 ? 'بعدك بنصها' : (l.ar || '');
       const bar = !l.done && l.pos > 5 && l.dur ? Math.min(98, Math.round(100 * l.pos / l.dur)) : 0;
-      return lrow({ state, num: l.lecture, en: true, sub: state === 'done' ? `${l.ar ? l.ar + ' · ' : ''}خلصتها ✓` : sub, bar,
-        title: l.intro ? '0. المقدمة' : `${l.lecture}. ${l.capstone ? '🏆 ' : ''}${l.title}`,
+      return lrow({ state, num: l.lecture, en: !l.intro, sub, sub2: state === 'locked' || state === 'open' && !l.pos ? '' : l.ar, bar, score: scoreOf(l.test),
+        title: l.intro ? 'المقدمة' : `${l.lecture}. ${l.title}`,
         onOpen: () => l.intro ? openIntro() : openLesson({ number: l.day, lesson: l.lesson }, { t: l.title }) });
     };
-    $('tabLec').replaceChildren(...chapterGroups(d.lectures, lecRow, cur));
-    // homework
+    const lec = d.lectures, ld = lec.filter(l => l.done).length;
+    $('lecSum').textContent = `شفت ${ld} من ${lec.length}`;
+    $('lecList').replaceChildren(...chapterGroups(lec, lecRow));
     const tRow = t => {
-      const isToday = t.open && t.day === d.day;
-      const state = !t.open ? 'locked' : t.done ? 'done' : isToday ? 'today' : 'open';
-      const sub = state === 'locked' ? opensText(d.trial ? null : t.opens_on) : state === 'done' ? 'خلصته ✓'
-        : isToday ? 'واجب اليوم' : 'ما خلصته';
-      return lrow({ state, num: t.day, title: t.title, sub, sub2: t.sub,
-        onOpen: () => openLesson({ number: t.day, lesson: t.lesson }, { t: t.title }, t.daily ? '#lp-daily' : '') });
+      const state = !t.open ? 'locked' : t.done ? 'done' : t.day === todayN ? 'today' : 'open';
+      const sub = state === 'locked' ? opensText(t.opens_on) : state === 'done' ? 'خلصته' : state === 'today' ? 'واجب اليوم' : 'ما خلصته';
+      return lrow({ state, num: t.day, title: t.title, sub, sub2: t.sub, score: t.quiz ? scoreOf(t.test) : null,
+        onOpen: () => openLesson({ number: t.day, lesson: t.lesson }, { t: t.title }, t.daily ? '#lp-daily' : t.quiz ? '#lp-test' : '#lp-hw') });
     };
-    const missed = d.tasks.filter(t => t.open && !t.done && t.day < d.day);
-    const parts = [];
-    if (missed.length) {
-      const m = document.createElement('div'); m.className = 'hw-missed';
-      m.innerHTML = `<h2>فاتتك (${missed.length})</h2><div class="lrows"></div>`;
-      missed.forEach(t => m.querySelector('.lrows').appendChild(tRow(t)));
-      parts.push(m);
-    }
-    $('tabHw').replaceChildren(...parts, ...chapterGroups(d.tasks, tRow, cur));
+    const opened = d.tasks.filter(t => t.open), td = opened.filter(t => t.done).length;
+    $('hwSum').textContent = `خلصت ${td} من ${opened.length} انفتحت`;
+    $('hwList').replaceChildren(...chapterGroups(d.tasks, tRow));
   }
   function openIntro() {
     const ov = $('lesson');
