@@ -143,5 +143,58 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => eyes()); else eyes();
 
-  window.Learn = { API, store, esc, call, fileUrl, toast, when, recorder, eyes };
+  // ---- lecture videos (Bunny player): rewind 5 seconds, 0.75x speed, resume where you stopped, know when it ended ----
+  let pjs = null;
+  function loadPlayerJs() {
+    if (window.playerjs) return Promise.resolve();
+    if (!pjs) pjs = new Promise((ok, no) => {
+      const s = document.createElement('script');
+      s.src = 'https://assets.mediadelivery.net/playerjs/playerjs-latest.min.js';
+      s.onload = ok; s.onerror = no; document.head.appendChild(s);
+    });
+    return pjs;
+  }
+  function tools(rewind, setRate) {
+    const bar = document.createElement('div'); bar.className = 'vtools';
+    bar.innerHTML = '<button type="button" class="vbtn" data-a="back">⏪ رجّع 5 ثواني</button>' +
+      '<button type="button" class="vbtn" data-a="speed" aria-pressed="false">🐢 السرعة: 1x</button>';
+    let rate = 1;
+    bar.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.a === 'back') return rewind();
+      rate = rate === 1 ? 0.75 : 1; setRate(rate);
+      b.textContent = '🐢 السرعة: ' + (rate === 1 ? '1x' : '0.75x'); b.setAttribute('aria-pressed', rate !== 1);
+    });
+    return bar;
+  }
+  function video(iframe, { key, token, pos = 0, done = false, onEnded } = {}) {
+    if (!iframe || iframe.dataset.vt) return; iframe.dataset.vt = '1';
+    const wrap = iframe.closest('.video,.lp-video') || iframe;
+    let player = null, last = 0, dur = 0, sentAt = 0, ended = false;
+    const save = fin => { if (key && token) call('/api/progress', { method: 'POST', json: { key, pos: last, dur, done: !!fin }, token }).catch(() => {}); };
+    const bar = tools(() => player && player.getCurrentTime(t => player.setCurrentTime(Math.max(0, (t || 0) - 5))),
+                      r => player && player.setPlaybackRate(r));
+    bar.hidden = true; wrap.after(bar);
+    loadPlayerJs().then(() => {
+      player = new playerjs.Player(iframe);
+      player.on('ready', () => {
+        bar.hidden = false;
+        let resumed = !(pos > 5 && !done);
+        player.on('play', () => { if (!resumed) { resumed = true; player.setCurrentTime(pos); } });
+        player.on('timeupdate', d => {
+          last = d.seconds || last; dur = d.duration || dur;
+          if (Date.now() - sentAt > 10000) { sentAt = Date.now(); save(false); }
+        });
+        player.on('pause', () => save(false));
+        player.on('ended', () => { if (ended) return; ended = true; last = dur || last; save(true); if (onEnded) onEnded(); });
+      });
+    }).catch(() => {});
+  }
+  // the same two buttons for a voice clip (the imitation model)
+  function audioTools(a) {
+    if (!a || a.dataset.vt) return; a.dataset.vt = '1';
+    a.after(tools(() => { a.currentTime = Math.max(0, a.currentTime - 5); }, r => { a.playbackRate = r; a.preservesPitch = true; }));
+  }
+
+  window.Learn = { API, store, esc, call, fileUrl, toast, when, recorder, eyes, video, audioTools };
 })();

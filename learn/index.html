@@ -127,9 +127,10 @@ section+section{margin-top:26px}
 .dt b{font:700 .97rem/1.4 var(--font-display)}
 .dt b.en{direction:ltr;unicode-bidi:isolate}
 .st{flex:none;font:800 .78rem/1 var(--font-display);padding:5px 9px 7px;border-radius:99px}
+.st.todo{background:var(--line);color:var(--ink-2)}
 .st.ok{background:var(--green-soft);color:var(--green)} .st.wait{background:var(--yellow-soft);color:var(--gold)} .st.bad{background:var(--red-soft);color:var(--red)}
 .chev{flex:none;color:var(--muted);font-size:1.3rem;line-height:1}
-.row-more{all:unset;box-sizing:border-box;cursor:pointer;width:100%;text-align:center;padding:13px;font:800 .9rem/1 var(--font-display);color:var(--ink-2)}
+.row-more{all:unset;box-sizing:border-box;cursor:pointer;width:100%;text-align:center;padding:13px;min-height:48px;font:800 .9rem/1 var(--font-display);color:var(--ink-2)}
 .wide{width:100%}
 .start-vids{padding:16px;display:grid;gap:16px}
 @media (min-width:640px){.start-vids{grid-template-columns:1fr 1fr}}
@@ -152,6 +153,76 @@ section+section{margin-top:26px}
 .lesson-body{flex:1;overflow:auto;padding-block:18px 40px}
 .lesson-body .stack{gap:10px}
 .lesson-body b{font-family:var(--font-display)}
+/* home v2 */
+.prog{height:10px!important;background:rgba(255,255,255,.75)!important;max-width:none!important}
+.prog i{background:var(--black)!important}
+.intro-top{padding:16px;display:flex;flex-direction:column;gap:10px}
+.intro-top h2{font-size:1.15rem;font-weight:900}
+.dcard{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;min-height:64px;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
+.dcard:focus-visible{outline:3px solid var(--black);outline-offset:2px}
+.dcard .d-ic{flex:none;width:44px;height:44px;border-radius:50%;background:var(--yellow-soft);display:grid;place-items:center;font-size:1.3rem}
+.dcard .d-tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.dcard .d-k{font:700 .9rem/1.4 var(--font-display);color:var(--muted)}
+.dcard .d-t{font:800 1.05rem/1.4 var(--font-display);direction:ltr;text-align:right;unicode-bidi:isolate}
+.dcard .d-ok{flex:none;font:800 .9rem/1 var(--font-display);color:var(--green)}
+.all-link{all:unset;box-sizing:border-box;cursor:pointer;align-self:flex-start;min-height:44px;display:inline-flex;align-items:center;font:800 1rem/1 var(--font-display);color:var(--ink);text-decoration:underline;text-underline-offset:5px}
+.miss-line{all:unset;box-sizing:border-box;cursor:pointer;width:100%;min-height:44px;display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;background:var(--yellow-wash);color:var(--ink-2);font:600 1rem/1.5 var(--font-body)}
+.miss-line .go{margin-inline-start:auto;font-weight:800}
+.logout-link{all:unset;box-sizing:border-box;cursor:pointer;display:block;margin:36px auto 0;min-height:44px;padding:10px 16px;color:var(--muted);font:600 1rem/1.5 var(--font-body);text-decoration:underline;text-underline-offset:4px}
+.t-next{font-size:1rem!important}
+.drow{min-height:56px}
+.dt b{font-size:1rem}
+/* bottom navigation */
+body.has-nav main .inner{padding-bottom:110px}
+.bnav{position:fixed;inset:auto 0 0 0;z-index:60;display:flex;background:var(--black);padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -2px 0 var(--yellow)}
+.bnav button{all:unset;box-sizing:border-box;cursor:pointer;flex:1;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#bbb;font:800 .95rem/1.2 var(--font-display)}
+.bnav button span{font-size:1.25rem;line-height:1}
+.bnav button[aria-current="page"]{color:var(--yellow)}
+.bnav button:focus-visible{outline:3px solid var(--yellow);outline-offset:-4px}
+/* WhatsApp help, bottom left on every page */
+.wa-help{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:110;display:inline-flex;align-items:center;gap:6px;min-height:48px;padding:0 16px 2px;border-radius:999px;background:#1FA855;color:#fff;font:800 1rem/1 var(--font-display);text-decoration:none;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+body.has-nav .wa-help{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+body.in-lesson .wa-help{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+/* my lessons */
+.page-h{font-size:1.5rem;font-weight:900;margin-bottom:14px}
+.tabs{display:flex;gap:6px;padding:5px;border-radius:16px;background:var(--line);margin-bottom:18px}
+.tabs button{all:unset;box-sizing:border-box;cursor:pointer;flex:1;min-height:46px;display:grid;place-items:center;border-radius:12px;font:800 1.02rem/1 var(--font-display);color:var(--ink-2)}
+.tabs button[aria-selected="true"]{background:var(--card);color:var(--black);box-shadow:var(--shadow)}
+.tabs button:focus-visible{outline:3px solid var(--black);outline-offset:-3px}
+.chg{border-radius:18px;background:var(--card);border:1px solid var(--line);margin-bottom:14px;overflow:hidden}
+.chg > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 16px;min-height:64px}
+.chg > summary::-webkit-details-marker{display:none}
+.chg .cg-t{flex:1;min-width:0;display:flex;flex-direction:column}
+.chg .cg-t b{font:900 1.05rem/1.4 var(--font-display)}
+.chg .cg-t span{color:var(--muted);font-size:.95rem}
+.chg .cg-ch{flex:none;color:var(--muted);font:700 .9rem/1 var(--font-display)}
+.chg[open] .cg-ch .c, .chg:not([open]) .cg-ch .o{display:none}
+.chg.locked > summary{color:var(--muted)}
+.lrows{border-top:1px solid var(--line)}
+.lrow{all:unset;box-sizing:border-box;cursor:pointer;width:100%;position:relative;display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:64px;border-bottom:1px solid var(--line)}
+.lrow:last-child{border-bottom:0}
+.lrow:focus-visible{outline:3px solid var(--black);outline-offset:-3px}
+.lrow .ln{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--paper);border:1.5px solid var(--line-2);font:900 1rem/1 var(--font-display)}
+.lrow .lt{flex:1;min-width:0;display:flex;flex-direction:column}
+.lrow .lt b{font:800 1.02rem/1.4 var(--font-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow .lt b.en{direction:ltr;text-align:right;unicode-bidi:isolate}
+.lrow .lt span{font-size:.95rem;color:var(--muted)}
+.lrow .lsub{display:flex;gap:8px;align-items:baseline;white-space:nowrap;overflow:hidden;min-width:0}
+.lrow .lsub > span{flex:none}
+.lrow .lsub .e{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;text-align:right;unicode-bidi:isolate}
+.lrow .lgo{flex:none;color:var(--muted);font-size:1.3rem}
+.lrow.done .ln{background:var(--green-soft);border-color:#BFE6CF;color:var(--green)}
+.lrow.done .lt span.st-t{color:var(--green);font-weight:700}
+.lrow.today{background:var(--yellow);border-bottom-color:var(--yellow)}
+.lrow.today .ln{background:var(--black);border-color:var(--black);color:var(--yellow)}
+.lrow.today .lt span{color:var(--black);font-weight:700}
+.lrow.locked{cursor:default;opacity:.55}
+.lrow.locked .ln{font-size:.95rem}
+.lrow .lbar{position:absolute;inset:auto 16px 4px 16px;height:3px;border-radius:3px;background:var(--line)}
+.lrow .lbar i{display:block;height:100%;border-radius:3px;background:var(--black)}
+.hw-missed{margin-bottom:18px}
+.hw-missed h2{font-size:1.05rem;font-weight:900;margin-bottom:8px}
+.hw-missed .lrows{border:1px solid var(--line);border-radius:18px;background:var(--card);overflow:hidden}
 .lesson{position:fixed;inset:0;z-index:100;background:var(--paper);display:flex;flex-direction:column}
 .lesson-bar{flex:none;display:flex;align-items:center;gap:12px;background:var(--black);color:#fff;
   padding:calc(10px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));box-shadow:0 2px 0 var(--yellow)}
@@ -177,7 +248,6 @@ section+section{margin-top:26px}
   <div class="lock" id="lock"></div>
   <div class="sp"></div>
   <span class="chip" id="dayChip" hidden>اليوم <b id="dayNum">1</b>/<span id="dayTot">30</span></span>
-  <button class="chip" id="logout" hidden>خروج</button>
 </div></header>
 
 <div id="vLogin">
@@ -213,50 +283,69 @@ section+section{margin-top:26px}
 </div>
 
 <div id="vApp" hidden>
-  <div class="hero"><div class="inner">
+  <div class="hero" id="hero"><div class="inner">
     <h1 id="hello">أهلاً 👋</h1>
     <div class="tag" id="heroTag"></div>
     <div class="prog" id="prog"><i id="progBar"></i></div>
     <div class="meta" id="heroMeta" hidden></div>
   </div></div>
   <main><div class="inner">
-    <button type="button" class="fbnote" id="fbNote" hidden></button>
+    <!-- home -->
+    <div id="vHome">
+      <button type="button" class="fbnote" id="fbNote" hidden></button>
+      <div id="paidView" hidden>
+        <div class="card intro-top" id="introTop" hidden></div>
+        <div class="today card" id="today"></div>
+        <button type="button" class="dcard card" id="dailyCard" hidden></button>
+        <button type="button" class="all-link" id="allLink">كل المحاضرات ←</button>
+        <button type="button" class="miss-line" id="missLine" hidden></button>
+        <section id="daysSec">
+          <div class="sec-h"><h2>كل الأيام</h2></div>
+          <div class="rows card" id="days"></div>
+        </section>
+        <button type="button" class="btn ghost wide" id="mtnToggle">🏔️ شوف رحلتك</button>
+        <div id="mtnBox" class="stack" hidden><div class="sec-h"><h2>رحلتك</h2><span class="muted small" id="mtnMeta"></span></div><div class="chps" id="chPills" hidden></div><div id="mtn"></div></div>
+      </div>
 
-    <!-- subscribers: today's lesson, the list of days, the mountain behind a button -->
-    <div id="paidView" hidden>
-      <div class="today card" id="today"></div>
-      <section id="daysSec">
-        <div class="sec-h"><h2>كل الأيام</h2></div>
-        <div class="rows card" id="days"></div>
-      </section>
-      <section id="startSec" hidden>
-        <div class="sec-h"><h2>🎬 فيديوهات البداية</h2></div>
-        <div class="card start-vids" id="startVids"></div>
-      </section>
-      <button type="button" class="btn ghost wide" id="mtnToggle">🏔️ شوف رحلتك</button>
-      <div id="mtnBox" class="stack" hidden><div class="sec-h"><h2>رحلتك</h2><span class="muted small" id="mtnMeta"></span></div><div class="chps" id="chPills" hidden></div><div id="mtn"></div></div>
+      <!-- free lesson: three steps, nothing else -->
+      <div id="freeView" hidden>
+        <div class="card pre-done" id="preDone" hidden></div>
+        <ol class="fsteps">
+          <li class="card fstep"><span class="fn">1</span><div class="fb-body"><h3>شوف المقدمة</h3><div class="intro-grid" id="fIntro"></div></div></li>
+          <li class="card fstep"><span class="fn">2</span><div class="fb-body"><h3>المحاضرة الأولى وواجبها</h3>
+            <p class="muted">فيديو المحاضرة، والملزمة وألعابها، وشرح واجب المحاكاة، وبالآخر تسجّل صوتك.</p>
+            <button type="button" class="btn y" id="fLesson">افتح الدرس ←</button></div></li>
+          <li class="card fstep" id="preStep"><span class="fn">3</span><div class="fb-body" id="preBox"></div></li>
+        </ol>
+        <details class="actd card">
+          <summary id="actTitle">🔑 وصلك كود التفعيل؟</summary>
+          <form class="stack" id="actBox">
+            <div class="row"><input class="input en" id="actCode" placeholder="TA-XXXXX" autocapitalize="characters" style="flex:1;min-width:0"><button class="btn">فعّل</button></div>
+            <div class="err small" id="actErr"></div>
+          </form>
+        </details>
+      </div>
+      <button type="button" class="logout-link" id="logout">تسجيل الخروج</button>
     </div>
 
-    <!-- free lesson: three steps, nothing else -->
-    <div id="freeView" hidden>
-      <div class="card pre-done" id="preDone" hidden></div>
-      <ol class="fsteps">
-        <li class="card fstep"><span class="fn">1</span><div class="fb-body"><h3>شوف المقدمة</h3><div class="intro-grid" id="fIntro"></div></div></li>
-        <li class="card fstep"><span class="fn">2</span><div class="fb-body"><h3>المحاضرة الأولى وواجبها</h3>
-          <p class="muted">فيديو المحاضرة، والملزمة وألعابها، وشرح واجب المحاكاة، وبالآخر تسجّل صوتك.</p>
-          <button type="button" class="btn y" id="fLesson">افتح الدرس ←</button></div></li>
-        <li class="card fstep" id="preStep"><span class="fn">3</span><div class="fb-body" id="preBox"></div></li>
-      </ol>
-      <details class="actd card">
-        <summary id="actTitle">🔑 وصلك كود التفعيل؟</summary>
-        <form class="stack" id="actBox">
-          <div class="row"><input class="input en" id="actCode" placeholder="TA-XXXXX" autocapitalize="characters" style="flex:1;min-width:0"><button class="btn">فعّل</button></div>
-          <div class="err small" id="actErr"></div>
-        </form>
-      </details>
+    <!-- my lessons: lectures | homework -->
+    <div id="vLessons" hidden>
+      <h1 class="page-h">دروسي</h1>
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" id="tLec" aria-selected="true" aria-controls="tabLec">المحاضرات</button>
+        <button type="button" role="tab" id="tHw" aria-selected="false" aria-controls="tabHw">الواجبات</button>
+      </div>
+      <div id="tabLec" role="tabpanel"></div>
+      <div id="tabHw" role="tabpanel" hidden></div>
     </div>
   </div></main>
+  <nav class="bnav" id="bnav" hidden aria-label="التنقل">
+    <button type="button" data-v="home" aria-current="page"><span aria-hidden="true">🏠</span>الرئيسية</button>
+    <button type="button" data-v="lessons"><span aria-hidden="true">📚</span>دروسي</button>
+  </nav>
 </div>
+
+<a class="wa-help" id="waHelp" target="_blank" rel="noopener" hidden><span aria-hidden="true">💬</span> مساعدة</a>
 
 <div class="lesson" id="lesson" hidden>
   <div class="lesson-bar"><button type="button" class="chip" id="lessonBack">→ رجوع</button><b id="lessonTitle"></b></div>
@@ -276,7 +365,26 @@ section+section{margin-top:26px}
   let token = store.get('learn_token');
   let data = null;
 
-  function show(v) { $('vLogin').hidden = v !== 'login'; $('vApp').hidden = v !== 'app'; $('logout').hidden = v !== 'app'; $('dayChip').hidden = v !== 'app'; }
+  function show(v) { $('vLogin').hidden = v !== 'login'; $('vApp').hidden = v !== 'app'; $('dayChip').hidden = v !== 'app'; if (v !== 'app') document.body.classList.remove('has-nav'); }
+  // help on WhatsApp, on every screen
+  if (window.SUPPORT_WA) { $('waHelp').href = `https://wa.me/${window.SUPPORT_WA}?text=${encodeURIComponent('هلا، عندي سؤال عن الكورس')}`; $('waHelp').hidden = false; }
+
+  // ---------- two screens: home | my lessons (lectures, homework) ----------
+  let view = 'home', tab = 'lec';
+  function setView(v, t) {
+    view = v; if (t) tab = t;
+    $('vHome').hidden = v !== 'home'; $('vLessons').hidden = v !== 'lessons'; $('hero').hidden = v !== 'home';
+    document.querySelectorAll('#bnav button').forEach(b => b.dataset.v === v ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
+    $('tLec').setAttribute('aria-selected', tab === 'lec'); $('tHw').setAttribute('aria-selected', tab === 'hw');
+    $('tabLec').hidden = tab !== 'lec'; $('tabHw').hidden = tab !== 'hw';
+    if (v === 'lessons' && data) renderLessons();
+    scrollTo(0, 0);
+  }
+  document.querySelectorAll('#bnav button').forEach(b => b.onclick = () => setView(b.dataset.v));
+  $('tLec').onclick = () => setView('lessons', 'lec');
+  $('tHw').onclick = () => setView('lessons', 'hw');
+  $('allLink').onclick = () => setView('lessons', 'lec');
+  $('missLine').onclick = () => setView('lessons', 'hw');
 
   // ---------- login / sign up ----------
   const params = new URLSearchParams(location.search);
@@ -481,9 +589,10 @@ section+section{margin-top:26px}
     $('paidView').hidden = d.trial;
     $('freeView').hidden = !d.trial;
     $('prog').hidden = d.trial;
+    $('bnav').hidden = d.trial; document.body.classList.toggle('has-nav', !d.trial);
     renderFeedbackNote();
     clearInterval(tick);
-    if (d.trial) return renderFree();
+    if (d.trial) { setView('home'); return renderFree(); }
     const today = d.days[d.days.length - 1];
     const ch = d.chapters[String(today.chapter || 1)];
     $('heroTag').textContent = d.finished ? 'خلصت الكورس! 🎉 تكدر ترجع لأي درس بأي وقت.'
@@ -491,7 +600,7 @@ section+section{margin-top:26px}
     requestAnimationFrame(() => { $('progBar').style.width = Math.max(2, Math.round(100 * (d.finished ? 1 : d.day / d.total))) + '%'; });
     renderToday();
     renderDays();
-    renderStart(today);
+    if (view === 'lessons') renderLessons();
     $('mtnBox').hidden = true; $('mtnToggle').textContent = '🏔️ شوف رحلتك';
     if (d.next_open) { countdown(); tick = setInterval(countdown, 30000); }
   }
@@ -512,47 +621,37 @@ section+section{margin-top:26px}
     renderPre();
   }
 
-  // ---- today: one card, one button ----
+  // ---- today: one card, one button, one line under it ----
   function renderToday() {
     const d = data, day = d.days[d.days.length - 1], L = dayLabel(day);
-    const miss = d.missing.length;
-    const missLine = miss ? `<div class="t-miss">⚠️ عندك ${miss} ${miss === 1 ? 'واجب ناقص' : 'واجبات ناقصة'}، تلكاها بالقائمة تحت</div>` : '';
-    if (day.number === 1 && day.kind === 'lecture') {     // day 1: the welcome video, then the first lecture
-      const sent1 = hwsOf(day).length && doneCount(day) === hwsOf(day).length;
-      $('today').innerHTML = `
-        <div class="t-k">اليوم 1 · البداية</div>
-        <h2 class="t-title">أهلاً بيك بالكورس 👋</h2>
-        ${d.intro.length ? `<div class="t-v"><b>1. شوف المقدمة</b>${d.intro.map(frame).join('')}</div>` : ''}
-        <div class="t-v"><b>${d.intro.length ? '2. ' : ''}ابدي أول محاضرة: <span class="en" dir="ltr">${esc(day.title)}</span></b></div>
-        <button type="button" class="btn y t-go">${sent1 ? 'افتح الدرس' : 'ابدي الدرس'} ←</button>
-        <div class="t-hint">${sent1 ? '✅ سلّمت واجبات اليوم' : 'محاضرة ← ملزمة ← شرح الواجب ← تسجّل صوتك'}</div>
-        ${dailyLine(day)}
-        <div class="t-next muted small" id="nextOpen"></div>`;
-      $('today').querySelector('.t-go').onclick = () => openLesson(day, L);
-      return;
+    // day 1 only: the welcome video above everything; after that it lives in "دروسي" as lecture 0
+    const intro = day.number === 1 && !d.finished && d.intro.length;
+    $('introTop').hidden = !intro;
+    if (intro) {
+      $('introTop').innerHTML = `<h2>🎬 ابدي من هنا: المقدمة</h2>${d.intro.map(frame).join('')}`;
+      watch($('introTop'), 'INTRO');
     }
-    const all = hwsOf(day), done = doneCount(day), sent = all.length && done === all.length;
-    const hint = day.kind === 'lecture' ? 'فيديو ← ملزمة ← واجب' : day.kind === 'homework' ? 'اسمع الفويس، وسجّل صوتك وارسله'
-      : day.kind === 'review' ? (day.final ? 'فويس بجمل من كل الكورس: قلّده وسجّل صوتك' : 'فويس بجمل من كل الفصل: قلّده وسجّل صوتك')
-      : day.kind === 'capstone' ? 'شوف فيديو التحدي، وسجّل فيديوك' : 'سلّم فيديو التحدي';
     $('today').innerHTML = `
       <div class="t-k">${d.finished ? '🏆 خلصت الكورس' : `درس اليوم · اليوم ${day.number}`}</div>
       <h2 class="t-title ${L.en ? 'en' : ''}" ${L.en ? 'dir="ltr"' : ''}>${esc(L.t)}</h2>
       <div class="t-sub">${esc(L.k)}</div>
-      <button type="button" class="btn y t-go">${sent ? 'افتح الدرس' : 'ابدي الدرس'} ←</button>
-      <div class="t-hint">${sent ? '✅ سلّمت واجبات اليوم' : done ? `سلّمت ${done} من ${all.length}، باقي واجب` : hint}</div>
-      ${dailyLine(day)}
-      ${missLine}
-      <div class="t-next muted small" id="nextOpen"></div>`;
+      <button type="button" class="btn y t-go">${hwsOf(day).length && doneCount(day) === hwsOf(day).length ? 'افتح الدرس' : 'ابدي الدرس'} ←</button>
+      <div class="t-next muted" id="nextOpen"></div>`;
     $('today').querySelector('.t-go').onclick = () => openLesson(day, L);
-  }
-
-  // ---- the welcome video and the imitation how-to stay on the page after day 1 ----
-  function renderStart(today) {
-    const d = data, vids = [...d.intro.map(u => ['المقدمة', u]), ...d.howto.map(u => ['شلون تسوي واجب المحاكاة', u])];
-    $('startSec').hidden = today.number === 1 || !vids.length;       // day 1 shows the intro in the card above
-    if ($('startSec').hidden) return;
-    $('startVids').innerHTML = vids.map(([t, u]) => `<div class="t-v"><b>${t}</b>${frame(u)}</div>`).join('');
+    // the second homework of the day: its own small card
+    const dc = $('dailyCard'), dl = day.daily;
+    dc.hidden = !dl;
+    if (dl) {
+      const done = dl.submissions.length;
+      dc.innerHTML = `<span class="d-ic" aria-hidden="true">🎧</span>
+        <span class="d-tx"><span class="d-k">الواجب الثاني: إنكليزي اليوم${dl.secs ? ` · ~${dl.secs} ثانية` : ''}</span><span class="d-t">${esc(dl.title)}</span></span>
+        ${done ? '<span class="d-ok">✓ سلّمته</span>' : '<span class="chev" aria-hidden="true">‹</span>'}`;
+      dc.onclick = () => openLesson(day, L, '#lp-daily');
+    }
+    // homework left behind: one calm line, it takes you to the homework list
+    const miss = d.missing.length;
+    $('missLine').hidden = !miss;
+    if (miss) $('missLine').innerHTML = `<span>عندك ${miss} واجب فاتك، كمّلها براحتك</span><span class="go" aria-hidden="true">←</span>`;
   }
 
   // ---- all days: one short row each, newest first ----
@@ -570,7 +669,7 @@ section+section{margin-top:26px}
   }
   function dayRow(day) {
     const L = dayLabel(day), all = hwsOf(day), done = doneCount(day);
-    const st = !all.length ? '' : done < all.length ? `<span class="st bad">${done ? `${done}/${all.length}` : 'ناقص'}</span>`
+    const st = !all.length ? '' : done < all.length ? `<span class="st todo">${done ? `${done}/${all.length}` : 'ما خلصته'}</span>`
       : all.every(h => h.submissions.some(s => s.feedback)) ? '<span class="st ok">✓ مصحّح</span>' : '<span class="st wait">⏳</span>';
     const b = document.createElement('button'); b.type = 'button'; b.className = 'drow';
     b.innerHTML = `<span class="dn">${day.number}</span><span class="dt"><b class="${L.en ? 'en' : ''}">${esc(L.t)}</b></span>${st}<span class="chev">‹</span>`;
@@ -639,6 +738,101 @@ section+section{margin-top:26px}
     });
   }
 
+  // ---- "دروسي": every lecture and every homework, by chapter ----
+  const DAYS_AR = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+  function opensText(iso) {
+    if (!iso) return 'للمشتركين بس';
+    const [y, m, dd] = iso.split('-').map(Number), at = new Date(y, m - 1, dd), now = new Date();
+    const days = Math.round((at - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 864e5);
+    const name = DAYS_AR[at.getDay()];
+    if (days <= 0) return `تفتح اليوم الساعة ${(data.send_hour || 17) % 12 || 12} العصر`;
+    if (days === 1) return 'تفتح غداً';
+    if (days < 7) return `تفتح يوم ${name}`;
+    if (days < 14) return `تفتح يوم ${name} الأسبوع الجاي`;
+    return `تفتح بعد ${Math.round(days / 7)} أسابيع، يوم ${name}`;
+  }
+  function chapterGroups(items, rowOf, open) {
+    const d = data, chs = [...new Set(items.map(x => x.chapter))].sort();
+    return chs.map(c => {
+      const its = items.filter(x => x.chapter === c), done = its.filter(x => x.done).length;
+      const locked = its.every(x => !x.open), ch = chap(c);
+      const g = document.createElement('details'); g.className = 'chg' + (locked ? ' locked' : ''); g.open = c === open;
+      g.innerHTML = `<summary><span class="cg-t"><b>${locked ? '🔒 ' : ''}${esc(ch.ar || '')} · <span class="en">${esc(ch.name || '')}</span></b>
+        <span>${locked ? 'مقفول لحد ما توصله' : `خلصت ${done} من ${its.length}`}</span></span>
+        <span class="cg-ch"><span class="o">سكّر ▴</span><span class="c">افتح ▾</span></span></summary><div class="lrows"></div>`;
+      // open items, then only the next few locked ones (a chapter has dozens of homework)
+      const box = g.querySelector('.lrows'), shut = its.filter(x => !x.open);
+      its.filter(x => x.open).forEach(x => box.appendChild(rowOf(x)));
+      shut.slice(0, locked ? shut.length : 3).forEach(x => box.appendChild(rowOf(x)));
+      if (!locked && shut.length > 3) {
+        const more = document.createElement('button'); more.type = 'button'; more.className = 'row-more';
+        more.textContent = `عرض الباقي (${shut.length - 3} تنفتح بعدين)`;
+        more.onclick = () => { more.remove(); shut.slice(3).forEach(x => box.appendChild(rowOf(x))); };
+        box.appendChild(more);
+      }
+      return g;
+    });
+  }
+  function lrow({ state, num, title, en, sub, sub2, bar, onOpen }) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'lrow ' + state;
+    const circle = state === 'done' ? '✓' : state === 'locked' ? '🔒' : num;
+    b.innerHTML = `<span class="ln" aria-hidden="true">${circle}</span>
+      <span class="lt"><b class="${en ? 'en' : ''}">${esc(title)}</b><span class="lsub"><span class="${state === 'done' ? 'st-t' : ''}">${esc(sub)}</span>${sub2 ? `<span class="e" dir="ltr">${esc(sub2)}</span>` : ''}</span></span>
+      ${state === 'locked' ? '' : '<span class="lgo" aria-hidden="true">‹</span>'}
+      ${bar ? `<span class="lbar" aria-hidden="true"><i style="width:${bar}%"></i></span>` : ''}`;
+    if (state === 'locked') b.setAttribute('aria-disabled', 'true'); else b.onclick = onOpen;
+    return b;
+  }
+  function renderLessons() {
+    const d = data, today = d.days[d.days.length - 1], cur = today.chapter || 1;
+    // lectures
+    const todayLec = d.lectures.find(l => !l.intro && l.day === d.day);
+    const lastOpen = [...d.lectures].reverse().find(l => l.open && !l.intro);
+    const hi = todayLec || (lastOpen && !lastOpen.done ? lastOpen : null);
+    const lecRow = l => {
+      const state = !l.open ? 'locked' : l === hi ? 'today' : l.done ? 'done' : 'open';
+      const sub = state === 'locked' ? opensText(d.trial ? null : l.opens_on)
+        : state === 'today' ? (l === todayLec ? 'محاضرة اليوم' : 'آخر محاضرة انفتحت') : (l.ar || '');
+      const bar = !l.done && l.pos > 5 && l.dur ? Math.min(98, Math.round(100 * l.pos / l.dur)) : 0;
+      return lrow({ state, num: l.lecture, en: true, sub: state === 'done' ? `${l.ar ? l.ar + ' · ' : ''}خلصتها ✓` : sub, bar,
+        title: l.intro ? '0. المقدمة' : `${l.lecture}. ${l.capstone ? '🏆 ' : ''}${l.title}`,
+        onOpen: () => l.intro ? openIntro() : openLesson({ number: l.day, lesson: l.lesson }, { t: l.title }) });
+    };
+    $('tabLec').replaceChildren(...chapterGroups(d.lectures, lecRow, cur));
+    // homework
+    const tRow = t => {
+      const isToday = t.open && t.day === d.day;
+      const state = !t.open ? 'locked' : t.done ? 'done' : isToday ? 'today' : 'open';
+      const sub = state === 'locked' ? opensText(d.trial ? null : t.opens_on) : state === 'done' ? 'خلصته ✓'
+        : isToday ? 'واجب اليوم' : 'ما خلصته';
+      return lrow({ state, num: t.day, title: t.title, sub, sub2: t.sub,
+        onOpen: () => openLesson({ number: t.day, lesson: t.lesson }, { t: t.title }, t.daily ? '#lp-daily' : '') });
+    };
+    const missed = d.tasks.filter(t => t.open && !t.done && t.day < d.day);
+    const parts = [];
+    if (missed.length) {
+      const m = document.createElement('div'); m.className = 'hw-missed';
+      m.innerHTML = `<h2>فاتتك (${missed.length})</h2><div class="lrows"></div>`;
+      missed.forEach(t => m.querySelector('.lrows').appendChild(tRow(t)));
+      parts.push(m);
+    }
+    $('tabHw').replaceChildren(...parts, ...chapterGroups(d.tasks, tRow, cur));
+  }
+  function openIntro() {
+    const ov = $('lesson');
+    $('lessonTitle').textContent = 'المقدمة';
+    $('lessonFrame').hidden = true; $('lessonBody').hidden = false;
+    $('lessonBody').innerHTML = `<div class="inner stack">${data.intro.map(frame).join('') || '<div class="muted">⏳ الفيديو راح ينزل قريباً.</div>'}</div>`;
+    watch($('lessonBody'), 'INTRO');
+    ov.hidden = false; document.body.style.overflow = 'hidden'; document.body.classList.add('in-lesson'); history.pushState({ lesson: 0 }, '');
+    dirty = true;
+  }
+  // rewind / speed / resume for the videos on this page (the intro)
+  function watch(box, key) {
+    const l = (data.lectures || []).find(x => x.key === key) || {};
+    box.querySelectorAll('.video iframe').forEach(f => Learn.video(f, { key, token, pos: l.pos || 0, done: l.done, onEnded: () => { dirty = true; } }));
+  }
+
   function frame(u) {
     return `<div class="video"><iframe src="${esc(u)}" loading="lazy" allow="accelerometer;gyroscope;encrypted-media;picture-in-picture;fullscreen" allowfullscreen title="فيديو"></iframe></div>`;
   }
@@ -646,26 +840,21 @@ section+section{margin-top:26px}
   // ---------- the lesson: full screen (video + workbook + homework), served by the API ----------
   let dirty = false;
   addEventListener('message', e => { if (e.data && e.data.lessonChanged) dirty = true; });
-  function openLesson(day, L) {
+  function openLesson(day, L, hash) {
     const ov = $('lesson');
-    if (!day.lesson) {                                    // the intro day: its two videos, no lesson page
-      $('lessonTitle').textContent = 'البداية';
-      $('lessonFrame').hidden = true; $('lessonBody').hidden = false;
-      $('lessonBody').innerHTML = `<div class="inner stack">${data.intro.map(u => `<b>1. المقدمة</b>${frame(u)}`).join('')}${data.howto.map(u => `<b>2. شلون تسوي واجب المحاكاة</b>${frame(u)}`).join('')}</div>`;
-      ov.hidden = false; document.body.style.overflow = 'hidden'; history.pushState({ lesson: 1 }, '');
-      return;
-    }
+    if (!day.lesson) return openIntro();
+    document.body.classList.add('in-lesson');
     $('lessonFrame').hidden = false; $('lessonBody').hidden = true; $('lessonBody').innerHTML = '';
     const op = mem.get('opened', []); if (!op.includes(day.number)) { op.push(day.number); mem.set('opened', op); }
     mem.set('intro_seen', true); dirty = true;
     $('lessonTitle').textContent = `اليوم ${day.number} · ${L.t}`;
-    $('lessonFrame').src = Learn.API + day.lesson + '?t=' + encodeURIComponent(token);
+    $('lessonFrame').src = Learn.API + day.lesson + '?t=' + encodeURIComponent(token) + (hash || '');
     ov.hidden = false; document.body.style.overflow = 'hidden';
     history.pushState({ lesson: day.number }, '');
   }
   function closeLesson(fromPop) {
     const ov = $('lesson'); if (ov.hidden) return;
-    ov.hidden = true; document.body.style.overflow = ''; $('lessonFrame').src = 'about:blank'; $('lessonBody').innerHTML = '';
+    ov.hidden = true; document.body.style.overflow = ''; document.body.classList.remove('in-lesson'); $('lessonFrame').src = 'about:blank'; $('lessonBody').innerHTML = '';
     if (!fromPop) history.back();
     if (dirty) { dirty = false; load(false); }
   }

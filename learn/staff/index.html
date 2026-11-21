@@ -109,6 +109,9 @@ tr:last-child td{border-bottom:0}
     <p class="muted small" style="margin:0">المنصة تعرف كل فيديو من عنوانه بـ Bunny، مثل <span class="en">C1 · L01 · Introducing Yourself</span>، و<span class="en">INTRO</span>، و<span class="en">IMITATION</span>.</p>
     <div id="libNote"></div>
     <div class="tbl-wrap"><table><thead><tr><th>الكود</th><th>المحاضرة</th><th>الحالة</th></tr></thead><tbody id="libBody"></tbody></table></div>
+    <div class="hd" style="margin-top:18px"><h2 style="font-size:1.15rem">العناوين العربية للمحاضرات</h2></div>
+    <p class="muted small" style="margin:0">السطر العربي اللي يطلع تحت اسم كل محاضرة بصفحة "دروسي" عند الطالب.</p>
+    <div class="stack" id="arTitles"></div>
   </section>
 </div></main>
 
@@ -362,6 +365,20 @@ tr:last-child td{border-bottom:0}
       + (r.unmatched.length ? `<div class="card pad small">فيديوهات ما عرفتها من عنوانها: <span class="en">${r.unmatched.map(esc).join(' · ')}</span></div>` : '');
     $('libBody').innerHTML = r.items.map(i => `<tr><td class="en" style="text-align:right">${esc(i.key)}</td><td class="en" style="text-align:right">${esc(i.title)}</td>
       <td>${i.videos ? '✅' + (i.videos > 1 ? ` (${i.videos} أجزاء)` : '') : (i.optional ? '<span class="muted">ماكو (اختياري)</span>' : '❌ ناقص')}</td></tr>`).join('');
+    loadTitles();
+  }
+
+  async function loadTitles() {
+    let r; try { r = await call('/api/staff/titles', { token }); } catch (x) { $('arTitles').textContent = x.message; return; }
+    $('arTitles').innerHTML = r.items.map(i => `<form class="row ar-t" data-k="${esc(i.key)}" style="align-items:center">
+      <span class="en small" style="min-width:150px;text-align:right">${esc(i.key)} · ${esc(i.title)}</span>
+      <input class="input" value="${esc(i.ar)}" maxlength="120" style="flex:1;min-width:180px" ${r.admin ? '' : 'disabled'}>
+      ${r.admin ? '<button class="btn sm">احفظ</button>' : ''}</form>`).join('');
+    $('arTitles').querySelectorAll('form').forEach(f => f.onsubmit = async e => {
+      e.preventDefault();
+      try { await call('/api/staff/titles', { method: 'POST', json: { key: f.dataset.k, ar: f.querySelector('input').value }, token }); toast('✅ انحفظ العنوان'); }
+      catch (x) { toast(x.message); }
+    });
   }
 
   function start() { show('app'); $('who').textContent = me || ''; openTab('hw'); }
