@@ -422,7 +422,8 @@ section+section{margin-top:26px}
   function dayLabel(d) {
     if (d.kind === 'intro') return { k: 'اليوم الأول', t: 'البداية: المقدمة وشرح واجب المحاكاة', en: false };
     if (d.kind === 'lecture') return { k: `${chap(d.chapter).ar || ''} · المحاضرة ${d.lecture} + واجب المحاكاة A`, t: d.title, en: true };
-    if (d.kind === 'homework') return { k: `المحاضرة ${d.lecture} · ${d.title}`, t: 'واجب المحاكاة B 🎙️', en: false };
+    if (d.kind === 'homework') return { k: `المحاضرة ${d.lecture} · ${d.title}`, t: `واجب المحاكاة ${d.homework ? d.homework.key.slice(-1) : 'B'} 🎙️`, en: false };
+    if (d.kind === 'review') return { k: `${chap(d.chapter).ar || ''} · مراجعة الفصل`, t: `مراجعة الفصل ${d.review || ''} 🔁`, en: false };
     if (d.kind === 'rest') return { k: 'يوم مراجعة', t: 'ماكو شي جديد اليوم', en: false };
     if (d.kind === 'capstone') return { k: `${chap(d.chapter).ar || ''} · التحدي النهائي`, t: d.title, en: true };
     return { k: 'التحدي النهائي', t: d.last ? 'آخر يوم لتسليم فيديو التحدي' : 'يوم تسجيل فيديو التحدي', en: false };
@@ -524,6 +525,7 @@ section+section{margin-top:26px}
     }
     const hw = day.homework, sent = hw && hw.submissions.length;
     const hint = day.kind === 'lecture' ? 'فيديو ← ملزمة ← واجب' : day.kind === 'homework' ? 'اسمع الفويس، وسجّل صوتك وارسله'
+      : day.kind === 'review' ? 'فويس بجمل من كل الفصل: قلّده وسجّل صوتك'
       : day.kind === 'capstone' ? 'شوف فيديو التحدي، وسجّل فيديوك' : 'سلّم فيديو التحدي';
     $('today').innerHTML = `
       <div class="t-k">${d.finished ? '🏆 خلصت الكورس' : `درس اليوم · اليوم ${day.number}`}</div>
