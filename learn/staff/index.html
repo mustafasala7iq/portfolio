@@ -28,6 +28,14 @@ tr:last-child td{border-bottom:0}
 .codebig{font:900 1.8rem/1 var(--font-display);letter-spacing:.06em;direction:ltr;text-align:center;padding:14px;border:2px dashed var(--black);border-radius:14px;background:var(--yellow-wash)}
 .msg{white-space:pre-wrap;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px}
 .login{max-width:420px;margin:40px auto 0}
+.pay-opt{display:flex;gap:8px;flex-wrap:wrap}
+.pay-opt label{flex:1 1 120px;display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:2px solid var(--line-2);border-radius:12px;font:800 .95rem/1.2 var(--font-display);cursor:pointer;background:#fff}
+.pay-opt input{accent-color:var(--black)}
+.pay-opt label:has(input:checked){border-color:var(--black);background:var(--yellow-wash)}
+.money{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:baseline;margin-bottom:12px}
+.money b{font:800 1.6rem/1.1 var(--font-display)}
+.pay-ed{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.pay-ed .input{width:110px;min-height:38px;padding:4px 8px}
 .seg{display:inline-flex;border:1px solid var(--line-2);border-radius:10px;overflow:hidden}
 .seg button{border:0;background:#fff;padding:6px 12px;font:700 .85rem/1.4 var(--font-display)}
 .seg button[aria-pressed="true"]{background:var(--black);color:#fff}
@@ -75,7 +83,8 @@ tr:last-child td{border-bottom:0}
 
   <section id="t-st" hidden>
     <div class="hd" style="margin-bottom:12px"><h2 style="font-size:1.15rem">الطلاب</h2><span class="muted small" id="stCount"></span></div>
-    <div class="tbl-wrap"><table><thead><tr><th>الطالب</th><th>اليوم</th><th>ناقص</th><th>الكويزات</th><th>آخر تسليم</th><th></th></tr></thead><tbody id="stBody"></tbody></table></div>
+    <div class="card pad money" id="money" hidden></div>
+    <div class="tbl-wrap"><table><thead><tr id="stHead"><th>الطالب</th><th>اليوم</th><th>ناقص</th><th>الكويزات</th><th>آخر تسليم</th><th></th></tr></thead><tbody id="stBody"></tbody></table></div>
   </section>
 
   <section id="t-leads" hidden class="stack">
@@ -94,6 +103,9 @@ tr:last-child td{border-bottom:0}
     <form class="card pad stack" id="codeForm">
       <h2 style="font-size:1.15rem">كود تفعيل جديد</h2>
       <div class="field"><label for="lbl">اسم الطالب (حتى تعرف الكود لمنو)</label><input class="input" id="lbl" placeholder="مثلاً: علي حسن"></div>
+      <div class="field"><label>الدفع</label>
+        <div class="pay-opt" role="radiogroup"><label><input type="radio" name="payk" value="paid" checked> دفع</label><label><input type="radio" name="payk" value="free"> مجاني</label></div></div>
+      <div class="field" id="amtF"><label for="amt">شكد دفع؟ (دينار)</label><input class="input en" id="amt" inputmode="numeric" placeholder="مثلاً 75000"></div>
       <button class="btn y">طلّع كود</button>
       <div id="newCode" class="stack" hidden>
         <div class="codebig" id="codeBig"></div>
@@ -101,7 +113,7 @@ tr:last-child td{border-bottom:0}
         <button type="button" class="btn sm" id="copyMsg">📋 انسخ الرسالة للطالب</button>
       </div>
     </form>
-    <div class="tbl-wrap"><table><thead><tr><th>الكود</th><th>لمنو</th><th>استخدمه</th><th>التاريخ</th></tr></thead><tbody id="codeBody"></tbody></table></div>
+    <div class="tbl-wrap"><table><thead><tr><th>الكود</th><th>لمنو</th><th>الدفع</th><th>استخدمه</th><th>التاريخ</th></tr></thead><tbody id="codeBody"></tbody></table></div>
   </section>
 
   <section id="t-lib" hidden class="stack">
@@ -200,9 +212,19 @@ tr:last-child td{border-bottom:0}
       <div class="small stack" style="gap:2px;margin-top:6px">${q.items.map(i => `<div><span class="en">${esc(i.key)}</span> · ${i.quiz ? `الكويز ${esc(i.quiz)}` : ''}${i.quiz && i.game != null ? ' · ' : ''}${i.game != null ? `اللعبة ${i.game}/3 ★` : ''}${i.tries > 2 ? ` <span class="muted">(${i.tries} محاولات)</span>` : ''}</div>`).join('')}</div></details>`;
   }
 
+  const iqd = n => Number(n).toLocaleString('en-US') + ' د.ع';
   async function loadSt() {
     let r; try { r = await call('/api/staff/students', { token }); } catch (x) { return out(x); }
     $('stCount').textContent = r.students.length + ' طالب';
+    const m = r.money;
+    $('money').hidden = !m;
+    if (m) $('money').innerHTML = `<div><div class="muted small">الفلوس اللي تجمعت</div><b class="num">${iqd(m.total)}</b></div>
+      <span class="small">${m.paid} دافع</span><span class="small">${m.free} مجاني</span>${m.unknown ? `<span class="small" style="color:var(--red)">${m.unknown} ما مكتوب شكد دفعوا</span>` : ''}`;
+    $('stHead').innerHTML = '<th>الطالب</th>' + (m ? '<th>الدفع</th>' : '') + '<th>اليوم</th><th>ناقص</th><th>الكويزات</th><th>آخر تسليم</th><th></th>';
+    const payCell = s => `<td class="small">${s.free ? '<span class="pill">مجاني</span>' : s.paid ? `<span class="num">${iqd(s.paid)}</span>` : '<span class="muted">ما مكتوب</span>'}
+      <details><summary class="muted small">عدّل</summary><div class="pay-ed"><input class="input en pay-n" inputmode="numeric" value="${s.paid || ''}" placeholder="المبلغ">
+        <label class="small"><input type="checkbox" class="pay-f" ${s.free ? 'checked' : ''}> مجاني</label>
+        <button class="btn sm pay-s" data-id="${s.id}">احفظ</button></div></details></td>`;
     $('stBody').innerHTML = r.students.map(s => {
       const flag = s.missing === 0 ? '🟢' : s.missing <= 2 ? '🟡' : '🔴';
       const text = `هلا ${s.name} 👋\nعندك ${s.missing} واجبات ناقصة بكورس مصطفى صلاح. ادخل على ${SITE} وسلّمهن 🎙️`;
@@ -210,7 +232,7 @@ tr:last-child td{border-bottom:0}
       return `<tr><td><b>${esc(s.name)}</b><div class="muted small en" style="text-align:right">+${esc(s.phone)} · ${esc(s.code)}</div>
           <div class="muted small en" style="text-align:right">${esc(s.email || '')}</div>
           <div class="muted small">📱 ${s.devices.length ? s.devices.map(esc).join('، ') : 'ماكو جهاز داخل'}</div></td>
-        <td class="num">${s.finished ? 'خلص 🎉' : s.day + '/' + r.total_days}</td>
+        ${m ? payCell(s) : ''}<td class="num">${s.finished ? 'خلص 🎉' : s.day + '/' + r.total_days}</td>
         <td>${flag} <span class="num">${s.missing}</span></td>
         <td>${quizCell(s.quizzes)}</td>
         <td class="small">${s.last ? when(s.last) : '<span class="muted">ماكو</span>'}</td>
@@ -220,7 +242,11 @@ tr:last-child td{border-bottom:0}
           ${r.admin ? `<button class="btn sm ghost rm" data-id="${s.id}" data-name="${esc(s.name)}">حذف</button>
             <span class="row" style="gap:6px"><input class="input en sd-n" type="number" min="1" max="${r.total_days}" placeholder="يوم" style="width:76px;min-height:38px;padding:4px 8px">
             <button class="btn sm ghost sd" data-id="${s.id}" data-name="${esc(s.name)}">⏩ انقله لهذا اليوم</button></span>` : ''}</div></td></tr>`;
-    }).join('') || '<tr><td colspan="6" class="muted">ماكو طلاب بعد.</td></tr>';
+    }).join('') || `<tr><td colspan="${m ? 7 : 6}" class="muted">ماكو طلاب بعد.</td></tr>`;
+    $('stBody').querySelectorAll('.pay-s').forEach(b => b.onclick = async () => {
+      const box = b.parentNode, free = box.querySelector('.pay-f').checked, paid = box.querySelector('.pay-n').value.trim();
+      try { await call('/api/staff/payment', { method: 'POST', json: { id: +b.dataset.id, free, paid: free ? null : paid }, token }); toast('انحفظ'); loadSt(); } catch (x) { out(x); }
+    });
     $('stBody').querySelectorAll('.dv').forEach(b => b.onclick = async () => {
       try { await call('/api/staff/devices', { method: 'POST', json: { id: +b.dataset.id }, token }); toast('📱 انطلع ' + b.dataset.name + ' من كل الأجهزة، هسه يكدر يدخل من جديد'); loadSt(); } catch (x) { out(x); }
     });
@@ -283,7 +309,7 @@ tr:last-child td{border-bottom:0}
     $('leadCount').textContent = `${leads.length} شخص · ${leads.filter(l => l.preorder).length} حجز`;
     $('leadBody').innerHTML = leads.map(l => {
       const text = `هلا ${l.name} 👋 شلون شفت الدرس المجاني بكورس مصطفى صلاح؟`;
-      const st = { new: 'جديد', contacted: 'تواصلنا', paid: 'دفع ✅', lost: 'ما يريد' };
+      const st = { new: 'جديد', contacted: 'تواصلنا', paid: 'دفع ✅', free: 'مجاني 🎁', lost: 'ما يريد' };
       return `<tr><td>${l.preorder ? '<span class="pill wait">🎟️ حجز</span> ' : ''}<b>${esc(l.name)}</b>
         ${l.pay ? `<div class="small">💵 ${esc(l.pay)}</div>` : ''}
         <select class="input lead-st" data-id="${l.id}" style="min-height:34px;padding:2px 30px 2px 8px;font-size:.85rem;margin-top:4px">${Object.entries(st).map(([k, t]) => `<option value="${k}" ${l.status === k ? 'selected' : ''}>${t}</option>`).join('')}</select><div class="muted small en" style="text-align:right">+${esc(l.phone)}</div><div class="muted small en" style="text-align:right">${esc(l.email || '')}</div></td>
@@ -317,7 +343,7 @@ tr:last-child td{border-bottom:0}
     lvl = r.tests;
     const by = {}; lvl.forEach(t => { by[t.level] = (by[t.level] || 0) + 1; });
     $('lvlCount').textContent = `${lvl.length} شخص` + (lvl.length ? ' · ' + Object.keys(by).sort().map(k => `${k}: ${by[k]}`).join('، ') : '');
-    const st = { new: 'جديد', contacted: 'تواصلنا', paid: 'دفع ✅', lost: 'ما يريد' };
+    const st = { new: 'جديد', contacted: 'تواصلنا', paid: 'دفع ✅', free: 'مجاني 🎁', lost: 'ما يريد' };
     $('lvlBody').innerHTML = lvl.map(t => {
       const text = `هلا ${t.name} 👋 شفنا نتيجتك باختبار المستوى (${t.level}). تحب نحچي وياك عن كورس Speak 360 وشلون يساعدك؟`;
       return `<tr><td><b>${esc(t.name)}</b>
@@ -345,10 +371,16 @@ tr:last-child td{border-bottom:0}
   };
 
   // ---------- codes ----------
+  const isFree = () => document.querySelector('input[name=payk]:checked').value === 'free';
+  try { $('amt').value = localStorage.getItem('lastAmount') || ''; } catch (e) {}
+  document.querySelectorAll('input[name=payk]').forEach(i => i.onchange = () => { $('amtF').hidden = isFree(); });
   $('codeForm').onsubmit = async e => {
     e.preventDefault();
+    const free = isFree(), amount = $('amt').value.trim();
+    if (!free && !amount) { toast('اكتب شكد دفع الطالب، أو اختار مجاني'); $('amt').focus(); return; }
     try {
-      const r = await call('/api/staff/codes', { method: 'POST', json: { label: $('lbl').value }, token });
+      const r = await call('/api/staff/codes', { method: 'POST', json: { label: $('lbl').value, free, amount: free ? null : amount }, token });
+      if (!free) try { localStorage.setItem('lastAmount', amount); } catch (e) {}
       $('newCode').hidden = false; $('codeBig').textContent = r.code;
       $('codeMsg').textContent = `أهلاً بيك بكورس مصطفى صلاح 🎉\n\n1. ادخل على: ${SITE}\n2. اضغط "أول مرة؟ فعّل اشتراكك بالكود"\n3. اكتب اسمك ورقمك وإيميلك وباسورد تختاره، وكود التفعيل: ${r.code}\n\nإذا سجلت بالدرس المجاني قبل، ادخل بحسابك وفعّل الكود من الصفحة الرئيسية.\nالحساب يشتغل على جهازين: موبايلك ولابتوبك.`;
       $('lbl').value = ''; loadCodes();
@@ -362,7 +394,8 @@ tr:last-child td{border-bottom:0}
   async function loadCodes() {
     let r; try { r = await call('/api/staff/codes', { token }); } catch (x) { return out(x); }
     $('codeBody').innerHTML = r.codes.map(c => `<tr><td class="en" style="text-align:right"><b>${esc(c.code)}</b></td><td>${esc(c.label || '')}</td>
-      <td>${c.used_by ? '✅ ' + esc(c.used_by) : '<span class="muted">بعده</span>'}</td><td class="small">${when(c.created_at)}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">ماكو أكواد.</td></tr>';
+      <td class="small">${c.free ? '<span class="pill">مجاني</span>' : c.amount ? `<span class="num">${iqd(c.amount)}</span>` : '<span class="muted">ما مكتوب</span>'}</td>
+      <td>${c.used_by ? '✅ ' + esc(c.used_by) : '<span class="muted">بعده</span>'}</td><td class="small">${when(c.created_at)}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">ماكو أكواد.</td></tr>';
   }
 
   // ---------- library ----------
