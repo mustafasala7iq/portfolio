@@ -372,7 +372,8 @@ tr:last-child td{border-bottom:0}
 
   // ---------- codes ----------
   const isFree = () => document.querySelector('input[name=payk]:checked').value === 'free';
-  try { $('amt').value = localStorage.getItem('lastAmount') || ''; } catch (e) {}
+  $('amt').value = '39000';
+  try { $('amt').value = localStorage.getItem('lastAmount') || '39000'; } catch (e) {}
   document.querySelectorAll('input[name=payk]').forEach(i => i.onchange = () => { $('amtF').hidden = isFree(); });
   $('codeForm').onsubmit = async e => {
     e.preventDefault();
