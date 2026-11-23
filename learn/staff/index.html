@@ -36,6 +36,8 @@ tr:last-child td{border-bottom:0}
 .money b{font:800 1.6rem/1.1 var(--font-display)}
 .pay-ed{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
 .pay-ed .input{width:110px;min-height:38px;padding:4px 8px}
+.sellers{flex-basis:100%;display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line-2);padding-top:10px}
+.sellers .sl{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.92rem}
 .seg{display:inline-flex;border:1px solid var(--line-2);border-radius:10px;overflow:hidden}
 .seg button{border:0;background:#fff;padding:6px 12px;font:700 .85rem/1.4 var(--font-display)}
 .seg button[aria-pressed="true"]{background:var(--black);color:#fff}
@@ -103,6 +105,7 @@ tr:last-child td{border-bottom:0}
     <form class="card pad stack" id="codeForm">
       <h2 style="font-size:1.15rem">كود تفعيل جديد</h2>
       <div class="field"><label for="lbl">اسم الطالب (حتى تعرف الكود لمنو)</label><input class="input" id="lbl" placeholder="مثلاً: علي حسن"></div>
+      <div class="field"><label for="seller">اسم البائع</label><input class="input" id="seller" list="sellerList" required autocomplete="off" placeholder="منو باع الكورس؟"><datalist id="sellerList"></datalist></div>
       <div class="field"><label>الدفع</label>
         <div class="pay-opt" role="radiogroup"><label><input type="radio" name="payk" value="paid" checked> دفع</label><label><input type="radio" name="payk" value="free"> مجاني</label></div></div>
       <div class="field" id="amtF"><label for="amt">شكد دفع؟ (دينار)</label><input class="input en" id="amt" inputmode="numeric" placeholder="مثلاً 75000"></div>
@@ -113,7 +116,7 @@ tr:last-child td{border-bottom:0}
         <button type="button" class="btn sm" id="copyMsg">📋 انسخ الرسالة للطالب</button>
       </div>
     </form>
-    <div class="tbl-wrap"><table><thead><tr><th>الكود</th><th>لمنو</th><th>الدفع</th><th>استخدمه</th><th>التاريخ</th></tr></thead><tbody id="codeBody"></tbody></table></div>
+    <div class="tbl-wrap"><table><thead><tr><th>الكود</th><th>لمنو</th><th>البائع</th><th>الدفع</th><th>استخدمه</th><th>التاريخ</th></tr></thead><tbody id="codeBody"></tbody></table></div>
   </section>
 
   <section id="t-lib" hidden class="stack">
@@ -219,10 +222,14 @@ tr:last-child td{border-bottom:0}
     const m = r.money;
     $('money').hidden = !m;
     if (m) $('money').innerHTML = `<div><div class="muted small">الفلوس اللي تجمعت</div><b class="num">${iqd(m.total)}</b></div>
-      <span class="small">${m.paid} دافع</span><span class="small">${m.free} مجاني</span>${m.unknown ? `<span class="small" style="color:var(--red)">${m.unknown} ما مكتوب شكد دفعوا</span>` : ''}`;
+      <span class="small">${m.paid} دافع</span><span class="small">${m.free} مجاني</span>${m.unknown ? `<span class="small" style="color:var(--red)">${m.unknown} ما مكتوب شكد دفعوا</span>` : ''}
+      ${(m.sellers || []).length ? `<div class="sellers"><div class="muted small">حسب البائع</div>${m.sellers.map(b => `<div class="sl"><b style="font-size:.95rem">${b.seller ? esc(b.seller) : '<span class="muted">بدون بائع</span>'}</b>
+        <span>${b.students} طالب · <span class="num">${iqd(b.total)}</span>${b.free ? ` · ${b.free} مجاني` : ''}</span></div>`).join('')}</div>` : ''}`;
     $('stHead').innerHTML = '<th>الطالب</th>' + (m ? '<th>الدفع</th>' : '') + '<th>اليوم</th><th>ناقص</th><th>الكويزات</th><th>آخر تسليم</th><th></th>';
     const payCell = s => `<td class="small">${s.free ? '<span class="pill">مجاني</span>' : s.paid ? `<span class="num">${iqd(s.paid)}</span>` : '<span class="muted">ما مكتوب</span>'}
+      <div class="muted small">${s.seller ? 'البائع: ' + esc(s.seller) : 'بدون بائع'}</div>
       <details><summary class="muted small">عدّل</summary><div class="pay-ed"><input class="input en pay-n" inputmode="numeric" value="${s.paid || ''}" placeholder="المبلغ">
+        <input class="input pay-sl" value="${esc(s.seller || '')}" placeholder="البائع">
         <label class="small"><input type="checkbox" class="pay-f" ${s.free ? 'checked' : ''}> مجاني</label>
         <button class="btn sm pay-s" data-id="${s.id}">احفظ</button></div></details></td>`;
     $('stBody').innerHTML = r.students.map(s => {
@@ -244,8 +251,8 @@ tr:last-child td{border-bottom:0}
             <button class="btn sm ghost sd" data-id="${s.id}" data-name="${esc(s.name)}">⏩ انقله لهذا اليوم</button></span>` : ''}</div></td></tr>`;
     }).join('') || `<tr><td colspan="${m ? 7 : 6}" class="muted">ماكو طلاب بعد.</td></tr>`;
     $('stBody').querySelectorAll('.pay-s').forEach(b => b.onclick = async () => {
-      const box = b.parentNode, free = box.querySelector('.pay-f').checked, paid = box.querySelector('.pay-n').value.trim();
-      try { await call('/api/staff/payment', { method: 'POST', json: { id: +b.dataset.id, free, paid: free ? null : paid }, token }); toast('انحفظ'); loadSt(); } catch (x) { out(x); }
+      const box = b.parentNode, free = box.querySelector('.pay-f').checked, paid = box.querySelector('.pay-n').value.trim(), seller = box.querySelector('.pay-sl').value.trim();
+      try { await call('/api/staff/payment', { method: 'POST', json: { id: +b.dataset.id, free, paid: free ? null : paid, seller }, token }); toast('انحفظ'); loadSt(); } catch (x) { out(x); }
     });
     $('stBody').querySelectorAll('.dv').forEach(b => b.onclick = async () => {
       try { await call('/api/staff/devices', { method: 'POST', json: { id: +b.dataset.id }, token }); toast('📱 انطلع ' + b.dataset.name + ' من كل الأجهزة، هسه يكدر يدخل من جديد'); loadSt(); } catch (x) { out(x); }
@@ -374,14 +381,17 @@ tr:last-child td{border-bottom:0}
   const isFree = () => document.querySelector('input[name=payk]:checked').value === 'free';
   $('amt').value = '39000';
   try { $('amt').value = localStorage.getItem('lastAmount') || '39000'; } catch (e) {}
+  try { $('seller').value = localStorage.getItem('lastSeller') || ''; } catch (e) {}
   document.querySelectorAll('input[name=payk]').forEach(i => i.onchange = () => { $('amtF').hidden = isFree(); });
   $('codeForm').onsubmit = async e => {
     e.preventDefault();
-    const free = isFree(), amount = $('amt').value.trim();
+    const free = isFree(), amount = $('amt').value.trim(), seller = $('seller').value.trim();
+    if (!seller) { toast('اكتب اسم البائع'); $('seller').focus(); return; }
     if (!free && !amount) { toast('اكتب شكد دفع الطالب، أو اختار مجاني'); $('amt').focus(); return; }
     try {
-      const r = await call('/api/staff/codes', { method: 'POST', json: { label: $('lbl').value, free, amount: free ? null : amount }, token });
+      const r = await call('/api/staff/codes', { method: 'POST', json: { label: $('lbl').value, free, amount: free ? null : amount, seller }, token });
       if (!free) try { localStorage.setItem('lastAmount', amount); } catch (e) {}
+      try { localStorage.setItem('lastSeller', seller); } catch (e) {}
       $('newCode').hidden = false; $('codeBig').textContent = r.code;
       $('codeMsg').textContent = `أهلاً بيك بكورس مصطفى صلاح 🎉\n\n1. ادخل على: ${SITE}\n2. اضغط "أول مرة؟ فعّل اشتراكك بالكود"\n3. اكتب اسمك ورقمك وإيميلك وباسورد تختاره، وكود التفعيل: ${r.code}\n\nإذا سجلت بالدرس المجاني قبل، ادخل بحسابك وفعّل الكود من الصفحة الرئيسية.\nالحساب يشتغل على جهازين: موبايلك ولابتوبك.`;
       $('lbl').value = ''; loadCodes();
@@ -394,9 +404,11 @@ tr:last-child td{border-bottom:0}
   };
   async function loadCodes() {
     let r; try { r = await call('/api/staff/codes', { token }); } catch (x) { return out(x); }
+    $('sellerList').innerHTML = (r.sellers || []).map(n => `<option value="${esc(n)}">`).join('');
     $('codeBody').innerHTML = r.codes.map(c => `<tr><td class="en" style="text-align:right"><b>${esc(c.code)}</b></td><td>${esc(c.label || '')}</td>
+      <td class="small">${c.seller ? esc(c.seller) : '<span class="muted">ما مكتوب</span>'}</td>
       <td class="small">${c.free ? '<span class="pill">مجاني</span>' : c.amount ? `<span class="num">${iqd(c.amount)}</span>` : '<span class="muted">ما مكتوب</span>'}</td>
-      <td>${c.used_by ? '✅ ' + esc(c.used_by) : '<span class="muted">بعده</span>'}</td><td class="small">${when(c.created_at)}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">ماكو أكواد.</td></tr>';
+      <td>${c.used_by ? '✅ ' + esc(c.used_by) : '<span class="muted">بعده</span>'}</td><td class="small">${when(c.created_at)}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">ماكو أكواد.</td></tr>';
   }
 
   // ---------- library ----------
