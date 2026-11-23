@@ -40,6 +40,11 @@ tr:last-child td{border-bottom:0}
 .rcv input{width:20px;height:20px;accent-color:var(--black);cursor:pointer}
 .rcv input:disabled{cursor:default}
 .pend{color:var(--red);font-weight:700}
+.st-tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.st-tools label{display:flex;flex-direction:column;gap:4px;flex:1 1 150px;min-width:0;font-size:.82rem;color:var(--muted)}
+.st-tools .input{min-height:44px;padding:6px 10px}
+.st-tools select.input{padding-left:30px;text-overflow:ellipsis}
+.st-note{font-size:.88rem;margin:-4px 0 12px}
 .sellers{flex-basis:100%;display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line-2);padding-top:10px}
 .sellers .sl{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.92rem}
 .seg{display:inline-flex;border:1px solid var(--line-2);border-radius:10px;overflow:hidden}
@@ -90,6 +95,20 @@ tr:last-child td{border-bottom:0}
   <section id="t-st" hidden>
     <div class="hd" style="margin-bottom:12px"><h2 style="font-size:1.15rem">الطلاب</h2><span class="muted small" id="stCount"></span></div>
     <div class="card pad money" id="money" hidden></div>
+    <div class="st-tools">
+      <label>رتّب حسب<select class="input" id="stSort">
+        <option value="new">الأحدث تسجيلاً</option><option value="old">الأقدم تسجيلاً</option><option value="name">الاسم (أ ← ي)</option>
+        <option value="day">الأبعد بالكورس</option><option value="missing">الأكثر واجبات ناقصة</option>
+        <option value="last">آخر تسليم (الأحدث)</option><option value="idle">أطول وقت بدون تسليم</option>
+        <option value="paid" data-admin>المبلغ (الأعلى)</option></select></label>
+      <label>اعرض<select class="input" id="stFilter">
+        <option value="all">كل الطلاب</option>
+        <option value="wait" data-admin>بانتظار الكاش</option><option value="got" data-admin>الكاش واصل</option>
+        <option value="free" data-admin>مجاني</option><option value="noamt" data-admin>ما مكتوب شكد دفعوا</option>
+        <option value="miss">عندهم واجبات ناقصة</option><option value="done">خلّصوا الكورس</option></select></label>
+      <label>دوّر<input class="input" id="stQ" type="search" placeholder="اسم، رقم، كود أو إيميل"></label>
+    </div>
+    <div class="st-note" id="stNote" hidden></div>
     <div class="tbl-wrap"><table><thead><tr id="stHead"><th>الطالب</th><th>اليوم</th><th>ناقص</th><th>الكويزات</th><th>آخر تسليم</th><th></th></tr></thead><tbody id="stBody"></tbody></table></div>
   </section>
 
@@ -227,13 +246,56 @@ tr:last-child td{border-bottom:0}
     catch (x) { box.checked = !box.checked; out(x); }
     box.disabled = false; if (after) after();
   }
+  let stData = null;
+  try { $('stSort').value = localStorage.getItem('stSort') || 'new'; } catch (e) {}
+  $('stSort').onchange = () => { try { localStorage.setItem('stSort', $('stSort').value); } catch (e) {} renderSt(); };
+  $('stFilter').onchange = renderSt;
+  $('stQ').oninput = renderSt;
+  function stView(list, admin) {
+    const f = $('stFilter').value, q = $('stQ').value.trim().toLowerCase(), by = $('stSort').value;
+    const pend = s => !s.free && !s.received;
+    let v = list.filter(s => {
+      if (f === 'wait') return pend(s);
+      if (f === 'got') return !s.free && s.received;
+      if (f === 'free') return s.free;
+      if (f === 'noamt') return !s.free && !s.paid;
+      if (f === 'miss') return s.missing > 0;
+      if (f === 'done') return s.finished;
+      return true;
+    });
+    if (q) v = v.filter(s => [s.name, s.phone, s.code, s.email, s.seller].some(x => (x || '').toLowerCase().includes(q.replace(/^0/, ''))));
+    const t = x => x ? Date.parse(x) || 0 : 0;
+    const cmp = {
+      new: (a, b) => t(b.start_date) - t(a.start_date) || b.id - a.id,
+      old: (a, b) => t(a.start_date) - t(b.start_date) || a.id - b.id,
+      name: (a, b) => a.name.localeCompare(b.name, 'ar'),
+      day: (a, b) => (b.finished - a.finished) || b.day - a.day,
+      missing: (a, b) => b.missing - a.missing,
+      last: (a, b) => t(b.last) - t(a.last),
+      idle: (a, b) => t(a.last) - t(b.last),
+      paid: (a, b) => (b.free ? -1 : b.paid || 0) - (a.free ? -1 : a.paid || 0),
+    }[by] || (() => 0);
+    return v.slice().sort(cmp);
+  }
   async function loadSt() {
     let r; try { r = await call('/api/staff/students', { token }); } catch (x) { return out(x); }
-    $('stCount').textContent = r.students.length + ' طالب';
+    stData = r; renderSt();
+  }
+  function renderSt() {
+    const r = stData; if (!r) return;
     const m = r.money;
+    document.querySelectorAll('#stSort [data-admin], #stFilter [data-admin]').forEach(o => { o.hidden = o.disabled = !m; });
+    if (!m && ['wait', 'got', 'free', 'noamt'].includes($('stFilter').value)) $('stFilter').value = 'all';
+    if (!m && $('stSort').value === 'paid') $('stSort').value = 'new';
+    const list = stView(r.students, !!m);
+    $('stCount').textContent = list.length === r.students.length ? r.students.length + ' طالب' : list.length + ' من ' + r.students.length + ' طالب';
+    const wn = m && $('stFilter').value === 'wait';
+    $('stNote').hidden = !wn;
+    if (wn) $('stNote').innerHTML = `<span class="pend">${list.length ? 'أشّر "الحساب واصل" لكل واحد يسلّمك المندوب فلوسه، ويختفي من هالقائمة.' : 'ماكو طالب مفعّل بانتظار الكاش.'}</span>`
+      + (m.codes_waiting_n ? `<div class="muted">وأكو ${m.codes_waiting_n} كود مباع ما تفعّل بعد وفلوسه يم المندوب (<span class="num">${iqd(m.codes_waiting)}</span>). تلكاهم بخانة أكواد التفعيل.</div>` : '');
     $('money').hidden = !m;
     if (m) $('money').innerHTML = `<div><div class="muted small">الفلوس اللي وصلت</div><b class="num">${iqd(m.total)}</b></div>
-      ${m.pending_n ? `<span class="small pend">بعدها يم المندوب: <span class="num">${iqd(m.pending)}</span> (${m.pending_n} طالب)</span>` : ''}
+      ${m.pending_n || m.codes_waiting_n ? `<button type="button" class="btn sm ghost pend" id="showWait">بعدها يم المندوب: <span class="num">${iqd(m.pending + m.codes_waiting)}</span> (${m.pending_n + m.codes_waiting_n})</button>` : ''}
       <span class="small">${m.paid} دافع</span><span class="small">${m.free} مجاني</span>${m.unknown ? `<span class="small" style="color:var(--red)">${m.unknown} ما مكتوب شكد دفعوا</span>` : ''}
       ${(m.sellers || []).length ? `<div class="sellers"><div class="muted small">مبيعات كل بائع (الواصل واللي يم المندوب)</div>${m.sellers.map(b => `<div class="sl"><b style="font-size:.95rem">${b.seller ? esc(b.seller) : '<span class="muted">بدون بائع</span>'}</b>
         <span>${b.students} طالب · <span class="num">${iqd(b.total)}</span>${b.free ? ` · ${b.free} مجاني` : ''}</span></div>`).join('')}</div>` : ''}`;
@@ -245,7 +307,8 @@ tr:last-child td{border-bottom:0}
         <input class="input pay-sl" value="${esc(s.seller || '')}" placeholder="البائع">
         <label class="small"><input type="checkbox" class="pay-f" ${s.free ? 'checked' : ''}> مجاني</label>
         <button class="btn sm pay-s" data-id="${s.id}">احفظ</button></div></details></td>`;
-    $('stBody').innerHTML = r.students.map(s => {
+    const sw = $('showWait'); if (sw) sw.onclick = () => { $('stFilter').value = 'wait'; renderSt(); $('stFilter').scrollIntoView({ block: 'center', behavior: 'smooth' }); };
+    $('stBody').innerHTML = list.map(s => {
       const flag = s.missing === 0 ? '🟢' : s.missing <= 2 ? '🟡' : '🔴';
       const text = `هلا ${s.name} 👋\nعندك ${s.missing} واجبات ناقصة بكورس مصطفى صلاح. ادخل على ${SITE} وسلّمهن 🎙️`;
       const wa = `https://wa.me/${s.phone}?text=${encodeURIComponent(text)}`;
@@ -262,7 +325,7 @@ tr:last-child td{border-bottom:0}
           ${r.admin ? `<button class="btn sm ghost rm" data-id="${s.id}" data-name="${esc(s.name)}">حذف</button>
             <span class="row" style="gap:6px"><input class="input en sd-n" type="number" min="1" max="${r.total_days}" placeholder="يوم" style="width:76px;min-height:38px;padding:4px 8px">
             <button class="btn sm ghost sd" data-id="${s.id}" data-name="${esc(s.name)}">⏩ انقله لهذا اليوم</button></span>` : ''}</div></td></tr>`;
-    }).join('') || `<tr><td colspan="${m ? 7 : 6}" class="muted">ماكو طلاب بعد.</td></tr>`;
+    }).join('') || `<tr><td colspan="${m ? 7 : 6}" class="muted">${r.students.length ? 'ماكو طالب بهالاختيار.' : 'ماكو طلاب بعد.'}</td></tr>`;
     $('stBody').querySelectorAll('.rcv-t').forEach(c => c.onchange = () => setReceived(c, loadSt));
     $('stBody').querySelectorAll('.pay-s').forEach(b => b.onclick = async () => {
       const box = b.parentNode, free = box.querySelector('.pay-f').checked, paid = box.querySelector('.pay-n').value.trim(), seller = box.querySelector('.pay-sl').value.trim();
