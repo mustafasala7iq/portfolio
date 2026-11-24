@@ -314,7 +314,8 @@ tr:last-child td{border-bottom:0}
       const wa = `https://wa.me/${s.phone}?text=${encodeURIComponent(text)}`;
       return `<tr><td><b>${esc(s.name)}</b><div class="muted small en" style="text-align:right">+${esc(s.phone)} · ${esc(s.code)}</div>
           <div class="muted small en" style="text-align:right">${esc(s.email || '')}</div>
-          <div class="muted small">📱 ${s.devices.length ? s.devices.map(esc).join('، ') : 'ماكو جهاز داخل'}</div></td>
+          <div class="muted small">📱 ${s.devices.length ? s.devices.map(esc).join('، ') : 'ماكو جهاز داخل'}</div>
+          <div class="muted small">أصوات الواجبات: ${s.accent === 'us' ? 'أمريكي' : s.accent === 'uk' ? 'بريطاني' : 'بريطاني (ما اختار بعد)'}</div></td>
         ${m ? payCell(s) : ''}<td class="num">${s.finished ? 'خلص 🎉' : s.day + '/' + r.total_days}</td>
         <td>${flag} <span class="num">${s.missing}</span></td>
         <td>${quizCell(s.quizzes)}</td>

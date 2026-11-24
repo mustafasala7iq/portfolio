@@ -169,6 +169,16 @@ section+section{margin-top:26px}
 #paidView{display:flex;flex-direction:column;gap:14px}
 #paidView[hidden]{display:none}
 .intro-top{padding:16px;display:flex;flex-direction:column;gap:10px}
+.acc{padding:18px 16px;margin-bottom:18px;display:flex;flex-direction:column;gap:12px;border:2px solid var(--yellow)}
+.acc h2{font:800 1.15rem/1.4 var(--font-display);margin:0}
+.acc p{margin:0;color:var(--muted);line-height:1.7}
+.acc-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.acc-opt{display:flex;flex-direction:column;gap:8px;padding:12px;border:2px solid var(--line-2);border-radius:14px;background:#fff}
+.acc-opt b{font:800 1.05rem/1.3 var(--font-display)}
+.acc-opt .btn{width:100%;min-height:46px;padding:0 10px}
+.acc-play{all:unset;box-sizing:border-box;cursor:pointer;min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;background:var(--yellow-wash);font-weight:700;font-size:.92rem}
+.acc-play[aria-pressed=true]{background:var(--yellow)}
+@media (max-width:340px){.acc-opts{grid-template-columns:1fr}}
 .intro-top h2{font-size:1.1rem;font-weight:900}
 /* today: compact */
 .today2{padding:14px 16px;display:flex;flex-direction:column;gap:10px;border:2px solid var(--black);box-shadow:0 4px 0 var(--black)}
@@ -305,6 +315,7 @@ section+section{margin-top:26px}
   <main><div class="inner">
     <div id="mtnBox" class="card mtn-card" hidden><div class="sec-h"><h2>رحلتك</h2><span class="muted small" id="mtnMeta"></span></div><div class="chps" id="chPills" hidden></div><div id="mtn"></div></div>
     <button type="button" class="fbnote" id="fbNote" hidden></button>
+    <div class="card acc" id="accentBox" hidden></div>
 
     <div id="paidView" hidden>
       <div class="card intro-top" id="introTop" hidden></div>
@@ -340,7 +351,8 @@ section+section{margin-top:26px}
         </form>
       </details>
     </div>
-    <button type="button" class="logout-link" id="logout">تسجيل الخروج</button>
+    <button type="button" class="logout-link" id="accentLink" hidden style="margin-top:28px"></button>
+    <button type="button" class="logout-link" id="logout" style="margin-top:4px">تسجيل الخروج</button>
   </div></main>
 </div>
 
@@ -582,6 +594,7 @@ section+section{margin-top:26px}
     $('freeView').hidden = !d.trial;
     $('journey').hidden = d.trial;
     renderFeedbackNote();
+    renderAccent();
     clearInterval(tick);
     if (d.trial) return renderFree();
     const today = d.days[d.days.length - 1];
@@ -594,6 +607,44 @@ section+section{margin-top:26px}
     $('mtnBox').hidden = true;
     if (d.next_open) { countdown(); tick = setInterval(countdown, 30000); }
   }
+  // ---- the homework voices: British or American, asked once, changeable from the link at the bottom ----
+  const ACC = { uk: 'بريطاني', us: 'أمريكي' };
+  let accAudio = null;
+  function renderAccent(open) {
+    const d = data, box = $('accentBox'), link = $('accentLink');
+    const ask = open || !d.accent;
+    link.hidden = !d.accent || ask;
+    link.textContent = 'لهجة أصوات الواجبات: ' + (ACC[d.accent] || '') + ' · غيّرها';
+    box.hidden = !ask;
+    if (!ask) return;
+    box.innerHTML = `<h2>شلون تحب تكون لهجة أصوات الواجبات؟</h2>
+      <p>واجبات المحاكاة صوت إنكليزي تسمعه وتقلّده. اسمع الاثنين واختار اللي يعجبك، وتكدر تغيّره بأي وقت.</p>
+      <div class="acc-opts">${['uk', 'us'].map(a => `<div class="acc-opt"><b>${ACC[a]}</b>
+        <button type="button" class="acc-play" data-a="${a}" aria-pressed="false">اسمع مثال</button>
+        <button type="button" class="btn ${d.accent === a ? '' : 'y'}" data-pick="${a}">${d.accent === a ? 'مختار' : 'اختار ' + ACC[a]}</button></div>`).join('')}</div>
+      ${d.accent ? '<button type="button" class="logout-link" id="accClose" style="margin:0 auto">خليها مثل ما هي</button>' : ''}`;
+    box.querySelectorAll('.acc-play').forEach(b => b.onclick = () => {
+      const on = b.getAttribute('aria-pressed') === 'true';
+      if (accAudio) accAudio.pause();
+      box.querySelectorAll('.acc-play').forEach(x => { x.setAttribute('aria-pressed', 'false'); x.textContent = 'اسمع مثال'; });
+      if (on) return;
+      accAudio = new Audio(`/learn/audio/${b.dataset.a === 'us' ? 'us/' : ''}C1-L01-A.mp3`);
+      accAudio.onended = () => { b.setAttribute('aria-pressed', 'false'); b.textContent = 'اسمع مثال'; };
+      accAudio.play().catch(() => {});
+      b.setAttribute('aria-pressed', 'true'); b.textContent = 'وكّف';
+    });
+    box.querySelectorAll('[data-pick]').forEach(b => b.onclick = async () => {
+      b.disabled = true;
+      try {
+        await call('/api/accent', { method: 'POST', json: { accent: b.dataset.pick }, token });
+        if (accAudio) accAudio.pause();
+        toast('صارت أصوات واجباتك ' + ACC[b.dataset.pick]);
+        await load();
+      } catch (e) { b.disabled = false; toast(e.message || 'صار خطأ، جرّب مرة ثانية'); }
+    });
+    const cl = $('accClose'); if (cl) cl.onclick = () => renderAccent(false);
+  }
+  $('accentLink').onclick = () => { renderAccent(true); $('accentBox').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
   // ---- the journey: one bar per stage of the course, the mountain of this chapter behind a link ----
   function renderJourney() {
     const d = data, today = d.days[d.days.length - 1], all = [...d.days, ...d.upcoming];
