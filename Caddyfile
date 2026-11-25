@@ -1,8 +1,0 @@
-:{$PORT:8080} {
-	root * /srv
-	header X-Robots-Tag "noindex, nofollow"
-	header Cache-Control "no-store"
-	@hidden path /Dockerfile /Caddyfile /.git* /CNAME
-	respond @hidden 404
-	file_server
-}
