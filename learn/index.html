@@ -168,6 +168,7 @@ section+section{margin-top:26px}
 .mtn-card{padding:16px;margin-bottom:18px}
 #paidView{display:flex;flex-direction:column;gap:14px}
 #paidView[hidden]{display:none}
+.pay-note{margin:8px 0 0;line-height:1.7}
 .paybox{gap:10px;margin-top:4px}
 .pay-price{display:flex;align-items:baseline;gap:6px;font-family:var(--font-display)}
 .pay-price b{font-size:1.7rem;font-weight:900}
@@ -303,7 +304,8 @@ section+section{margin-top:26px}
       <div class="field" data-m="free"><label for="city">المحافظة</label>
         <select class="input" id="city"><option value="">اختار محافظتك</option><option>البصرة</option><option>بغداد</option><option>أربيل</option><option>الأنبار</option><option>بابل</option><option>حلبجة</option><option>دهوك</option><option>ديالى</option><option>ذي قار</option><option>السليمانية</option><option>صلاح الدين</option><option>القادسية</option><option>كربلاء</option><option>كركوك</option><option>المثنى</option><option>ميسان</option><option>النجف</option><option>نينوى</option><option>واسط</option><option>خارج العراق</option></select></div>
       <div class="field" data-m="pre"><label for="pay">شلون تحب تدفع؟</label>
-        <select class="input" id="pay"><option value="">اختار</option><option>كاش ويا المندوب</option><option>حوالة إلكترونية</option></select></div>
+        <select class="input" id="pay"><option value="">اختار</option><option>كاش ويا المندوب</option><option>حوالة إلكترونية</option></select>
+        <p class="small pay-note" id="payNote" hidden></p></div>
       <div class="err small" id="loginErr" role="alert"></div>
       <button class="btn y" id="loginBtn">دخول</button>
       <div class="links small" id="loginLinks"></div>
@@ -448,6 +450,28 @@ section+section{margin-top:26px}
     $('loginLinks').querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); setMode(a.dataset.go); });
   }
   setMode(mode);
+
+  // online payment on the booking form: only when this server takes Wayl payments
+  const ONLINE = 'دفع أونلاين';
+  let payInfo = null;
+  function payPick() {
+    if (!(PRE && mode === 'free')) return;
+    const on = $('pay').value === ONLINE;
+    $('loginBtn').textContent = on ? 'ادفع هسه وابدي الكورس ←' : 'احجز مقعدي';
+    $('loginTitle').textContent = on ? 'اشترك بسعر الإطلاق 🎟️' : 'احجز مقعدك بسعر الإطلاق 🎟️';
+    $('loginSub').textContent = on ? 'سوّي حسابك وادفع أونلاين، وينفتحلك الكورس كامل أول ما تكمّل الدفع.'
+      : 'سجّل حجزك هسة بدون دفع، ونتواصل وياك بأسرع وقت حتى نثبّت حجزك. وبنفس الوقت شوف الدرس الأول مجاناً.';
+    $('payNote').hidden = !on;
+    if (on && payInfo) $('payNote').innerHTML = `<b class="num">${Number(payInfo.price).toLocaleString('en-US')} د.ع</b>${payInfo.regular ? ` <s class="muted num">${Number(payInfo.regular).toLocaleString('en-US')}</s>` : ''} · تدفع بصفحة Wayl الآمنة بالبطاقة أو المحفظة الإلكترونية، وأول ما تكمّل ينفتحلك الكورس كامل.`;
+  }
+  $('pay').onchange = payPick;
+  if (PRE) call('/api/checkout/info').then(r => {
+    if (!r || !r.enabled) return;
+    payInfo = r;
+    const o = document.createElement('option'); o.value = ONLINE; o.textContent = 'ادفع أونلاين هسه (بطاقة أو محفظة)';
+    $('pay').insertBefore(o, $('pay').options[1]);
+  }).catch(() => {});
+
   // Iraqi mobile: 07 then 5/7/8/9 then 8 digits (spaces, +964 and 00964 are fine)
   function iraqiMobile(v) {
     let d = (v || '').replace(/\D/g, '').replace(/^00/, '');
@@ -480,6 +504,17 @@ section+section{margin-top:26px}
         : await call('/api/register', { method: 'POST', json: { ...body, name: v('name'), phone: v('phone'), free: mode === 'free',
             code: v('code'), goal: v('goal'), city: v('city'), source: SOURCE, preorder: PRE && mode === 'free', pay: v('pay') } });
       token = r.token; store.set('learn_token', token); store.set('has_account', '1');
+      if (mode === 'free' && PRE && v('pay') === ONLINE) {
+        // account made; now the order and Wayl's link, then off to pay
+        px('InitiateCheckout');
+        btn.textContent = 'جاري فتح صفحة الدفع…';
+        try {
+          const c = await call('/api/checkout', { method: 'POST', token });
+          if (c.state === 'redirect' && c.url) { location.href = c.url; return; }
+        } catch (x) { toast('انسوّى حسابك، بس ما كدرنا نفتح صفحة الدفع هسه. جرّب من زر الدفع تحت.'); }
+        await load(true);
+        return;
+      }
       if (mode !== 'login') px(PRE && mode === 'free' ? 'Lead' : mode === 'act' ? 'Purchase' : 'CompleteRegistration');
       await load(true);
     } catch (x) { err.textContent = x.message; }
