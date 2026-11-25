@@ -168,6 +168,12 @@ section+section{margin-top:26px}
 .mtn-card{padding:16px;margin-bottom:18px}
 #paidView{display:flex;flex-direction:column;gap:14px}
 #paidView[hidden]{display:none}
+.paybox{gap:10px;margin-top:4px}
+.pay-price{display:flex;align-items:baseline;gap:6px;font-family:var(--font-display)}
+.pay-price b{font-size:1.7rem;font-weight:900}
+.paybox .btn{width:100%}
+.pay-alt{margin-top:10px}
+.pay-alt summary{cursor:pointer;min-height:40px;display:flex;align-items:center}
 .intro-top{padding:16px;display:flex;flex-direction:column;gap:10px}
 .acc{padding:18px 16px;margin-bottom:18px;display:flex;flex-direction:column;gap:12px;border:2px solid var(--yellow)}
 .acc h2{font:800 1.15rem/1.4 var(--font-display);margin:0}
@@ -561,22 +567,56 @@ section+section{margin-top:26px}
     catch (x) { $('actErr').textContent = x.message; }
   };
 
+  // ---- pay online (Wayl): shown to free accounts when the server has online payments on ----
+  const fmtIQD = n => Number(n).toLocaleString('en-US');
+  function payBlock(co) {
+    const open = co.order && co.order.state === 'open' && co.order.url;
+    return `<div class="paybox stack">
+      <div class="pay-price"><b class="num">${fmtIQD(co.price)}</b> <span>د.ع</span>${co.regular ? ` <s class="muted num">${fmtIQD(co.regular)}</s>` : ''}</div>
+      <button type="button" class="btn y pay-go">${open ? 'كمّل الدفع ←' : 'ادفع أونلاين وابدي هسه ←'}</button>
+      <p class="muted small">الدفع بصفحة Wayl الآمنة، بالبطاقة أو المحفظة الإلكترونية. أول ما تكمّل الدفع ينفتحلك الكورس كامل.</p>
+      <div class="err small pay-err" style="min-height:0"></div></div>`;
+  }
+  async function payNow(btn, errBox) {
+    btn.disabled = true; const was = btn.textContent; btn.textContent = 'جاري فتح صفحة الدفع…'; errBox.textContent = '';
+    try {
+      const r = await call('/api/checkout', { method: 'POST', token });
+      if (r.state === 'redirect' && r.url) { location.href = r.url; return; }
+      if (r.state === 'paid') { toast('🎉 انفتحلك الكورس الكامل'); load(true); return; }
+      errBox.textContent = 'ثواني ونجرّب مرة ثانية…'; setTimeout(() => payNow(btn, errBox), 2000);
+    } catch (x) { errBox.textContent = x.message || 'صار خطأ، جرّب مرة ثانية'; btn.disabled = false; btn.textContent = was; }
+  }
+  function wirePay(root) {
+    const b = root.querySelector('.pay-go'); if (b) b.onclick = () => payNow(b, root.querySelector('.pay-err'));
+  }
+
   function renderPre() {
     const d = data, box = $('preBox');
     box.hidden = !d.trial;
     if (!d.trial) return;
+    const co = d.checkout && d.checkout.enabled ? d.checkout : null;
     $('preStep').hidden = !!d.preorder;
     $('preDone').hidden = !d.preorder;
     if (d.preorder) {
       $('preDone').innerHTML = `<b class="pre-ok-t">🎉 تم حجز مقعدك بنجاح!</b>
         <p>مقعدك محجوز بسعر الإطلاق. راح نتواصل وياك على واتساب بأسرع وقت حتى نثبّت حجزك.</p>
+        ${co ? `<p>أو ادفع هسه أونلاين وابدي فوراً:</p>${payBlock(co)}` : ''}
         <p class="pre-ok-go">ولحد ذاك الوقت، ابدي بدرسك المجاني 👇</p>`;
+      if (co) wirePay($('preDone'));
       return;
     }
+    if (co) {
+      box.innerHTML = `<h3>عجبك؟ اشترك هسه</h3>${payBlock(co)}
+        <details class="pay-alt"><summary class="muted small">أو احجز وادفع كاش ويا المندوب</summary>
+        <div class="row" style="margin-top:8px"><select class="input" id="prePay" style="flex:1;min-width:0"><option value="">شلون تحب تدفع؟</option><option>كاش ويا المندوب</option><option>حوالة إلكترونية</option></select>
+        <button type="button" class="btn" id="preGo">احجز</button></div><div class="err small" id="preErr" style="min-height:0"></div></details>`;
+      wirePay(box);
+    } else {
     box.innerHTML = `<h3>عجبك؟ احجز مقعدك</h3>
       <p class="muted">بسعر الإطلاق، وبدون دفع هسة. نتواصل وياك بأسرع وقت حتى نثبّت حجزك.</p>
       <div class="row"><select class="input" id="prePay" style="flex:1;min-width:0"><option value="">شلون تحب تدفع؟</option><option>كاش ويا المندوب</option><option>حوالة إلكترونية</option></select>
       <button type="button" class="btn y" id="preGo">احجز</button></div><div class="err small" id="preErr" style="min-height:0"></div>`;
+    }
     $('preGo').onclick = async () => {
       if (!$('prePay').value) { $('preErr').textContent = 'اختار شلون تحب تدفع.'; return; }
       try { await call('/api/activate', { method: 'POST', json: { preorder: true, pay: $('prePay').value }, token }); data.preorder = true; px('Lead'); renderPre(); $('heroTag').textContent = 'درسك المجاني 🎁'; $('heroMeta').innerHTML = ''; $('actTitle').textContent = '🔑 وصلك كود التفعيل؟ اكتبه هنا'; $('preDone').scrollIntoView({ behavior: 'smooth', block: 'center' }); toast('✅ انحجز مقعدك'); }

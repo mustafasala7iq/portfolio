@@ -88,6 +88,7 @@ tr:last-child td{border-bottom:0}
     <button role="tab" data-t="lvl">اختبار المستوى</button>
     <button role="tab" data-t="codes">أكواد التفعيل</button>
     <button role="tab" data-t="lib">الفيديوهات</button>
+    <button role="tab" data-t="pay" id="tabPay" hidden>المدفوعات<span class="n" id="nPay" hidden>0</span></button>
   </nav>
 
   <section id="t-hw">
@@ -154,6 +155,19 @@ tr:last-child td{border-bottom:0}
     <div class="tbl-wrap"><table><thead><tr><th>الكود</th><th>لمنو</th><th>البائع</th><th>الدفع</th><th>واصل الحساب؟</th><th>استخدمه</th><th>التاريخ</th></tr></thead><tbody id="codeBody"></tbody></table></div>
   </section>
 
+  <section id="t-pay" hidden class="stack">
+    <div class="hd"><h2 style="font-size:1.15rem">المدفوعات الأونلاين</h2><span class="muted small" id="payEnv"></span></div>
+    <div class="card pad pay-alerts" id="payAlerts" hidden></div>
+    <div class="st-tools">
+      <label>اعرض<select class="input" id="payState">
+        <option value="">كل الطلبات</option><option value="alerts">تحتاج انتباه</option><option value="open">مفتوحة (ما دفعوا بعد)</option>
+        <option value="paid">مدفوعة</option><option value="needs_review">تحتاج مراجعة</option></select></label>
+      <label>دوّر<input class="input" id="payQ" type="search" placeholder="اسم، رقم، ORD- أو PAY-"></label>
+    </div>
+    <div class="tbl-wrap"><table><thead><tr><th>الطلب</th><th>الطالب</th><th>المبلغ</th><th>الحالة</th><th>الروابط</th><th>التاريخ</th></tr></thead><tbody id="payBody"></tbody></table></div>
+    <div class="card pad stack" id="payDetail" hidden></div>
+  </section>
+
   <section id="t-lib" hidden class="stack">
     <div class="hd"><h2 style="font-size:1.15rem">الفيديوهات على Bunny</h2><button class="btn sm ghost" id="libRefresh">↻ حدّث</button></div>
     <p class="muted small" style="margin:0">المنصة تعرف كل فيديو من عنوانه بـ Bunny، مثل <span class="en">C1 · L01 · Introducing Yourself</span>، و<span class="en">INTRO</span>، و<span class="en">IMITATION</span>.</p>
@@ -192,9 +206,9 @@ tr:last-child td{border-bottom:0}
   document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => openTab(b.dataset.t));
   function openTab(t) {
     document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.t === t)));
-    ['hw', 'st', 'leads', 'lvl', 'codes', 'lib'].forEach(x => { $('t-' + x).hidden = x !== t; });
+    ['hw', 'st', 'leads', 'lvl', 'codes', 'lib', 'pay'].forEach(x => { $('t-' + x).hidden = x !== t; });
     if (t !== 'hw') $('bulkFab').hidden = true;
-    ({ hw: loadHw, st: loadSt, leads: loadLeads, lvl: loadLvl, codes: loadCodes, lib: loadLib })[t]();
+    ({ hw: loadHw, st: loadSt, leads: loadLeads, lvl: loadLvl, codes: loadCodes, lib: loadLib, pay: loadPay })[t]();
   }
   document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
     hwStatus = b.dataset.s; document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); loadHw();
@@ -555,7 +569,78 @@ tr:last-child td{border-bottom:0}
     });
   }
 
-  function start() { show('app'); $('who').textContent = me || ''; openTab('hw'); }
+  // ---------- online payments (admin only; the tab appears when the server has them on) ----------
+  const PAY_STATE = { open: 'مفتوح', paid: 'مدفوع ✅', expired: 'انتهى', cancelled: 'ملغي', needs_review: 'يحتاج مراجعة', refunded: 'مسترجع' };
+  const SES_STATE = { creating: 'ينعمل', open: 'مفتوح', complete: 'مدفوع', failed: 'ما تم', expired: 'انتهى', cancelled: 'ملغي', unknown: '؟' };
+  const ALERT = { paid_twice: 'دفع مرتين', paid_not_unlocked: 'دفع بس ما انفتحله', unlocked_not_paid: 'انفتحله بس Wayl ما يكول مدفوع',
+                  amount_mismatch: 'المبلغ مو مطابق', env_mismatch: 'دفعة تجريبية على السيرفر الحقيقي', other: 'تنبيه' };
+  const iqdN = n => Number(n || 0).toLocaleString('en-US') + ' د.ع';
+  async function payProbe() {
+    try {
+      const r = await call('/api/staff/payments?state=open', { token });
+      $('tabPay').hidden = !r.enabled;
+      $('nPay').hidden = !r.alerts; $('nPay').textContent = r.alerts;
+    } catch (x) { $('tabPay').hidden = true; }
+  }
+  $('payState').onchange = loadPay;
+  let payT; $('payQ').oninput = () => { clearTimeout(payT); payT = setTimeout(loadPay, 300); };
+  async function loadPay() {
+    const f = $('payState').value, q = $('payQ').value.trim();
+    const qs = new URLSearchParams();
+    if (f === 'alerts') qs.set('alerts', '1'); else if (f) qs.set('state', f);
+    if (q) qs.set('q', q);
+    let r; try { r = await call('/api/staff/payments?' + qs, { token }); } catch (x) { return out(x); }
+    $('payEnv').textContent = r.enabled ? (r.env === 'live' ? 'Wayl: حقيقي' : 'Wayl: تجريبي (test)') : 'الدفع الأونلاين مطفي بهالسيرفر';
+    $('nPay').hidden = !r.alerts; $('nPay').textContent = r.alerts;
+    const lc = r.last_compare;
+    $('payAlerts').hidden = !r.alerts && !lc;
+    $('payAlerts').innerHTML = (r.alerts ? `<b class="pend">${r.alerts} تنبيه يحتاج انتباهك</b> <button type="button" class="btn sm" id="payShowAlerts">اعرضهن</button>` : '<span class="muted small">ماكو تنبيهات.</span>')
+      + (lc ? `<div class="muted small">آخر مقارنة ويا Wayl: ${when(lc.started_at)} · فحصت ${lc.sessions_checked} رابط${lc.error ? ' · <span class="pend">فشلت: ' + esc(lc.error) + '</span>' : ''}</div>` : '');
+    const sa = $('payShowAlerts'); if (sa) sa.onclick = () => { $('payState').value = 'alerts'; loadPay(); };
+    $('payBody').innerHTML = r.orders.map(o => `<tr class="pay-row" data-id="${esc(o.public_id)}" style="cursor:pointer">
+      <td class="en small" style="text-align:right"><b>${esc(o.public_id)}</b>${o.env === 'test' ? ' <span class="pill">test</span>' : ''}</td>
+      <td>${esc(o.name)}<div class="muted small en">+${esc(o.phone)}</div></td>
+      <td class="num small">${iqdN(o.amount_iqd)}</td>
+      <td>${esc(PAY_STATE[o.state] || o.state)}${o.alerts ? ` <span class="pill pend">⚠ ${o.alerts}</span>` : ''}</td>
+      <td class="small">${o.sessions}${o.paid_sessions > 1 ? ` <span class="pend">(${o.paid_sessions} مدفوعة)</span>` : ''}</td>
+      <td class="small">${when(o.created_at)}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">ماكو طلبات.</td></tr>';
+    $('payBody').querySelectorAll('.pay-row').forEach(tr => tr.onclick = () => payDetail(tr.dataset.id));
+  }
+  async function payDetail(pid) {
+    let r; try { r = await call('/api/staff/payments/' + encodeURIComponent(pid), { token }); } catch (x) { return out(x); }
+    const o = r.order, box = $('payDetail');
+    const ses = r.sessions.map(s => `<tr><td class="en small" style="text-align:right">${esc(s.reference_id)}</td><td>${esc(SES_STATE[s.state] || s.state)}</td>
+      <td class="en small">${esc(s.wayl_status || '—')}</td><td class="small">${esc(s.payment_method || '')}</td><td class="small">${s.link_expires_at ? when(s.link_expires_at) : ''}</td></tr>`).join('');
+    const al = r.alerts.map(a => `<div class="msg">${a.resolved_at ? '✅' : '⚠'} <b>${esc(ALERT[a.kind] || a.kind)}</b> · ${when(a.created_at)}${a.note ? '<br>' + esc(a.note) : ''}
+      ${a.resolved_at ? `<div class="muted small">حلّه ${esc(a.resolved_by || '')} · ${when(a.resolved_at)}</div>` : `<div class="row" style="margin-top:6px"><input class="input al-note" placeholder="شنو سويت؟ مثلاً: رجّعت الفلوس من Wayl" style="flex:1;min-width:0"><button type="button" class="btn sm al-ok" data-id="${a.id}">تم</button></div>`}</div>`).join('');
+    const lg = r.log.map(l => `<tr class="${l.ok ? '' : 'pend'}"><td class="small en" style="white-space:nowrap">${esc(String(l.at).slice(11, 23))}</td>
+      <td class="en small" style="text-align:right">${esc(l.step)}</td><td class="small">${esc(l.actor_type)}${l.actor ? ' · ' + esc(l.actor) : ''}</td>
+      <td class="en small">${esc(l.wayl_status || '')}${l.http_status ? ' · ' + l.http_status : ''}${l.duration_ms != null ? ' · ' + l.duration_ms + 'ms' : ''}</td>
+      <td class="en small" style="text-align:left;max-width:280px;overflow-wrap:anywhere">${l.detail ? esc(JSON.stringify(l.detail)) : ''}</td></tr>`).join('');
+    box.hidden = false;
+    box.innerHTML = `<div class="hd"><h3 class="en">${esc(o.public_id)}</h3><button type="button" class="btn sm ghost" id="payClose">سكّر</button></div>
+      <div>${esc(r.student.name)} · <span class="en">+${esc(r.student.phone)}</span> · ${iqdN(o.amount_iqd)} · ${esc(PAY_STATE[o.state] || o.state)}${o.code ? ` · الكود <b class="en">${esc(o.code)}</b>` : ''}</div>
+      <button type="button" class="btn y" id="payCheck">تحقق من Wayl هسه</button>
+      ${al ? `<div class="stack">${al}</div>` : ''}
+      <h3 style="font-size:1rem;margin:0">روابط الدفع (كل رابط = محاولة)</h3>
+      <div class="tbl-wrap"><table><thead><tr><th>PAY</th><th>حالتنا</th><th>حالة Wayl</th><th>الطريقة</th><th>ينتهي</th></tr></thead><tbody>${ses}</tbody></table></div>
+      <h3 style="font-size:1rem;margin:0">كل الخطوات بالترتيب (UTC)</h3>
+      <div class="tbl-wrap"><table><thead><tr><th>الوقت</th><th>الخطوة</th><th>منو</th><th>Wayl</th><th>التفاصيل</th></tr></thead><tbody>${lg}</tbody></table></div>`;
+    $('payClose').onclick = () => { box.hidden = true; };
+    $('payCheck').onclick = async () => {
+      $('payCheck').disabled = true; $('payCheck').textContent = 'جاري السؤال من Wayl…';
+      try { const c = await call('/api/staff/payments/' + encodeURIComponent(pid) + '/check', { method: 'POST', token });
+        toast(c.paid_links > 1 ? '⚠ هالطلب مدفوع ' + c.paid_links + ' مرات' : '✅ تم التحقق'); } catch (x) { out(x); }
+      payDetail(pid); loadPay();
+    };
+    box.querySelectorAll('.al-ok').forEach(b => b.onclick = async () => {
+      try { await call('/api/staff/payment-alerts/' + b.dataset.id + '/resolve', { method: 'POST', json: { note: b.parentNode.querySelector('.al-note').value }, token }); toast('انحفظ'); payDetail(pid); loadPay(); }
+      catch (x) { out(x); }
+    });
+    box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function start() { show('app'); $('who').textContent = me || ''; openTab('hw'); payProbe(); }
   if (token) start(); else show('login');
 })();
 </script>
