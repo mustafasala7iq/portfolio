@@ -24,6 +24,19 @@ main .inner{padding-block:36px 60px;max-width:520px}
 .pay-card .btn{width:100%;max-width:320px}
 .pay-ref{font-size:.82rem;color:var(--muted);direction:ltr}
 </style>
+<!-- Meta Pixel -->
+  <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1276107000741413');
+    fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none" alt=""
+    src="https://www.facebook.com/tr?id=1276107000741413&ev=PageView&noscript=1" /></noscript>
+  <!-- End Meta Pixel -->
 </head>
 <body>
 <header class="bar"><div class="inner"><div class="lock" id="lock"></div><div class="sp"></div></div></header>
@@ -68,6 +81,11 @@ main .inner{padding-block:36px 60px;max-width:520px}
       return setTimeout(poll, 5000);              // the network dropped: keep trying quietly
     }
     if (r.state === 'paid') {
+      // tell Meta about the sale once per order, even if the page is reloaded
+      try {
+        const k = 'px_paid_' + order;
+        if (window.fbq && !store.get(k)) { fbq('track', 'Purchase', { value: r.amount || 39000, currency: 'IQD' }, { eventID: order }); store.set(k, '1'); }
+      } catch (e) { /* never block the page */ }
       say('✓', 'ok', 'تم الدفع، انفتحلك الكورس 🎉', 'وصلت دفعتك وصار حسابك كامل. يومك الأول جاهز هسه.', '<a class="btn y" href="/learn/">ادخل للكورس ←</a>');
       return;
     }
