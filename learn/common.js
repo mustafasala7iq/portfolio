@@ -4,10 +4,26 @@
     get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} },
   };
-  // ?api=... lets us point a page at a test server without editing config.js
+  // ?api=staging points this browser at the test server, ?api=live switches back.
+  // Only these known servers (and localhost for development) are allowed, so a shared link
+  // can never send a student's password to someone else's server.
+  const SERVERS = { staging: 'https://course-bot-staging.up.railway.app' };
+  const okApi = u => !!u && (Object.values(SERVERS).includes(u) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(u));
   const qApi = new URLSearchParams(location.search).get('api');
-  if (qApi) store.set('learn_api', qApi);
+  if (qApi === 'live') store.set('learn_api', null);
+  else if (qApi) { const u = SERVERS[qApi] || qApi.replace(/\/$/, ''); if (okApi(u)) store.set('learn_api', u); }
+  if (store.get('learn_api') && !okApi(store.get('learn_api'))) store.set('learn_api', null);
   const API = (store.get('learn_api') || window.LEARN_API || '').replace(/\/$/, '');
+  if (store.get('learn_api') && SERVERS.staging === API) {          // make the test server impossible to miss
+    const show = () => {
+      if (document.getElementById('stagingBar')) return;
+      const b = document.createElement('a'); b.id = 'stagingBar'; b.href = '?api=live';
+      b.textContent = 'بيئة تجريبية (staging) · اضغط هنا للرجوع للموقع الحقيقي';
+      b.style.cssText = 'position:fixed;z-index:9999;left:0;right:0;bottom:0;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));background:#B42318;color:#fff;font:700 13px/1.4 system-ui,sans-serif;text-align:center;text-decoration:none';
+      document.body.appendChild(b);
+    };
+    document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', show) : show();
+  }
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
