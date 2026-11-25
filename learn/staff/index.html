@@ -28,6 +28,10 @@ tr:last-child td{border-bottom:0}
 .codebig{font:900 1.8rem/1 var(--font-display);letter-spacing:.06em;direction:ltr;text-align:center;padding:14px;border:2px dashed var(--black);border-radius:14px;background:var(--yellow-wash)}
 .msg{white-space:pre-wrap;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px}
 .login{max-width:420px;margin:40px auto 0}
+.bulk{margin-bottom:12px;border:2px solid var(--yellow)}
+.bulk-fab{position:fixed;z-index:50;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:560px;margin:0 auto;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.pick{display:inline-flex;align-items:center;gap:8px;min-height:40px;font-weight:700;cursor:pointer}
+.pick input{width:22px;height:22px;accent-color:var(--black)}
 .pay-opt{display:flex;gap:8px;flex-wrap:wrap}
 .pay-opt label{flex:1 1 120px;display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:2px solid var(--line-2);border-radius:12px;font:800 .95rem/1.2 var(--font-display);cursor:pointer;background:#fff}
 .pay-opt input{accent-color:var(--black)}
@@ -89,7 +93,14 @@ tr:last-child td{border-bottom:0}
   <section id="t-hw">
     <div class="hd" style="margin-bottom:12px"><h2 style="font-size:1.15rem">الواجبات</h2>
       <div class="seg"><button data-s="pending" aria-pressed="true">تنتظر التصحيح</button><button data-s="all" aria-pressed="false">الكل</button><button data-s="trial" aria-pressed="false">الدرس المجاني</button></div></div>
+    <div class="card pad stack bulk" id="bulk" hidden>
+      <div class="hd" style="gap:10px;flex-wrap:wrap"><label class="rcv"><input type="checkbox" id="bulkAll"> حدد الكل</label><span class="muted small" id="bulkN"></span></div>
+      <div class="field"><label for="bulkText">رد واحد للواجبات اللي حددتها (إذا سمعتهن وكلهن زينات). <span class="en">{name}</span> = اسم الطالب الأول</label>
+        <textarea class="input" id="bulkText" rows="2"></textarea></div>
+      <button type="button" class="btn y" id="bulkSend" disabled>أرسل الرد للمحددين</button>
+    </div>
     <div class="list" id="hwList"></div>
+    <button type="button" class="btn y bulk-fab" id="bulkFab" hidden></button>
   </section>
 
   <section id="t-st" hidden>
@@ -182,6 +193,7 @@ tr:last-child td{border-bottom:0}
   function openTab(t) {
     document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.t === t)));
     ['hw', 'st', 'leads', 'lvl', 'codes', 'lib'].forEach(x => { $('t-' + x).hidden = x !== t; });
+    if (t !== 'hw') $('bulkFab').hidden = true;
     ({ hw: loadHw, st: loadSt, leads: loadLeads, lvl: loadLvl, codes: loadCodes, lib: loadLib })[t]();
   }
   document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
@@ -194,14 +206,40 @@ tr:last-child td{border-bottom:0}
     let r; try { r = await call('/api/staff/submissions?' + q, { token }); } catch (x) { return out(x); }
     if (hwStatus === 'pending') $('nHw').textContent = r.submissions.length;
     const box = $('hwList'); box.innerHTML = '';
+    $('bulk').hidden = hwStatus !== 'pending' || !r.submissions.length;
+    $('bulkAll').checked = false; bulkPaint();
     if (!r.submissions.length) { box.innerHTML = `<div class="card pad muted">${hwStatus === 'pending' ? '👏 ماكو واجبات تنتظر التصحيح.' : 'ماكو واجبات بعد.'}</div>`; return; }
     r.submissions.forEach(s => box.appendChild(hwCard(s)));
+    box.querySelectorAll('.pick input').forEach(i => i.onchange = bulkPaint); bulkPaint();
   }
+  const BULK_TEXT = 'عاشت إيدك {name}! سمعت تسجيلك، نطقك واضح وزين. كمّل هيج 👏';
+  try { $('bulkText').value = localStorage.getItem('bulkText') || BULK_TEXT; } catch (e) { $('bulkText').value = BULK_TEXT; }
+  const picked = () => [...document.querySelectorAll('#hwList .pick input:checked')];
+  function bulkPaint() {
+    const n = picked().length, all = document.querySelectorAll('#hwList .pick input').length;
+    $('bulkN').textContent = n ? `محدد ${n} من ${all}` : `${all} واجب ينتظر`;
+    $('bulkSend').disabled = !n; $('bulkSend').textContent = n ? `أرسل الرد للمحددين (${n})` : 'أرسل الرد للمحددين';
+    $('bulkFab').hidden = !n || $('bulk').hidden || $('t-hw').hidden; $('bulkFab').textContent = `أرسل الرد للمحددين (${n})`;
+    $('bulkAll').checked = all > 0 && n === all;
+  }
+  $('bulkAll').onchange = () => { document.querySelectorAll('#hwList .pick input').forEach(i => { i.checked = $('bulkAll').checked; }); bulkPaint(); };
+  $('bulkFab').onclick = () => $('bulkSend').click();
+  $('bulkSend').onclick = async () => {
+    const ids = picked().map(i => +i.dataset.id), text = $('bulkText').value.trim();
+    if (!text) { toast('اكتب الرد'); return; }
+    $('bulkSend').disabled = true;
+    try {
+      const r = await call('/api/staff/feedback-bulk', { method: 'POST', json: { ids, text }, token });
+      try { localStorage.setItem('bulkText', text); } catch (e) {}
+      toast(`✅ وصل الرد لـ ${r.sent} واجب`); loadHw();
+    } catch (x) { out(x); bulkPaint(); }
+  };
   function hwCard(s) {
     const el = document.createElement('article'); el.className = 'card pad stack sub';
     const wa = 'https://wa.me/' + s.student.phone;
     el.innerHTML = `<div class="hd"><h3>${s.trial ? '<span class="pill wait">🎁 مجاني</span> ' : ''}${esc(s.student.name)} <a class="muted small en" href="${wa}" target="_blank" rel="noopener">+${esc(s.student.phone)}</a></h3><span class="muted small">${when(s.created_at)}</span></div>
       <div class="muted small en" dir="ltr" style="text-align:right">${esc(s.title)} · <b style="white-space:nowrap">${esc(s.hw_key)}</b> · Day ${s.day}</div>
+      ${!s.feedback && hwStatus === 'pending' ? `<label class="pick"><input type="checkbox" data-id="${s.id}"> حدد للرد الجماعي</label>` : ''}
       ${s.note ? `<div class="msg">💬 ${esc(s.note)}</div>` : ''}
       ${s.audio ? `<audio controls preload="none" src="${esc(fileUrl(s.audio, token))}"></audio>` : ''}
       ${s.link ? `<a class="btn ghost sm" href="${esc(s.link)}" target="_blank" rel="noopener">🎥 افتح فيديو التحدي</a>` : ''}
