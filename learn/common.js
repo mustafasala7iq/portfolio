@@ -4,10 +4,13 @@
     get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} },
   };
-  // ?api=... lets us point a page at a test server without editing config.js
+  // ?api=... points a page at a test server, but only on a developer's own computer.
+  // On the real site it is ignored and any saved one is wiped, so a link can't send students' passwords elsewhere.
+  const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
   const qApi = new URLSearchParams(location.search).get('api');
-  if (qApi) store.set('learn_api', qApi);
-  const API = (store.get('learn_api') || window.LEARN_API || '').replace(/\/$/, '');
+  if (LOCAL && qApi) store.set('learn_api', qApi);
+  if (!LOCAL) store.set('learn_api', null);
+  const API = ((LOCAL && store.get('learn_api')) || window.LEARN_API || '').replace(/\/$/, '');
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
