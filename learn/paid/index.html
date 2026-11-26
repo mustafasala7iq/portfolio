@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B0B0B">
+<title>تأكيد الدفع · كورس مصطفى صلاح</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/learn/shared.css">
+<style>
+main .inner{padding-block:36px 60px;max-width:520px}
+.pay-card{padding:28px 22px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.pay-card h1{font-size:1.45rem;font-weight:900;text-wrap:balance}
+.pay-card p{color:var(--muted);line-height:1.8;margin:0}
+.pay-ic{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:1.8rem;background:var(--yellow-wash)}
+.pay-ic.ok{background:#E7F6EC;color:#13753A}
+.pay-ic.no{background:#FDECEA;color:#B42318}
+.spin{width:30px;height:30px;border:3px solid rgba(0,0,0,.12);border-top-color:var(--black);border-radius:50%;animation:sp 0.9s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.spin{animation-duration:3s}}
+.pay-card .btn{width:100%;max-width:320px}
+.pay-ref{font-size:.82rem;color:var(--muted);direction:ltr}
+</style>
+<!-- Meta Pixel -->
+  <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1276107000741413');
+    fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none" alt=""
+    src="https://www.facebook.com/tr?id=1276107000741413&ev=PageView&noscript=1" /></noscript>
+  <!-- End Meta Pixel -->
+</head>
+<body>
+<header class="bar"><div class="inner"><div class="lock" id="lock"></div><div class="sp"></div></div></header>
+<main><div class="inner">
+  <div class="card pay-card" id="box" aria-live="polite">
+    <div class="pay-ic"><div class="spin" role="img" aria-label="جاري التأكيد"></div></div>
+    <h1>جاري تأكيد الدفع…</h1>
+    <p>لا تسكّر الصفحة. نتأكد من الدفع ويا Wayl، وهذا ياخذ ثواني.</p>
+  </div>
+</div></main>
+<script src="/learn/config.js"></script>
+<script src="/learn/brand.js"></script>
+<script src="/learn/common.js"></script>
+<script>
+(function () {
+  const { call, store, esc } = Learn;
+  const $ = id => document.getElementById(id);
+  if (window.BRAND) $('lock').innerHTML = `<img class="sig" src="${BRAND.sig}" alt="Mustafa Salah">`;
+  const q = new URLSearchParams(location.search);
+  const order = q.get('order') || '';
+  const token = store.get('learn_token');
+  const box = $('box');
+  const ref = `<div class="pay-ref">${esc(order)}</div>`;
+  const say = (ic, cls, title, text, extra = '') => {
+    box.innerHTML = `<div class="pay-ic ${cls}">${ic}</div><h1>${title}</h1><p>${text}</p>${extra}${ref}`;
+  };
+  if (!token || !order) {
+    say('🔑', '', 'سجّل دخولك', 'حتى نتأكد من دفعتك، سجّل دخول بنفس الحساب اللي دفعت منه.', '<a class="btn y" href="/learn/?login=1">سجّل دخول</a>');
+    return;
+  }
+  let tries = 0, first = true;
+  async function poll() {
+    tries++;
+    let r;
+    try {
+      const extra = first ? `&back=1&referenceId=${encodeURIComponent(q.get('referenceId') || '')}&orderid=${encodeURIComponent(q.get('orderid') || '')}` : '';
+      r = await call(`/api/checkout/status?order=${encodeURIComponent(order)}${extra}`, { token });
+      first = false;
+    } catch (x) {
+      if (x.status === 401) { store.set('learn_token', null); say('🔑', '', 'سجّل دخولك', 'انتهت جلستك. سجّل دخول بنفس الحساب حتى نكمّل التأكيد.', '<a class="btn y" href="/learn/?login=1">سجّل دخول</a>'); return; }
+      if (x.status === 404) { say('?', 'no', 'ما لكينا هالطلب', 'تأكد إنك داخل بنفس الحساب اللي دفعت منه.', '<a class="btn y" href="/learn/">رجوع للمنصة</a>'); return; }
+      return setTimeout(poll, 5000);              // the network dropped: keep trying quietly
+    }
+    if (r.state === 'paid') {
+      // tell Meta about the sale once per order, even if the page is reloaded
+      try {
+        const k = 'px_paid_' + order;
+        if (window.fbq && !store.get(k)) { fbq('track', 'Purchase', { value: r.amount || 39000, currency: 'IQD' }, { eventID: order }); store.set(k, '1'); }
+      } catch (e) { /* never block the page */ }
+      say('✓', 'ok', 'تم الدفع، انفتحلك الكورس 🎉', 'وصلت دفعتك وصار حسابك كامل. يومك الأول جاهز هسه.', '<a class="btn y" href="/learn/">ادخل للكورس ←</a>');
+      return;
+    }
+    if (r.state === 'needs_review') {
+      say('!', 'no', 'دفعتك وصلت، ونراجعها', 'حسابك مفعّل من قبل، فراح نتواصل وياك بخصوص الدفعة الثانية.', '<a class="btn y" href="/learn/">رجوع للمنصة</a>');
+      return;
+    }
+    if (r.state === 'failed' || r.state === 'expired' || r.state === 'cancelled') {
+      say('✕', 'no', 'ما تم الدفع', 'ما انسحب منك أي مبلغ بهالمحاولة. تكدر تجرّب مرة ثانية.', '<button type="button" class="btn y" id="again">جرّب الدفع مرة ثانية</button><a class="btn" href="/learn/">رجوع للمنصة</a>');
+      $('again').onclick = async () => {
+        $('again').disabled = true; $('again').textContent = 'جاري فتح صفحة الدفع…';
+        try { const c = await call('/api/checkout', { method: 'POST', token }); if (c.url) location.href = c.url; else location.reload(); }
+        catch (x) { $('again').disabled = false; $('again').textContent = 'جرّب الدفع مرة ثانية'; Learn.toast(x.message); }
+      };
+      return;
+    }
+    // still open at Wayl: keep checking, quickly at first, then slower
+    if (tries === 20) {
+      say('<div class="spin"></div>', '', 'بعدنا ننتظر تأكيد الدفع', 'إذا كمّلت الدفع، راح ينفتحلك الكورس تلقائياً خلال دقائق حتى لو سكّرت الصفحة. وإذا ما دفعت، تكدر تكمّل من صفحة الدفع.',
+        r.url ? `<a class="btn y" href="${esc(r.url)}">كمّل الدفع</a><a class="btn" href="/learn/">رجوع للمنصة</a>` : '<a class="btn" href="/learn/">رجوع للمنصة</a>');
+    }
+    setTimeout(poll, tries < 20 ? 3000 : 10000);
+  }
+  poll();
+})();
+</script>
+</body>
+</html>
