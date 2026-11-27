@@ -44,6 +44,7 @@ tr:last-child td{border-bottom:0}
 .rcv input{width:20px;height:20px;accent-color:var(--black);cursor:pointer}
 .rcv input:disabled{cursor:default}
 .pend{color:var(--red);font-weight:700}
+.backup{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
 .st-tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
 .st-tools label{display:flex;flex-direction:column;gap:4px;flex:1 1 150px;min-width:0;font-size:.82rem;color:var(--muted)}
 .st-tools .input{min-height:44px;padding:6px 10px}
@@ -107,6 +108,10 @@ tr:last-child td{border-bottom:0}
   <section id="t-st" hidden>
     <div class="hd" style="margin-bottom:12px"><h2 style="font-size:1.15rem">الطلاب</h2><span class="muted small" id="stCount"></span></div>
     <div class="card pad money" id="money" hidden></div>
+    <div class="card pad backup" id="backupRow" hidden>
+      <span><b>نسخة احتياطية من كل البيانات</b> <span class="muted small">(ملف .sql، للأدمن بس)</span></span>
+      <span class="row"><button type="button" class="btn sm" data-fmt="sqlite">SQLite</button><button type="button" class="btn sm" data-fmt="mysql">بشكل MySQL</button></span>
+    </div>
     <div class="st-tools">
       <label>رتّب حسب<select class="input" id="stSort">
         <option value="new">الأحدث تسجيلاً</option><option value="old">الأقدم تسجيلاً</option><option value="name">الاسم (أ ← ي)</option>
@@ -342,6 +347,20 @@ tr:last-child td{border-bottom:0}
     }[by] || (() => 0);
     return v.slice().sort(cmp);
   }
+  // admin: download every row as a .sql file (the server makes one consistent snapshot)
+  document.querySelectorAll('#backupRow [data-fmt]').forEach(b => b.onclick = async () => {
+    const was = b.textContent; b.disabled = true; b.textContent = 'جاري التحضير…';
+    try {
+      const res = await fetch(Learn.API + '/api/staff/backup?format=' + b.dataset.fmt, { headers: { Authorization: 'Bearer ' + token } });
+      if (!res.ok) { let m = 'ما كدرت أنزّل النسخة.'; try { m = (await res.json()).message || m; } catch (e) {} throw new Error(m); }
+      const name = ((res.headers.get('Content-Disposition') || '').match(/filename="([^"]+)"/) || [])[1] || 'backup.sql';
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      toast('✅ نزلت ' + name);
+    } catch (x) { toast(x.message); }
+    finally { b.disabled = false; b.textContent = was; }
+  });
   async function loadSt() {
     let r; try { r = await call('/api/staff/students', { token }); } catch (x) { return out(x); }
     stData = r; renderSt();
@@ -350,6 +369,7 @@ tr:last-child td{border-bottom:0}
     const r = stData; if (!r) return;
     const m = r.money;
     document.querySelectorAll('#stSort [data-admin], #stFilter [data-admin]').forEach(o => { o.hidden = o.disabled = !m; });
+    $('backupRow').hidden = !m;
     if (!m && ['wait', 'got', 'free', 'noamt'].includes($('stFilter').value)) $('stFilter').value = 'all';
     if (!m && $('stSort').value === 'paid') $('stSort').value = 'new';
     const list = stView(r.students, !!m);
