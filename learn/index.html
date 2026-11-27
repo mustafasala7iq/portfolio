@@ -287,25 +287,25 @@ section+section{margin-top:26px}
         <h1 id="loginTitle">كورس مصطفى صلاح</h1>
         <p class="sub muted" id="loginSub">ما راح تحفظ، راح تحجي.</p>
       </div>
-      <div class="field" data-m="act free"><label for="name">اسمك</label>
+      <div class="field" data-m="join free"><label for="name">اسمك</label>
         <input class="input" id="name" autocomplete="name" placeholder="مثلاً: علي حسن"></div>
-      <div class="field" data-m="act free"><label for="phone">رقم الموبايل</label>
+      <div class="field" data-m="join free"><label for="phone">رقم الموبايل</label>
         <input class="input en" id="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="07xx xxx xxxx" maxlength="16"></div>
-      <div class="field" data-m="login act free forgot"><label for="email" id="emailLabel">الإيميل</label>
+      <div class="field" data-m="login join free forgot"><label for="email" id="emailLabel">الإيميل</label>
         <input class="input en" id="email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" placeholder="name@gmail.com"></div>
-      <div class="field" data-m="login act free reset"><label for="pw">الباسورد</label>
+      <div class="field" data-m="login join free reset"><label for="pw">الباسورد</label>
         <input class="input en" id="pw" type="password" autocomplete="current-password" placeholder="6 أحرف أو أكثر"></div>
-      <div class="field" data-m="act free reset"><label for="pw2">أكد الباسورد</label>
+      <div class="field" data-m="join free reset"><label for="pw2">أكد الباسورد</label>
         <input class="input en" id="pw2" type="password" autocomplete="new-password" placeholder="اكتبه مرة ثانية"></div>
-      <div class="field" data-m="act"><label for="code">كود التفعيل</label>
-        <input class="input en" id="code" autocapitalize="characters" autocomplete="one-time-code" placeholder="TA-XXXXX"></div>
-      <div class="field" data-m="free"><label for="goal">ليش تتعلم إنكليزي؟</label>
+      <div class="field" data-m="join free"><label for="goal">ليش تتعلم إنكليزي؟</label>
         <select class="input" id="goal"><option value="">اختار</option><option>للشغل</option><option>للدراسة</option><option>للسفر</option><option>أريد أحچي بثقة</option><option>غيرها</option></select></div>
-      <div class="field" data-m="free"><label for="city">المحافظة</label>
+      <div class="field" data-m="join free"><label for="city">المحافظة</label>
         <select class="input" id="city"><option value="">اختار محافظتك</option><option>البصرة</option><option>بغداد</option><option>أربيل</option><option>الأنبار</option><option>بابل</option><option>حلبجة</option><option>دهوك</option><option>ديالى</option><option>ذي قار</option><option>السليمانية</option><option>صلاح الدين</option><option>القادسية</option><option>كربلاء</option><option>كركوك</option><option>المثنى</option><option>ميسان</option><option>النجف</option><option>نينوى</option><option>واسط</option><option>خارج العراق</option></select></div>
-      <div class="field" data-m="pre"><label for="pay">شلون تحب تدفع؟</label>
-        <select class="input" id="pay"><option value="">اختار</option><option>كاش ويا المندوب</option><option>حوالة إلكترونية</option></select>
+      <div class="field" data-m="join"><label for="pay">شلون تحب تدفع؟</label>
+        <select class="input" id="pay"><option value="">اختار</option><option value="code">عندي كود تفعيل</option><option value="cash">كاش ويا المندوب (يوصلك الكود لباب البيت)</option><option value="transfer">حوالة إلكترونية</option></select>
         <p class="small pay-note" id="payNote" hidden></p></div>
+      <div class="field" id="codeField" hidden><label for="code">كود التفعيل</label>
+        <input class="input en" id="code" autocapitalize="characters" autocomplete="one-time-code" placeholder="TA-XXXXX"></div>
       <div class="err small" id="loginErr" role="alert"></div>
       <button class="btn y" id="loginBtn">دخول</button>
       <div class="links small" id="loginLinks"></div>
@@ -413,20 +413,27 @@ section+section{margin-top:26px}
     } catch (e) { /* never block the page */ }
   }
   const RESET = params.get('reset');
-  let mode = RESET ? 'reset' : params.has('free') ? 'free' : (params.has('login') || store.get('has_account') ? 'login' : 'act');
+  // one sign-up page for everyone ("join"): pay online, use an activation code, or book and pay cash with the courier.
+  // ?free=1 alone is the free-lesson sign-up; ?preorder (old links) and ?code=TA-XXXXX open "join".
+  const CODE_IN_LINK = (params.get('code') || '').trim();
+  let payInfo = null, payTouched = false;                     // filled by /api/checkout/info below
+  const fmtN = n => Number(n).toLocaleString('en-US');
+  let mode = RESET ? 'reset' : (PRE || CODE_IN_LINK) ? 'join' : params.has('free') ? 'free'
+    : (params.has('login') || store.get('has_account') ? 'login' : 'join');
   const MODES = {
     login: { t: 'سجّل دخول', s: 'أهلاً بيك مرة ثانية 👋 ادخل بإيميلك أو رقم موبايلك، والباسورد.', b: 'دخول',
-      l: `<a href="#" data-go="act">ما عندك حساب؟ سوّي حساب</a><a href="#" data-go="forgot">نسيت الباسورد؟</a>` },
+      l: `<a href="#" data-go="join">ما عندك حساب؟ سوّي حساب</a><a href="#" data-go="forgot">نسيت الباسورد؟</a>` },
     forgot: { t: 'نسيت الباسورد؟', s: 'اكتب إيميلك أو رقم موبايلك اللي سجلت بيه، ونرسلك رابط على إيميل حسابك تحط بيه باسورد جديد.', b: 'أرسل الرابط',
       l: `<a href="#" data-go="login">رجوع لتسجيل الدخول</a>${WA ? `<a href="${WA}" target="_blank" rel="noopener">ما وصلك شي؟ راسلنا على واتساب</a>` : ''}` },
     reset: { t: 'باسورد جديد 🔑', s: 'اكتب باسورد جديد لحسابك، وبعدها تدخل مباشرة.', b: 'احفظ وادخل',
       l: `<a href="#" data-go="forgot">الرابط ما يشتغل؟ اطلب رابط جديد</a>` },
-    act: { t: 'سوّي حسابك', s: 'اكتب معلوماتك وكود التفعيل اللي وصلك. بعدها تدخل بإيميلك والباسورد من موبايلك ولابتوبك.', b: 'سوّي الحساب وابدي الكورس',
-      l: `<span>عندك حساب؟ <a href="#" data-go="login">سجّل دخول</a></span><span>ما عندك كود؟ <a href="/learn/free">جرّب الدرس الأول مجاناً</a></span>` },
+    join: { t: 'اشترك بالكورس 🎟️', s: 'سوّي حسابك واختار شلون تدفع. بعدها تدخل بإيميلك والباسورد من موبايلك ولابتوبك.', b: 'سوّي حسابك',
+      l: `<span>عندك حساب؟ <a href="#" data-go="login">سجّل دخول</a></span><span>مو متأكد بعد؟ <a href="#" data-go="free">جرّب الدرس الأول مجاناً</a></span>` },
     free: { t: 'درسك الأول مجاناً 🎁', s: 'سوّي حسابك، وشوف المقدمة والمحاضرة الأولى، وجرّب واجب المحاكاة.', b: 'ابدي الدرس المجاني',
-      l: `<span>عندك حساب؟ <a href="#" data-go="login">سجّل دخول</a></span>` },
+      l: `<span>عندك حساب؟ <a href="#" data-go="login">سجّل دخول</a></span><span>تريد الكورس كامل؟ <a href="#" data-go="join">اشترك</a></span>` },
   };
   function setMode(m) {
+    if (m === 'act') m = 'join';
     mode = m; const M = MODES[m]; $('loginBtn').hidden = false;
     $('loginTitle').textContent = M.t; $('loginSub').textContent = M.s; $('loginBtn').textContent = M.b;
     const either = m === 'login' || m === 'forgot';             // these two take the email or the mobile number
@@ -437,13 +444,9 @@ section+section{margin-top:26px}
     $('loginLinks').innerHTML = M.l; $('loginErr').textContent = '';
     document.querySelectorAll('#loginForm [data-m]').forEach(f => {
       const ms = f.dataset.m.split(' ');
-      f.hidden = !(ms.includes(m) || (PRE && m === 'free' && ms.includes('pre')));
+      f.hidden = !ms.includes(m);
     });
-    if (PRE && m === 'free') {
-      $('loginTitle').textContent = 'احجز مقعدك بسعر الإطلاق 🎟️';
-      $('loginSub').textContent = 'سجّل حجزك هسة بدون دفع، ونتواصل وياك بأسرع وقت حتى نثبّت حجزك. وبنفس الوقت شوف الدرس الأول مجاناً.';
-      $('loginBtn').textContent = 'احجز مقعدي';
-    }
+    if (typeof payPick === 'function') payPick();
     $('pw').autocomplete = m === 'login' ? 'current-password' : 'new-password';
     $('pw').placeholder = m === 'reset' ? 'الباسورد الجديد: 6 أحرف أو أكثر' : '6 أحرف أو أكثر';
     $('pw2').value = '';
@@ -451,26 +454,32 @@ section+section{margin-top:26px}
   }
   setMode(mode);
 
-  // online payment on the booking form: only when this server takes Wayl payments
-  const ONLINE = 'دفع أونلاين';
-  let payInfo = null;
+  // the payment choice on the sign-up page
   function payPick() {
-    if (!(PRE && mode === 'free')) return;
-    const on = $('pay').value === ONLINE;
-    $('loginBtn').textContent = on ? 'ادفع هسه وابدي الكورس ←' : 'احجز مقعدي';
-    $('loginTitle').textContent = on ? 'اشترك بسعر الإطلاق 🎟️' : 'احجز مقعدك بسعر الإطلاق 🎟️';
-    $('loginSub').textContent = on ? 'سوّي حسابك وادفع أونلاين، وينفتحلك الكورس كامل أول ما تكمّل الدفع.'
-      : 'سجّل حجزك هسة بدون دفع، ونتواصل وياك بأسرع وقت حتى نثبّت حجزك. وبنفس الوقت شوف الدرس الأول مجاناً.';
-    $('payNote').hidden = !on;
-    if (on && payInfo) $('payNote').innerHTML = `<b class="num">${Number(payInfo.price).toLocaleString('en-US')} د.ع</b>${payInfo.regular ? ` <s class="muted num">${Number(payInfo.regular).toLocaleString('en-US')}</s>` : ''} · تدفع بصفحة Wayl الآمنة بالبطاقة أو المحفظة الإلكترونية، وأول ما تكمّل ينفتحلك الكورس كامل.`;
+    const c = mode === 'join' ? $('pay').value : '';
+    $('codeField').hidden = c !== 'code';
+    if (mode !== 'join') return;
+    $('loginBtn').textContent = { online: 'ادفع هسه وابدي الكورس ←', code: 'سوّي الحساب وابدي الكورس', cash: 'احجز مقعدي', transfer: 'احجز مقعدي' }[c] || 'سوّي حسابك';
+    const price = payInfo ? `<b class="num">${fmtN(payInfo.price)} د.ع</b>${payInfo.regular ? ` <s class="muted num">${fmtN(payInfo.regular)}</s>` : ''} · ` : '';
+    const note = {
+      online: price + 'تدفع بصفحة Wayl الآمنة بالبطاقة أو المحفظة الإلكترونية، وأول ما تكمّل ينفتحلك الكورس كامل.',
+      code: 'اكتب الكود اللي وصلك ويا الفاتورة، وتبدي الكورس اليوم.',
+      cash: 'نتواصل وياك على واتساب، والمندوب يوصلك الفاتورة والكود وتدفع كاش عند الاستلام. ولحد ذاك الوقت شوف الدرس الأول مجاناً.',
+      transfer: 'نتواصل وياك على واتساب ونرسلك تفاصيل الحوالة، وأول ما توصل نرسلك الكود. ولحد ذاك الوقت شوف الدرس الأول مجاناً.',
+    }[c];
+    $('payNote').hidden = !note; $('payNote').innerHTML = note || '';
   }
-  $('pay').onchange = payPick;
-  if (PRE) call('/api/checkout/info').then(r => {
+  $('pay').onchange = () => { payTouched = true; payPick(); };
+  if (CODE_IN_LINK) { $('pay').value = 'code'; $('code').value = CODE_IN_LINK; }
+  call('/api/checkout/info').then(r => {
     if (!r || !r.enabled) return;
     payInfo = r;
-    const o = document.createElement('option'); o.value = ONLINE; o.textContent = 'ادفع أونلاين هسه (بطاقة أو محفظة)';
+    const o = document.createElement('option'); o.value = 'online'; o.textContent = 'ادفع أونلاين هسه (بطاقة أو محفظة)';
     $('pay').insertBefore(o, $('pay').options[1]);
+    if (!payTouched && !CODE_IN_LINK && !$('pay').value) $('pay').value = 'online';
+    payPick();
   }).catch(() => {});
+  payPick();
 
   // Iraqi mobile: 07 then 5/7/8/9 then 8 digits (spaces, +964 and 00964 are fine)
   function iraqiMobile(v) {
@@ -494,17 +503,20 @@ section+section{margin-top:26px}
       return fail(mode === 'login' ? 'اكتب إيميلك أو رقم موبايلك اللي سجلت بيه.' : 'اكتب إيميلك صح، مثل name@gmail.com', 'email');
     if ($('pw').value.length < 6) return fail(mode === 'login' ? 'اكتب الباسورد.' : 'الباسورد لازم يكون 6 أحرف أو أكثر.', 'pw');
     if (mode !== 'login' && $('pw2').value !== $('pw').value) return fail('الباسوردين مو نفس الشي. اكتبهن مرة ثانية.', 'pw2');
-    if (mode === 'act' && !v('code')) return fail('اكتب كود التفعيل.', 'code');
-    if (mode === 'free' && !v('city')) return fail('اختار محافظتك.', 'city');
-    if (mode === 'free' && PRE && !v('pay')) return fail('اختار شلون تحب تدفع.', 'pay');
+    const pay = mode === 'join' ? v('pay') : '';
+    if ((mode === 'free' || mode === 'join') && !v('city')) return fail('اختار محافظتك.', 'city');
+    if (mode === 'join' && !pay) return fail('اختار شلون تحب تدفع.', 'pay');
+    if (pay === 'code' && !v('code')) return fail('اكتب كود التفعيل.', 'code');
     const btn = $('loginBtn'); btn.disabled = true;
     try {
       const body = { email: v('email'), password: $('pw').value };
       const r = mode === 'login' ? await call('/api/login', { method: 'POST', json: body })
-        : await call('/api/register', { method: 'POST', json: { ...body, name: v('name'), phone: v('phone'), free: mode === 'free',
-            code: v('code'), goal: v('goal'), city: v('city'), source: SOURCE, preorder: PRE && mode === 'free', pay: v('pay') } });
+        : await call('/api/register', { method: 'POST', json: { ...body, name: v('name'), phone: v('phone'),
+            free: mode === 'free' || (!!pay && pay !== 'code'), code: pay === 'code' ? v('code') : '',
+            goal: v('goal'), city: v('city'), source: SOURCE, preorder: !!pay && pay !== 'code',
+            pay: { online: 'دفع أونلاين', cash: 'كاش ويا المندوب', transfer: 'حوالة إلكترونية' }[pay] || '' } });
       token = r.token; store.set('learn_token', token); store.set('has_account', '1');
-      if (mode === 'free' && PRE && v('pay') === ONLINE) {
+      if (pay === 'online') {
         // account made; now the order and Wayl's link, then off to pay
         px('InitiateCheckout');
         btn.textContent = 'جاري فتح صفحة الدفع…';
@@ -515,7 +527,7 @@ section+section{margin-top:26px}
         await load(true);
         return;
       }
-      if (mode !== 'login') px(PRE && mode === 'free' ? 'Lead' : mode === 'act' ? 'Purchase' : 'CompleteRegistration');
+      if (mode !== 'login') px(pay === 'cash' || pay === 'transfer' ? 'Lead' : pay === 'code' ? 'Purchase' : 'CompleteRegistration');
       await load(true);
     } catch (x) { err.textContent = x.message; }
     finally { btn.disabled = false; }
@@ -642,13 +654,13 @@ section+section{margin-top:26px}
     }
     if (co) {
       box.innerHTML = `<h3>عجبك؟ اشترك هسه</h3>${payBlock(co)}
-        <details class="pay-alt"><summary class="muted small">أو احجز وادفع كاش ويا المندوب</summary>
+        <details class="pay-alt"><summary class="muted small">أو احجز وادفع كاش ويا المندوب أو بحوالة</summary>
         <div class="row" style="margin-top:8px"><select class="input" id="prePay" style="flex:1;min-width:0"><option value="">شلون تحب تدفع؟</option><option>كاش ويا المندوب</option><option>حوالة إلكترونية</option></select>
         <button type="button" class="btn" id="preGo">احجز</button></div><div class="err small" id="preErr" style="min-height:0"></div></details>`;
       wirePay(box);
     } else {
     box.innerHTML = `<h3>عجبك؟ احجز مقعدك</h3>
-      <p class="muted">بسعر الإطلاق، وبدون دفع هسة. نتواصل وياك بأسرع وقت حتى نثبّت حجزك.</p>
+      <p class="muted">بسعر الإطلاق، وبدون دفع هسة. نتواصل وياك على واتساب حتى نثبّت حجزك.</p>
       <div class="row"><select class="input" id="prePay" style="flex:1;min-width:0"><option value="">شلون تحب تدفع؟</option><option>كاش ويا المندوب</option><option>حوالة إلكترونية</option></select>
       <button type="button" class="btn y" id="preGo">احجز</button></div><div class="err small" id="preErr" style="min-height:0"></div>`;
     }
