@@ -169,6 +169,8 @@ section+section{margin-top:26px}
 #paidView{display:flex;flex-direction:column;gap:14px}
 #paidView[hidden]{display:none}
 .pay-note{margin:8px 0 0;line-height:1.7}
+.phone-in{display:flex;gap:8px;direction:ltr}.phone-in .input{flex:1;min-width:0}
+.dial{display:flex;align-items:center;padding:0 12px;border:2px solid var(--line, #ddd);border-radius:12px;background:var(--yellow-wash);font-weight:700;white-space:nowrap}
 .paybox{gap:10px;margin-top:4px}
 .pay-price{display:flex;align-items:baseline;gap:6px;font-family:var(--font-display)}
 .pay-price b{font-size:1.7rem;font-weight:900}
@@ -289,8 +291,10 @@ section+section{margin-top:26px}
       </div>
       <div class="field" data-m="join free"><label for="name">اسمك</label>
         <input class="input" id="name" autocomplete="name" placeholder="مثلاً: علي حسن"></div>
+      <div class="field" data-m="join free"><label for="country">البلد</label>
+        <select class="input" id="country"></select></div>
       <div class="field" data-m="join free"><label for="phone">رقم الموبايل</label>
-        <input class="input en" id="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="07xx xxx xxxx" maxlength="16"></div>
+        <div class="phone-in"><span class="dial en" id="dial" hidden></span><input class="input en" id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07xx xxx xxxx" maxlength="20"></div></div>
       <div class="field" data-m="login join free forgot"><label for="email" id="emailLabel">الإيميل</label>
         <input class="input en" id="email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" placeholder="name@gmail.com"></div>
       <div class="field" data-m="login join free reset"><label for="pw">الباسورد</label>
@@ -299,8 +303,8 @@ section+section{margin-top:26px}
         <input class="input en" id="pw2" type="password" autocomplete="new-password" placeholder="اكتبه مرة ثانية"></div>
       <div class="field" data-m="join free"><label for="goal">ليش تتعلم إنكليزي؟</label>
         <select class="input" id="goal"><option value="">اختار</option><option>للشغل</option><option>للدراسة</option><option>للسفر</option><option>أريد أحچي بثقة</option><option>غيرها</option></select></div>
-      <div class="field" data-m="join free"><label for="city">المحافظة</label>
-        <select class="input" id="city"><option value="">اختار محافظتك</option><option>البصرة</option><option>بغداد</option><option>أربيل</option><option>الأنبار</option><option>بابل</option><option>حلبجة</option><option>دهوك</option><option>ديالى</option><option>ذي قار</option><option>السليمانية</option><option>صلاح الدين</option><option>القادسية</option><option>كربلاء</option><option>كركوك</option><option>المثنى</option><option>ميسان</option><option>النجف</option><option>نينوى</option><option>واسط</option><option>خارج العراق</option></select></div>
+      <div class="field" data-m="join free" id="cityField"><label for="city">المحافظة</label>
+        <select class="input" id="city"><option value="">اختار محافظتك</option><option>البصرة</option><option>بغداد</option><option>أربيل</option><option>الأنبار</option><option>بابل</option><option>حلبجة</option><option>دهوك</option><option>ديالى</option><option>ذي قار</option><option>السليمانية</option><option>صلاح الدين</option><option>القادسية</option><option>كربلاء</option><option>كركوك</option><option>المثنى</option><option>ميسان</option><option>النجف</option><option>نينوى</option><option>واسط</option></select></div>
       <div class="field" data-m="join"><label for="pay">شلون تحب تدفع؟</label>
         <select class="input" id="pay"><option value="">اختار</option><option value="code">عندي كود تفعيل</option><option value="cash">كاش ويا المندوب (يوصلك الكود لباب البيت)</option><option value="transfer">حوالة إلكترونية</option></select>
         <p class="small pay-note" id="payNote" hidden></p></div>
@@ -418,6 +422,24 @@ section+section{margin-top:26px}
   const CODE_IN_LINK = (params.get('code') || '').trim();
   let payInfo = null, payTouched = false;                     // filled by /api/checkout/info below
   const fmtN = n => Number(n).toLocaleString('en-US');
+  // students abroad: pick the country, the province goes away and the phone takes that country's code.
+  // The names match COUNTRIES on the server; "خارج العراق" = any other country (they type the full number with +).
+  const COUNTRY = [['العراق', '964'], ['السعودية', '966'], ['الكويت', '965'], ['الإمارات', '971'], ['قطر', '974'], ['البحرين', '973'],
+    ['عُمان', '968'], ['الأردن', '962'], ['لبنان', '961'], ['سوريا', '963'], ['مصر', '20'], ['تركيا', '90'], ['إيران', '98'],
+    ['المملكة المتحدة', '44'], ['ألمانيا', '49'], ['السويد', '46'], ['هولندا', '31'], ['الولايات المتحدة', '1'], ['كندا', '1'],
+    ['أستراليا', '61'], ['خارج العراق', '']];
+  $('country').innerHTML = COUNTRY.map(([n]) => `<option value="${n}">${n === 'خارج العراق' ? 'دولة ثانية' : n}</option>`).join('');
+  const dialOf = () => (COUNTRY.find(c => c[0] === $('country').value) || COUNTRY[0])[1];
+  const inIraq = () => $('country').value === 'العراق';
+  function geoPick() {
+    const iq = inIraq(), dial = dialOf(), signup = mode === 'join' || mode === 'free';
+    $('cityField').hidden = !(signup && iq);
+    $('dial').hidden = iq || !dial; $('dial').textContent = '+' + dial;
+    $('phone').placeholder = iq ? '07xx xxx xxxx' : dial ? 'رقمك بدون رمز البلد' : '+رمز البلد ثم الرقم';
+    const cash = $('pay').querySelector('option[value="cash"]');     // the courier only delivers inside Iraq
+    if (cash) { cash.hidden = cash.disabled = !iq; if (!iq && $('pay').value === 'cash') { $('pay').value = ''; } }
+  }
+  $('country').onchange = () => { geoPick(); payPick(); };
   let mode = RESET ? 'reset' : (PRE || CODE_IN_LINK) ? 'join' : params.has('free') ? 'free'
     : (params.has('login') || store.get('has_account') ? 'login' : 'join');
   const MODES = {
@@ -446,6 +468,7 @@ section+section{margin-top:26px}
       const ms = f.dataset.m.split(' ');
       f.hidden = !ms.includes(m);
     });
+    if (typeof geoPick === 'function') geoPick();
     if (typeof payPick === 'function') payPick();
     $('pw').autocomplete = m === 'login' ? 'current-password' : 'new-password';
     $('pw').placeholder = m === 'reset' ? 'الباسورد الجديد: 6 أحرف أو أكثر' : '6 أحرف أو أكثر';
@@ -481,6 +504,25 @@ section+section{margin-top:26px}
   }).catch(() => {});
   payPick();
 
+  // a number from abroad, in full: + or 00, the country code, then the number (10 to 15 digits)
+  function intlNumber(v) {
+    const t = (v || '').trim();
+    if (!/^(\+|00)/.test(t)) return null;
+    const d = t.replace(/\D/g, '').replace(/^00/, '');
+    return d.length >= 10 && d.length <= 15 && !d.startsWith('964') ? '+' + d : null;
+  }
+  // the phone to send: Iraq as typed (07…), elsewhere the country code + the number without its leading 0
+  function phoneValue() {
+    const raw = $('phone').value.trim();
+    if (inIraq()) return iraqiMobile(raw);
+    const dial = dialOf();
+    if (!dial) return intlNumber(raw);
+    if (/^(\+|00)/.test(raw)) return intlNumber(raw);            // they typed the code themselves
+    const local = raw.replace(/\D/g, '').replace(/^0+/, '');
+    const d = dial + local;
+    return local.length >= 6 && d.length >= 10 && d.length <= 15 ? '+' + d : null;
+  }
+
   // Iraqi mobile: 07 then 5/7/8/9 then 8 digits (spaces, +964 and 00964 are fine)
   function iraqiMobile(v) {
     let d = (v || '').replace(/\D/g, '').replace(/^00/, '');
@@ -496,24 +538,25 @@ section+section{margin-top:26px}
     if (mode === 'forgot' || mode === 'reset') return forgotOrReset(err, v, fail);
     if (mode !== 'login') {
       if (!v('name')) return fail('اكتب اسمك.', 'name');
-      if (!iraqiMobile(v('phone'))) return fail('اكتب رقم موبايلك العراقي الصحيح: 11 رقم يبدي بـ 07، مثل 0770 123 4567', 'phone');
+      if (!phoneValue()) return fail(inIraq() ? 'اكتب رقم موبايلك العراقي الصحيح: 11 رقم يبدي بـ 07، مثل 0770 123 4567'
+        : dialOf() ? 'اكتب رقم موبايلك الصحيح، بدون رمز البلد.' : 'اكتب رقمك كامل ويا رمز البلد، يبدي بـ + مثل +965 5012 3456', 'phone');
     }
     const emailOk = /^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(v('email'));
-    if (mode === 'login' ? !(emailOk || iraqiMobile(v('email'))) : !emailOk)
+    if (mode === 'login' ? !(emailOk || iraqiMobile(v('email')) || intlNumber(v('email'))) : !emailOk)
       return fail(mode === 'login' ? 'اكتب إيميلك أو رقم موبايلك اللي سجلت بيه.' : 'اكتب إيميلك صح، مثل name@gmail.com', 'email');
     if ($('pw').value.length < 6) return fail(mode === 'login' ? 'اكتب الباسورد.' : 'الباسورد لازم يكون 6 أحرف أو أكثر.', 'pw');
     if (mode !== 'login' && $('pw2').value !== $('pw').value) return fail('الباسوردين مو نفس الشي. اكتبهن مرة ثانية.', 'pw2');
     const pay = mode === 'join' ? v('pay') : '';
-    if ((mode === 'free' || mode === 'join') && !v('city')) return fail('اختار محافظتك.', 'city');
+    if ((mode === 'free' || mode === 'join') && inIraq() && !v('city')) return fail('اختار محافظتك.', 'city');
     if (mode === 'join' && !pay) return fail('اختار شلون تحب تدفع.', 'pay');
     if (pay === 'code' && !v('code')) return fail('اكتب كود التفعيل.', 'code');
     const btn = $('loginBtn'); btn.disabled = true;
     try {
       const body = { email: v('email'), password: $('pw').value };
       const r = mode === 'login' ? await call('/api/login', { method: 'POST', json: body })
-        : await call('/api/register', { method: 'POST', json: { ...body, name: v('name'), phone: v('phone'),
+        : await call('/api/register', { method: 'POST', json: { ...body, name: v('name'), phone: phoneValue(),
             free: mode === 'free' || (!!pay && pay !== 'code'), code: pay === 'code' ? v('code') : '',
-            goal: v('goal'), city: v('city'), source: SOURCE, preorder: !!pay && pay !== 'code',
+            goal: v('goal'), city: inIraq() ? v('city') : $('country').value, source: SOURCE, preorder: !!pay && pay !== 'code',
             pay: { online: 'دفع أونلاين', cash: 'كاش ويا المندوب', transfer: 'حوالة إلكترونية' }[pay] || '' } });
       token = r.token; store.set('learn_token', token); store.set('has_account', '1');
       if (pay === 'online') {
@@ -536,7 +579,7 @@ section+section{margin-top:26px}
     const btn = $('loginBtn'); btn.disabled = true;
     try {
       if (mode === 'forgot') {
-        if (!(/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(v('email')) || iraqiMobile(v('email'))))
+        if (!(/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(v('email')) || iraqiMobile(v('email')) || intlNumber(v('email'))))
           return fail('اكتب إيميلك أو رقم موبايلك اللي سجلت بيه.', 'email');
         let r;
         try { r = await call('/api/forgot', { method: 'POST', json: { email: v('email') } }); }
