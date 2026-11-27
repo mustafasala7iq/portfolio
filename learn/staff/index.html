@@ -45,6 +45,7 @@ tr:last-child td{border-bottom:0}
 .rcv input:disabled{cursor:default}
 .pend{color:var(--red);font-weight:700}
 .backup{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.pager{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:10px 0}
 .st-tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
 .st-tools label{display:flex;flex-direction:column;gap:4px;flex:1 1 150px;min-width:0;font-size:.82rem;color:var(--muted)}
 .st-tools .input{min-height:44px;padding:6px 10px}
@@ -102,6 +103,7 @@ tr:last-child td{border-bottom:0}
       <button type="button" class="btn y" id="bulkSend" disabled>أرسل الرد للمحددين</button>
     </div>
     <div class="list" id="hwList"></div>
+    <div class="pager" id="hwPager" hidden></div>
     <button type="button" class="btn y bulk-fab" id="bulkFab" hidden></button>
   </section>
 
@@ -127,6 +129,7 @@ tr:last-child td{border-bottom:0}
     </div>
     <div class="st-note" id="stNote" hidden></div>
     <div class="tbl-wrap"><table><thead><tr id="stHead"><th>الطالب</th><th>اليوم</th><th>ناقص</th><th>الكويزات</th><th>آخر تسليم</th><th></th></tr></thead><tbody id="stBody"></tbody></table></div>
+    <div class="pager" id="stPager" hidden></div>
   </section>
 
   <section id="t-leads" hidden class="stack">
@@ -146,12 +149,14 @@ tr:last-child td{border-bottom:0}
       <label>دوّر<input class="input" id="ldQ" type="search" placeholder="اسم، رقم، إيميل، محافظة"></label>
     </div>
     <div class="tbl-wrap"><table><thead><tr><th>الاسم</th><th>الهدف</th><th>المحافظة</th><th>المصدر</th><th>واجب</th><th>الكويز</th><th>سجّل</th><th></th></tr></thead><tbody id="leadBody"></tbody></table></div>
+    <div class="pager" id="ldPager" hidden></div>
   </section>
 
   <section id="t-lvl" hidden class="stack">
     <div class="hd"><h2 style="font-size:1.15rem">اللي سوّوا اختبار المستوى</h2><div class="row"><span class="muted small" id="lvlCount"></span><button class="btn sm ghost" id="lvlCsv">⬇︎ Excel (CSV)</button></div></div>
     <p class="muted small" style="margin:0">رابط الاختبار: <b class="en">mustafasalah.net/test/</b>. حط بعده <span class="en">?src=</span> واسم المصدر، مثل <span class="en">/test/?src=ig-ad1</span></p>
     <div class="tbl-wrap"><table><thead><tr><th>الاسم</th><th>المستوى</th><th>النتيجة</th><th>المصدر</th><th>سوّاه</th><th></th></tr></thead><tbody id="lvlBody"></tbody></table></div>
+    <div class="pager" id="lvlPager" hidden></div>
   </section>
 
   <section id="t-codes" hidden class="stack">
@@ -170,7 +175,9 @@ tr:last-child td{border-bottom:0}
         <button type="button" class="btn sm" id="copyMsg">📋 انسخ الرسالة للطالب</button>
       </div>
     </form>
+    <div class="st-tools"><label>دوّر<input class="input" id="codeQ" type="search" placeholder="الكود، اسم الطالب أو البائع"></label><span class="muted small" id="codeCount"></span></div>
     <div class="tbl-wrap"><table><thead><tr><th>الكود</th><th>لمنو</th><th>البائع</th><th>الدفع</th><th>واصل الحساب؟</th><th>استخدمه</th><th>التاريخ</th></tr></thead><tbody id="codeBody"></tbody></table></div>
+    <div class="pager" id="codePager" hidden></div>
   </section>
 
   <section id="t-pay" hidden class="stack">
@@ -233,10 +240,14 @@ tr:last-child td{border-bottom:0}
   });
 
   // ---------- homework ----------
+  let hwPage = 1, hwWas = null;
   async function loadHw() {
-    const q = hwStatus === 'trial' ? 'status=all&trial=1' : 'status=' + hwStatus;
+    if (hwWas !== hwStatus) { hwPage = 1; hwWas = hwStatus; }
+    const q = (hwStatus === 'trial' ? 'status=all&trial=1' : 'status=' + hwStatus) + '&page=' + hwPage;
     let r; try { r = await call('/api/staff/submissions?' + q, { token }); } catch (x) { return out(x); }
-    if (hwStatus === 'pending') $('nHw').textContent = r.submissions.length;
+    hwPage = r.page;
+    if (hwStatus === 'pending') $('nHw').textContent = r.total;
+    pager('hwPager', r, n => { hwPage = n; loadHw(); });
     const box = $('hwList'); box.innerHTML = '';
     $('bulk').hidden = hwStatus !== 'pending' || !r.submissions.length;
     $('bulkAll').checked = false; bulkPaint();
@@ -316,37 +327,30 @@ tr:last-child td{border-bottom:0}
     catch (x) { box.checked = !box.checked; out(x); }
     box.disabled = false; if (after) after();
   }
-  let stData = null;
-  try { $('stSort').value = localStorage.getItem('stSort') || 'new'; } catch (e) {}
-  $('stSort').onchange = () => { try { localStorage.setItem('stSort', $('stSort').value); } catch (e) {} renderSt(); };
-  $('stFilter').onchange = renderSt;
-  $('stQ').oninput = renderSt;
-  function stView(list, admin) {
-    const f = $('stFilter').value, q = $('stQ').value.trim().toLowerCase(), by = $('stSort').value;
-    const pend = s => !s.free && !s.received;
-    let v = list.filter(s => {
-      if (f === 'wait') return pend(s);
-      if (f === 'got') return !s.free && s.received;
-      if (f === 'free') return s.free;
-      if (f === 'noamt') return !s.free && !s.paid;
-      if (f === 'miss') return s.missing > 0;
-      if (f === 'done') return s.finished;
-      return true;
-    });
-    if (q) v = v.filter(s => [s.name, s.phone, s.code, s.email, s.seller].some(x => (x || '').toLowerCase().includes(q.replace(/^0/, ''))));
-    const t = x => x ? Date.parse(x) || 0 : 0;
-    const cmp = {
-      new: (a, b) => t(b.start_date) - t(a.start_date) || b.id - a.id,
-      old: (a, b) => t(a.start_date) - t(b.start_date) || a.id - b.id,
-      name: (a, b) => a.name.localeCompare(b.name, 'ar'),
-      day: (a, b) => (b.finished - a.finished) || b.day - a.day,
-      missing: (a, b) => b.missing - a.missing,
-      last: (a, b) => t(b.last) - t(a.last),
-      idle: (a, b) => t(a.last) - t(b.last),
-      paid: (a, b) => (b.free ? -1 : b.paid || 0) - (a.free ? -1 : a.paid || 0),
-    }[by] || (() => 0);
-    return v.slice().sort(cmp);
+  // ---------- paging: every list comes from the server a page at a time (sorted, filtered and searched there) ----------
+  const qs = o => new URLSearchParams(Object.entries(o).filter(([, v]) => v !== undefined && v !== null)).toString();
+  function pager(id, r, go) {
+    const el = $(id);
+    if (!r || !r.pages || r.pages <= 1) { el.hidden = true; el.innerHTML = ''; return; }
+    el.hidden = false;
+    el.innerHTML = `<button type="button" class="btn sm ghost" data-pg="${r.page - 1}" ${r.page <= 1 ? 'disabled' : ''}>→ السابق</button>
+      <span class="muted small">صفحة ${r.page} من ${r.pages}</span>
+      <button type="button" class="btn sm ghost" data-pg="${r.page + 1}" ${r.page >= r.pages ? 'disabled' : ''}>التالي ←</button>`;
+    el.querySelectorAll('[data-pg]').forEach(b => b.onclick = () => { go(+b.dataset.pg); el.closest('section').scrollIntoView({ block: 'start' }); });
   }
+  const later = (fn, ms = 300) => { let t; return () => { clearTimeout(t); t = setTimeout(fn, ms); }; };
+  // CSV exports ask for everything that matches the current filters (?all=1), not just the page on screen
+  function csvDownload(name, rows) {
+    const csv = '\ufeff' + rows.map(r => r.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(',')).join('\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  let stData = null, stPage = 1;
+  try { $('stSort').value = localStorage.getItem('stSort') || 'new'; } catch (e) {}
+  $('stSort').onchange = () => { try { localStorage.setItem('stSort', $('stSort').value); } catch (e) {} stPage = 1; loadSt(); };
+  $('stFilter').onchange = () => { stPage = 1; loadSt(); };
+  $('stQ').oninput = later(() => { stPage = 1; loadSt(); });
   // admin: download every row as a .sql file (the server makes one consistent snapshot)
   document.querySelectorAll('#backupRow [data-fmt]').forEach(b => b.onclick = async () => {
     const was = b.textContent; b.disabled = true; b.textContent = 'جاري التحضير…';
@@ -362,21 +366,26 @@ tr:last-child td{border-bottom:0}
     finally { b.disabled = false; b.textContent = was; }
   });
   async function loadSt() {
-    let r; try { r = await call('/api/staff/students', { token }); } catch (x) { return out(x); }
-    stData = r; renderSt();
+    const p = qs({ sort: $('stSort').value, filter: $('stFilter').value, q: $('stQ').value.trim() || undefined, page: stPage });
+    let r; try { r = await call('/api/staff/students?' + p, { token }); } catch (x) { return out(x); }
+    if (!r.money && (['wait', 'got', 'free', 'noamt'].includes($('stFilter').value) || $('stSort').value === 'paid')) {
+      $('stFilter').value = ['wait', 'got', 'free', 'noamt'].includes($('stFilter').value) ? 'all' : $('stFilter').value;
+      if ($('stSort').value === 'paid') $('stSort').value = 'new';
+      return loadSt();                                         // those are the admin's only
+    }
+    stData = r; stPage = r.page; renderSt();
+    pager('stPager', r, n => { stPage = n; loadSt(); });
   }
   function renderSt() {
     const r = stData; if (!r) return;
     const m = r.money;
     document.querySelectorAll('#stSort [data-admin], #stFilter [data-admin]').forEach(o => { o.hidden = o.disabled = !m; });
     $('backupRow').hidden = !m;
-    if (!m && ['wait', 'got', 'free', 'noamt'].includes($('stFilter').value)) $('stFilter').value = 'all';
-    if (!m && $('stSort').value === 'paid') $('stSort').value = 'new';
-    const list = stView(r.students, !!m);
-    $('stCount').textContent = list.length === r.students.length ? r.students.length + ' طالب' : list.length + ' من ' + r.students.length + ' طالب';
+    const list = r.students;
+    $('stCount').textContent = r.total === r.all ? r.all + ' طالب' : r.total + ' من ' + r.all + ' طالب';
     const wn = m && $('stFilter').value === 'wait';
     $('stNote').hidden = !wn;
-    if (wn) $('stNote').innerHTML = `<span class="pend">${list.length ? 'الطالب ينحسب واصل تلقائياً أول ما يفعّل كوده. هذول انت شلت عنهم الصح بيدك.' : 'ماكو طالب مفعّل بانتظار الكاش: كل اللي يفعّل كوده ينحسب واصل.'}</span>`
+    if (wn) $('stNote').innerHTML = `<span class="pend">${r.total ? 'الطالب ينحسب واصل تلقائياً أول ما يفعّل كوده. هذول انت شلت عنهم الصح بيدك.' : 'ماكو طالب مفعّل بانتظار الكاش: كل اللي يفعّل كوده ينحسب واصل.'}</span>`
       + (m.codes_waiting_n ? `<div class="muted">وأكو ${m.codes_waiting_n} كود مباع ما تفعّل بعد وفلوسه يم المندوب (<span class="num">${iqd(m.codes_waiting)}</span>). تنحسب واصلة أول ما يفعّلوها، وتلكاهم بخانة أكواد التفعيل.</div>` : '');
     $('money').hidden = !m;
     if (m) $('money').innerHTML = `<div><div class="muted small">الفلوس اللي وصلت</div><b class="num">${iqd(m.total)}</b></div>
@@ -392,7 +401,7 @@ tr:last-child td{border-bottom:0}
         <input class="input pay-sl" value="${esc(s.seller || '')}" placeholder="البائع">
         <label class="small"><input type="checkbox" class="pay-f" ${s.free ? 'checked' : ''}> مجاني</label>
         <button class="btn sm pay-s" data-id="${s.id}">احفظ</button></div></details></td>`;
-    const sw = $('showWait'); if (sw) sw.onclick = () => { $('stFilter').value = 'wait'; renderSt(); $('stFilter').scrollIntoView({ block: 'center', behavior: 'smooth' }); };
+    const sw = $('showWait'); if (sw) sw.onclick = () => { $('stFilter').value = 'wait'; stPage = 1; loadSt(); $('stFilter').scrollIntoView({ block: 'center', behavior: 'smooth' }); };
     $('stBody').innerHTML = list.map(s => {
       const flag = s.missing === 0 ? '🟢' : s.missing <= 2 ? '🟡' : '🔴';
       const text = `هلا ${s.name} 👋\nعندك ${s.missing} واجبات ناقصة بكورس مصطفى صلاح. ادخل على ${SITE} وسلّمهن 🎙️`;
@@ -471,44 +480,22 @@ tr:last-child td{border-bottom:0}
   };
 
   // ---------- free-lesson sign-ups ----------
-  let leads = [];
+  let leads = [], ldRes = null, ldPage = 1;
   $('freeLink').textContent = SITE + 'free';
+  const ldParams = extra => qs({ sort: $('ldSort').value, filter: $('ldFilter').value, q: $('ldQ').value.trim() || undefined,
+    src: $('ldSrc').selectedIndex > 0 ? $('ldSrc').value : undefined, ...extra });
   async function loadLeads() {
-    let r; try { r = await call('/api/staff/leads', { token }); } catch (x) { return out(x); }
-    leads = r.leads;
-    const srcs = [...new Set(leads.map(l => l.source || ''))].sort();
-    const keep = $('ldSrc').value;
-    $('ldSrc').innerHTML = '<option value="">كل المصادر</option>' + srcs.map(x => `<option value="${esc(x)}">${x ? esc(x) : 'بدون مصدر'} (${leads.filter(l => (l.source || '') === x).length})</option>`).join('');
-    if (srcs.includes(keep)) $('ldSrc').value = keep;
+    let r; try { r = await call('/api/staff/leads?' + ldParams({ page: ldPage }), { token }); } catch (x) { return out(x); }
+    ldRes = r; leads = r.leads; ldPage = r.page;
+    const keep = $('ldSrc').selectedIndex > 0 ? $('ldSrc').value : null;
+    $('ldSrc').innerHTML = '<option value="">كل المصادر</option>' + r.sources.map(x => `<option value="${esc(x.source)}">${x.source ? esc(x.source) : 'بدون مصدر'} (${x.n})</option>`).join('');
+    if (keep !== null) { const i = r.sources.findIndex(x => x.source === keep); if (i >= 0) $('ldSrc').selectedIndex = i + 1; }
     renderLeads();
-  }
-  const digits = x => String(x || '').replace(/\D/g, '').replace(/^0/, '964');
-  function shownLeads() {
-    const f = $('ldFilter').value, src = $('ldSrc').value, q = $('ldQ').value.trim().toLowerCase(), qd = digits(q);
-    const list = leads.filter(l => {
-      if (f === 'pre' && !l.preorder) return false;
-      if (f === 'nopre' && l.preorder) return false;
-      if (f.startsWith('st:') && l.status !== f.slice(3)) return false;
-      if (f.startsWith('pay:') && !(l.pay || '').includes(f.slice(4))) return false;
-      if (f === 'hw' && !l.homework) return false;
-      if (f === 'nohw' && l.homework) return false;
-      if ($('ldSrc').selectedIndex > 0 && (l.source || '') !== src) return false;
-      if (q) {
-        const hay = [l.name, l.email, l.city, l.goal, l.source, l.pay].join(' ').toLowerCase();
-        if (!hay.includes(q) && !(qd.length >= 4 && String(l.phone).includes(qd.replace(/^964/, '')))) return false;
-      }
-      return true;
-    });
-    const t = l => String(l.created_at || '');
-    const by = { new: (a, b) => t(b).localeCompare(t(a)), old: (a, b) => t(a).localeCompare(t(b)),
-                 name: (a, b) => String(a.name).localeCompare(String(b.name), 'ar'),
-                 hw: (a, b) => (!!b.homework - !!a.homework) || t(b).localeCompare(t(a)),
-                 pre: (a, b) => (!!b.preorder - !!a.preorder) || t(b).localeCompare(t(a)) }[$('ldSort').value];
-    return list.sort(by);
+    pager('ldPager', r, n => { ldPage = n; loadLeads(); });
   }
   function renderLeads() {
-    const list = shownLeads();
-    $('leadCount').textContent = (list.length === leads.length ? `${leads.length} شخص` : `${list.length} من ${leads.length}`) + ` · ${list.filter(l => l.preorder).length} حجز`;
+    const list = leads, r = ldRes;
+    $('leadCount').textContent = (r.total === r.all ? `${r.all} شخص` : `${r.total} من ${r.all}`) + ` · ${r.pre_n} حجز`;
     $('leadBody').innerHTML = list.map(l => {
       const text = `هلا ${l.name} 👋 شلون شفت الدرس المجاني بكورس مصطفى صلاح؟`;
       const st = { new: 'جديد', contacted: 'تواصلنا', paid: 'دفع ✅', free: 'مجاني 🎁', lost: 'ما يريد' };
@@ -520,7 +507,7 @@ tr:last-child td{border-bottom:0}
         <td><div class="row"><a class="btn sm y" href="https://wa.me/${l.phone}?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">واتساب</a>
           <button class="btn sm ghost pw" data-id="${l.id}" data-name="${esc(l.name)}" data-phone="${esc(l.phone)}" data-email="${esc(l.email || '')}">باسورد جديد</button>
           <button class="btn sm ghost rm" data-id="${l.id}" data-name="${esc(l.name)}">حذف</button></div></td></tr>`;
-    }).join('') || `<tr><td colspan="8" class="muted">${leads.length ? 'ماكو أحد يطابق البحث.' : 'ماكو أحد بعد.'}</td></tr>`;
+    }).join('') || `<tr><td colspan="8" class="muted">${r.all ? 'ماكو أحد يطابق البحث.' : 'ماكو أحد بعد.'}</td></tr>`;
     $('leadBody').querySelectorAll('.pw').forEach(newPassword);
     $('leadBody').querySelectorAll('.rm').forEach(b => b.onclick = async () => {
       if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'متأكد؟ اضغط مرة ثانية'; b.classList.add('rec'); return; }
@@ -531,23 +518,23 @@ tr:last-child td{border-bottom:0}
         const l = leads.find(x => x.id === +sel.dataset.id); if (l) l.status = sel.value; toast('انحفظت الحالة'); } catch (x) { out(x); }
     });
   }
-  ['ldSort', 'ldFilter', 'ldSrc'].forEach(id => { $(id).onchange = renderLeads; });
-  let ldT; $('ldQ').oninput = () => { clearTimeout(ldT); ldT = setTimeout(renderLeads, 200); };
-  $('leadCsv').onclick = () => {
-    const rows = [['name', 'phone', 'email', 'goal', 'city', 'source', 'preorder', 'pay', 'status', 'homework', 'signed_up']].concat(
-      shownLeads().map(l => [l.name, '+' + l.phone, l.email || '', l.goal || '', l.city || '', l.source || '', l.preorder ? 'yes' : '', l.pay || '', l.status, l.homework, l.created_at]));
-    const csv = '\ufeff' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-    a.download = 'free-signups.csv'; document.body.appendChild(a); a.click(); a.remove();
+  ['ldSort', 'ldFilter', 'ldSrc'].forEach(id => { $(id).onchange = () => { ldPage = 1; loadLeads(); }; });
+  $('ldQ').oninput = later(() => { ldPage = 1; loadLeads(); });
+  $('leadCsv').onclick = async () => {
+    let r; try { r = await call('/api/staff/leads?' + ldParams({ all: 1 }), { token }); } catch (x) { return out(x); }
+    csvDownload('free-signups.csv', [['name', 'phone', 'email', 'goal', 'city', 'source', 'preorder', 'pay', 'status', 'homework', 'signed_up']].concat(
+      r.leads.map(l => [l.name, '+' + l.phone, l.email || '', l.goal || '', l.city || '', l.source || '', l.preorder ? 'yes' : '', l.pay || '', l.status, l.homework, l.created_at])));
   };
 
   // ---------- level test takers ----------
   let lvl = [];
+  let lvlPage = 1;
   async function loadLvl() {
-    let r; try { r = await call('/api/staff/level-tests', { token }); } catch (x) { return out(x); }
-    lvl = r.tests;
-    const by = {}; lvl.forEach(t => { by[t.level] = (by[t.level] || 0) + 1; });
-    $('lvlCount').textContent = `${lvl.length} شخص` + (lvl.length ? ' · ' + Object.keys(by).sort().map(k => `${k}: ${by[k]}`).join('، ') : '');
+    let r; try { r = await call('/api/staff/level-tests?' + qs({ page: lvlPage }), { token }); } catch (x) { return out(x); }
+    lvl = r.tests; lvlPage = r.page;
+    const by = r.by_level || {};
+    $('lvlCount').textContent = `${r.total} شخص` + (r.total ? ' · ' + Object.keys(by).sort().map(k => `${k}: ${by[k]}`).join('، ') : '');
+    pager('lvlPager', r, n => { lvlPage = n; loadLvl(); });
     const st = { new: 'جديد', contacted: 'تواصلنا', paid: 'دفع ✅', free: 'مجاني 🎁', lost: 'ما يريد' };
     $('lvlBody').innerHTML = lvl.map(t => {
       const text = `هلا ${t.name} 👋 شفنا نتيجتك باختبار المستوى (${t.level}). تحب نحچي وياك عن كورس Speak 360 وشلون يساعدك؟`;
@@ -567,12 +554,10 @@ tr:last-child td{border-bottom:0}
       try { await call('/api/staff/level-tests', { method: 'POST', json: { id: +b.dataset.id, remove: true }, token }); toast('انحذف ' + b.dataset.name); loadLvl(); } catch (x) { out(x); }
     });
   }
-  $('lvlCsv').onclick = () => {
-    const rows = [['name', 'phone', 'level', 'score', 'total', 'source', 'status', 'taken_at']].concat(
-      lvl.map(t => [t.name, '+' + t.phone, t.level, t.score, t.total, t.source || '', t.status, t.created_at]));
-    const csv = '\ufeff' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-    a.download = 'level-tests.csv'; document.body.appendChild(a); a.click(); a.remove();
+  $('lvlCsv').onclick = async () => {
+    let r; try { r = await call('/api/staff/level-tests?all=1', { token }); } catch (x) { return out(x); }
+    csvDownload('level-tests.csv', [['name', 'phone', 'level', 'score', 'total', 'source', 'status', 'taken_at']].concat(
+      r.tests.map(t => [t.name, '+' + t.phone, t.level, t.score, t.total, t.source || '', t.status, t.created_at])));
   };
 
   // ---------- codes ----------
@@ -601,8 +586,13 @@ tr:last-child td{border-bottom:0}
     try { await navigator.clipboard.writeText(t); toast('📋 انسخت'); }
     catch (e) { const r = document.createRange(); r.selectNodeContents($('codeMsg')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('حدد النص وانسخه'); }
   };
+  let codePage = 1;
+  $('codeQ').oninput = later(() => { codePage = 1; loadCodes(); });
   async function loadCodes() {
-    let r; try { r = await call('/api/staff/codes', { token }); } catch (x) { return out(x); }
+    let r; try { r = await call('/api/staff/codes?' + qs({ page: codePage, q: $('codeQ').value.trim() || undefined }), { token }); } catch (x) { return out(x); }
+    codePage = r.page;
+    $('codeCount').textContent = r.total + ' كود';
+    pager('codePager', r, n => { codePage = n; loadCodes(); });
     $('sellerList').innerHTML = (r.sellers || []).map(n => `<option value="${esc(n)}">`).join('');
     $('codeBody').innerHTML = r.codes.map(c => `<tr><td class="en" style="text-align:right"><b>${esc(c.code)}</b></td><td>${esc(c.label || '')}</td>
       <td class="small">${c.seller ? esc(c.seller) : '<span class="muted">ما مكتوب</span>'}</td>
