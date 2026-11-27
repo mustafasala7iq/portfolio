@@ -240,14 +240,13 @@ tr:last-child td{border-bottom:0}
   });
 
   // ---------- homework ----------
-  let hwPage = 1, hwWas = null;
+  const hwPg = pg(); let hwWas = null;
   async function loadHw() {
-    if (hwWas !== hwStatus) { hwPage = 1; hwWas = hwStatus; }
-    const q = (hwStatus === 'trial' ? 'status=all&trial=1' : 'status=' + hwStatus) + '&page=' + hwPage;
+    if (hwWas !== hwStatus) { hwPg.reset(); hwWas = hwStatus; }
+    const q = (hwStatus === 'trial' ? 'status=all&trial=1' : 'status=' + hwStatus) + (hwPg.cur ? '&cursor=' + encodeURIComponent(hwPg.cur) : '');
     let r; try { r = await call('/api/staff/submissions?' + q, { token }); } catch (x) { return out(x); }
-    hwPage = r.page;
     if (hwStatus === 'pending') $('nHw').textContent = r.total;
-    pager('hwPager', r, n => { hwPage = n; loadHw(); });
+    pager('hwPager', hwPg, r, loadHw);
     const box = $('hwList'); box.innerHTML = '';
     $('bulk').hidden = hwStatus !== 'pending' || !r.submissions.length;
     $('bulkAll').checked = false; bulkPaint();
@@ -329,14 +328,19 @@ tr:last-child td{border-bottom:0}
   }
   // ---------- paging: every list comes from the server a page at a time (sorted, filtered and searched there) ----------
   const qs = o => new URLSearchParams(Object.entries(o).filter(([, v]) => v !== undefined && v !== null)).toString();
-  function pager(id, r, go) {
-    const el = $(id);
-    if (!r || !r.pages || r.pages <= 1) { el.hidden = true; el.innerHTML = ''; return; }
+  // a list's place: the cursors of the pages seen so far (page 1 has none), so "Previous" can go back
+  function pg() { return { stack: [null], i: 0, reset() { this.stack = [null]; this.i = 0; }, get cur() { return this.stack[this.i] || undefined; } }; }
+  function pager(id, st, r, go) {
+    const el = $(id), pages = Math.max(1, Math.ceil((r.total || 0) / (r.per || 20)));
+    if (pages <= 1 && !st.i) { el.hidden = true; el.innerHTML = ''; return; }
     el.hidden = false;
-    el.innerHTML = `<button type="button" class="btn sm ghost" data-pg="${r.page - 1}" ${r.page <= 1 ? 'disabled' : ''}>→ السابق</button>
-      <span class="muted small">صفحة ${r.page} من ${r.pages}</span>
-      <button type="button" class="btn sm ghost" data-pg="${r.page + 1}" ${r.page >= r.pages ? 'disabled' : ''}>التالي ←</button>`;
-    el.querySelectorAll('[data-pg]').forEach(b => b.onclick = () => { go(+b.dataset.pg); el.closest('section').scrollIntoView({ block: 'start' }); });
+    el.innerHTML = `<button type="button" class="btn sm ghost" data-dir="-1" ${st.i ? '' : 'disabled'}>→ السابق</button>
+      <span class="muted small">صفحة ${st.i + 1} من ${pages}</span>
+      <button type="button" class="btn sm ghost" data-dir="1" ${r.next_cursor ? '' : 'disabled'}>التالي ←</button>`;
+    el.querySelectorAll('[data-dir]').forEach(b => b.onclick = () => {
+      if (+b.dataset.dir > 0) { st.stack[st.i + 1] = r.next_cursor; st.stack.length = st.i + 2; st.i++; } else if (st.i) st.i--;
+      go(); el.closest('section').scrollIntoView({ block: 'start' });
+    });
   }
   const later = (fn, ms = 300) => { let t; return () => { clearTimeout(t); t = setTimeout(fn, ms); }; };
   // CSV exports ask for everything that matches the current filters (?all=1), not just the page on screen
@@ -346,11 +350,11 @@ tr:last-child td{border-bottom:0}
     a.download = name; document.body.appendChild(a); a.click(); a.remove();
   }
 
-  let stData = null, stPage = 1;
+  let stData = null; const stPg = pg();
   try { $('stSort').value = localStorage.getItem('stSort') || 'new'; } catch (e) {}
-  $('stSort').onchange = () => { try { localStorage.setItem('stSort', $('stSort').value); } catch (e) {} stPage = 1; loadSt(); };
-  $('stFilter').onchange = () => { stPage = 1; loadSt(); };
-  $('stQ').oninput = later(() => { stPage = 1; loadSt(); });
+  $('stSort').onchange = () => { try { localStorage.setItem('stSort', $('stSort').value); } catch (e) {} stPg.reset(); loadSt(); };
+  $('stFilter').onchange = () => { stPg.reset(); loadSt(); };
+  $('stQ').oninput = later(() => { stPg.reset(); loadSt(); });
   // admin: download every row as a .sql file (the server makes one consistent snapshot)
   document.querySelectorAll('#backupRow [data-fmt]').forEach(b => b.onclick = async () => {
     const was = b.textContent; b.disabled = true; b.textContent = 'جاري التحضير…';
@@ -366,15 +370,15 @@ tr:last-child td{border-bottom:0}
     finally { b.disabled = false; b.textContent = was; }
   });
   async function loadSt() {
-    const p = qs({ sort: $('stSort').value, filter: $('stFilter').value, q: $('stQ').value.trim() || undefined, page: stPage });
+    const p = qs({ sort: $('stSort').value, filter: $('stFilter').value, q: $('stQ').value.trim() || undefined, cursor: stPg.cur });
     let r; try { r = await call('/api/staff/students?' + p, { token }); } catch (x) { return out(x); }
     if (!r.money && (['wait', 'got', 'free', 'noamt'].includes($('stFilter').value) || $('stSort').value === 'paid')) {
       $('stFilter').value = ['wait', 'got', 'free', 'noamt'].includes($('stFilter').value) ? 'all' : $('stFilter').value;
       if ($('stSort').value === 'paid') $('stSort').value = 'new';
-      return loadSt();                                         // those are the admin's only
+      stPg.reset(); return loadSt();                           // those are the admin's only
     }
-    stData = r; stPage = r.page; renderSt();
-    pager('stPager', r, n => { stPage = n; loadSt(); });
+    stData = r; renderSt();
+    pager('stPager', stPg, r, loadSt);
   }
   function renderSt() {
     const r = stData; if (!r) return;
@@ -401,7 +405,7 @@ tr:last-child td{border-bottom:0}
         <input class="input pay-sl" value="${esc(s.seller || '')}" placeholder="البائع">
         <label class="small"><input type="checkbox" class="pay-f" ${s.free ? 'checked' : ''}> مجاني</label>
         <button class="btn sm pay-s" data-id="${s.id}">احفظ</button></div></details></td>`;
-    const sw = $('showWait'); if (sw) sw.onclick = () => { $('stFilter').value = 'wait'; stPage = 1; loadSt(); $('stFilter').scrollIntoView({ block: 'center', behavior: 'smooth' }); };
+    const sw = $('showWait'); if (sw) sw.onclick = () => { $('stFilter').value = 'wait'; stPg.reset(); loadSt(); $('stFilter').scrollIntoView({ block: 'center', behavior: 'smooth' }); };
     $('stBody').innerHTML = list.map(s => {
       const flag = s.missing === 0 ? '🟢' : s.missing <= 2 ? '🟡' : '🔴';
       const text = `هلا ${s.name} 👋\nعندك ${s.missing} واجبات ناقصة بكورس مصطفى صلاح. ادخل على ${SITE} وسلّمهن 🎙️`;
@@ -480,18 +484,18 @@ tr:last-child td{border-bottom:0}
   };
 
   // ---------- free-lesson sign-ups ----------
-  let leads = [], ldRes = null, ldPage = 1;
+  let leads = [], ldRes = null; const ldPg = pg();
   $('freeLink').textContent = SITE + 'free';
   const ldParams = extra => qs({ sort: $('ldSort').value, filter: $('ldFilter').value, q: $('ldQ').value.trim() || undefined,
     src: $('ldSrc').selectedIndex > 0 ? $('ldSrc').value : undefined, ...extra });
   async function loadLeads() {
-    let r; try { r = await call('/api/staff/leads?' + ldParams({ page: ldPage }), { token }); } catch (x) { return out(x); }
-    ldRes = r; leads = r.leads; ldPage = r.page;
+    let r; try { r = await call('/api/staff/leads?' + ldParams({ cursor: ldPg.cur }), { token }); } catch (x) { return out(x); }
+    ldRes = r; leads = r.leads;
     const keep = $('ldSrc').selectedIndex > 0 ? $('ldSrc').value : null;
     $('ldSrc').innerHTML = '<option value="">كل المصادر</option>' + r.sources.map(x => `<option value="${esc(x.source)}">${x.source ? esc(x.source) : 'بدون مصدر'} (${x.n})</option>`).join('');
     if (keep !== null) { const i = r.sources.findIndex(x => x.source === keep); if (i >= 0) $('ldSrc').selectedIndex = i + 1; }
     renderLeads();
-    pager('ldPager', r, n => { ldPage = n; loadLeads(); });
+    pager('ldPager', ldPg, r, loadLeads);
   }
   function renderLeads() {
     const list = leads, r = ldRes;
@@ -518,8 +522,8 @@ tr:last-child td{border-bottom:0}
         const l = leads.find(x => x.id === +sel.dataset.id); if (l) l.status = sel.value; toast('انحفظت الحالة'); } catch (x) { out(x); }
     });
   }
-  ['ldSort', 'ldFilter', 'ldSrc'].forEach(id => { $(id).onchange = () => { ldPage = 1; loadLeads(); }; });
-  $('ldQ').oninput = later(() => { ldPage = 1; loadLeads(); });
+  ['ldSort', 'ldFilter', 'ldSrc'].forEach(id => { $(id).onchange = () => { ldPg.reset(); loadLeads(); }; });
+  $('ldQ').oninput = later(() => { ldPg.reset(); loadLeads(); });
   $('leadCsv').onclick = async () => {
     let r; try { r = await call('/api/staff/leads?' + ldParams({ all: 1 }), { token }); } catch (x) { return out(x); }
     csvDownload('free-signups.csv', [['name', 'phone', 'email', 'goal', 'city', 'source', 'preorder', 'pay', 'status', 'homework', 'signed_up']].concat(
@@ -528,13 +532,13 @@ tr:last-child td{border-bottom:0}
 
   // ---------- level test takers ----------
   let lvl = [];
-  let lvlPage = 1;
+  const lvlPg = pg();
   async function loadLvl() {
-    let r; try { r = await call('/api/staff/level-tests?' + qs({ page: lvlPage }), { token }); } catch (x) { return out(x); }
-    lvl = r.tests; lvlPage = r.page;
+    let r; try { r = await call('/api/staff/level-tests?' + qs({ cursor: lvlPg.cur }), { token }); } catch (x) { return out(x); }
+    lvl = r.tests;
     const by = r.by_level || {};
     $('lvlCount').textContent = `${r.total} شخص` + (r.total ? ' · ' + Object.keys(by).sort().map(k => `${k}: ${by[k]}`).join('، ') : '');
-    pager('lvlPager', r, n => { lvlPage = n; loadLvl(); });
+    pager('lvlPager', lvlPg, r, loadLvl);
     const st = { new: 'جديد', contacted: 'تواصلنا', paid: 'دفع ✅', free: 'مجاني 🎁', lost: 'ما يريد' };
     $('lvlBody').innerHTML = lvl.map(t => {
       const text = `هلا ${t.name} 👋 شفنا نتيجتك باختبار المستوى (${t.level}). تحب نحچي وياك عن كورس Speak 360 وشلون يساعدك؟`;
@@ -586,13 +590,12 @@ tr:last-child td{border-bottom:0}
     try { await navigator.clipboard.writeText(t); toast('📋 انسخت'); }
     catch (e) { const r = document.createRange(); r.selectNodeContents($('codeMsg')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('حدد النص وانسخه'); }
   };
-  let codePage = 1;
-  $('codeQ').oninput = later(() => { codePage = 1; loadCodes(); });
+  const codePg = pg();
+  $('codeQ').oninput = later(() => { codePg.reset(); loadCodes(); });
   async function loadCodes() {
-    let r; try { r = await call('/api/staff/codes?' + qs({ page: codePage, q: $('codeQ').value.trim() || undefined }), { token }); } catch (x) { return out(x); }
-    codePage = r.page;
+    let r; try { r = await call('/api/staff/codes?' + qs({ cursor: codePg.cur, q: $('codeQ').value.trim() || undefined }), { token }); } catch (x) { return out(x); }
     $('codeCount').textContent = r.total + ' كود';
-    pager('codePager', r, n => { codePage = n; loadCodes(); });
+    pager('codePager', codePg, r, loadCodes);
     $('sellerList').innerHTML = (r.sellers || []).map(n => `<option value="${esc(n)}">`).join('');
     $('codeBody').innerHTML = r.codes.map(c => `<tr><td class="en" style="text-align:right"><b>${esc(c.code)}</b></td><td>${esc(c.label || '')}</td>
       <td class="small">${c.seller ? esc(c.seller) : '<span class="muted">ما مكتوب</span>'}</td>
