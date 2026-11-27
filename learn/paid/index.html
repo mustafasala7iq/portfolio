@@ -55,40 +55,57 @@ main .inner{padding-block:36px 60px;max-width:520px}
   const { call, store, esc } = Learn;
   const $ = id => document.getElementById(id);
   if (window.BRAND) $('lock').innerHTML = `<img class="sig" src="${BRAND.sig}" alt="Mustafa Salah">`;
-  const q = new URLSearchParams(location.search);
-  const order = q.get('order') || '';
+  // Wayl appends ?referenceId=PAY-…&orderid=… to our return address, so read our numbers from anywhere in it
+  const href = decodeURIComponent(location.href);
+  const order = ((href.match(/ORD-\d{8}-\d{6}-[0-9A-F]{6}/i) || [])[0] || '').toUpperCase();
+  const payRef = ((href.match(/PAY-\d{8}-\d{6}-[0-9A-F]{6}/i) || [])[0] || '').toUpperCase();
   const token = store.get('learn_token');
   const box = $('box');
-  const ref = `<div class="pay-ref">${esc(order)}</div>`;
+  const ref = `<div class="pay-ref">${esc(order || payRef)}</div>`;
   const say = (ic, cls, title, text, extra = '') => {
     box.innerHTML = `<div class="pay-ic ${cls}">${ic}</div><h1>${title}</h1><p>${text}</p>${extra}${ref}`;
   };
-  if (!token || !order) {
+  if (!token || !(order || payRef)) {
     say('🔑', '', 'سجّل دخولك', 'حتى نتأكد من دفعتك، سجّل دخول بنفس الحساب اللي دفعت منه.', '<a class="btn y" href="/learn/?login=1">سجّل دخول</a>');
     return;
   }
-  let tries = 0, first = true;
+  let tries = 0, first = true, lost = 0;
+  // the order wasn't matched: if the course is already open the payment went through; otherwise keep checking
+  async function viaAccount() {
+    lost++;
+    try {
+      const me = await call('/api/me', { token });
+      if (!me.trial) { paid(order || payRef, 0); return; }
+    } catch (x) { /* fall through */ }
+    if (lost < 20) { setTimeout(poll, 3000); return; }
+    say('<div class="spin"></div>', '', 'بعدنا ننتظر تأكيد الدفع',
+      'إذا كمّلت الدفع، راح ينفتحلك الكورس تلقائياً خلال دقائق، حتى لو سكّرت الصفحة. وإذا ما انفتح، راسلنا على واتساب.',
+      '<a class="btn y" href="/learn/">رجوع للمنصة</a>');
+  }
+  function paid(id, amount) {
+    // tell Meta about the sale once per order, even if the page is reloaded
+    try {
+      const k = 'px_paid_' + id;
+      if (window.fbq && !store.get(k)) { fbq('track', 'Purchase', { value: amount || 39000, currency: 'IQD' }, { eventID: id }); store.set(k, '1'); }
+    } catch (e) { /* never block the page */ }
+    say('✓', 'ok', 'تم الدفع، انفتحلك الكورس 🎉', 'وصلت دفعتك وصار حسابك كامل. يومك الأول جاهز هسه.', '<a class="btn y" href="/learn/">ادخل للكورس ←</a>');
+  }
   async function poll() {
     tries++;
     let r;
     try {
-      const extra = first ? `&back=1&referenceId=${encodeURIComponent(q.get('referenceId') || '')}&orderid=${encodeURIComponent(q.get('orderid') || '')}` : '';
-      r = await call(`/api/checkout/status?order=${encodeURIComponent(order)}${extra}`, { token });
+      const qs = new URLSearchParams();
+      if (order) qs.set('order', order);
+      if (payRef) qs.set('referenceId', payRef);
+      if (first) qs.set('back', '1');
+      r = await call(`/api/checkout/status?${qs}`, { token });
       first = false;
     } catch (x) {
       if (x.status === 401) { store.set('learn_token', null); say('🔑', '', 'سجّل دخولك', 'انتهت جلستك. سجّل دخول بنفس الحساب حتى نكمّل التأكيد.', '<a class="btn y" href="/learn/?login=1">سجّل دخول</a>'); return; }
-      if (x.status === 404) { say('?', 'no', 'ما لكينا هالطلب', 'تأكد إنك داخل بنفس الحساب اللي دفعت منه.', '<a class="btn y" href="/learn/">رجوع للمنصة</a>'); return; }
+      if (x.status === 404) { first = false; return viaAccount(); }
       return setTimeout(poll, 5000);              // the network dropped: keep trying quietly
     }
-    if (r.state === 'paid') {
-      // tell Meta about the sale once per order, even if the page is reloaded
-      try {
-        const k = 'px_paid_' + order;
-        if (window.fbq && !store.get(k)) { fbq('track', 'Purchase', { value: r.amount || 39000, currency: 'IQD' }, { eventID: order }); store.set(k, '1'); }
-      } catch (e) { /* never block the page */ }
-      say('✓', 'ok', 'تم الدفع، انفتحلك الكورس 🎉', 'وصلت دفعتك وصار حسابك كامل. يومك الأول جاهز هسه.', '<a class="btn y" href="/learn/">ادخل للكورس ←</a>');
-      return;
-    }
+    if (r.state === 'paid') { paid(r.order, r.amount); return; }
     if (r.state === 'needs_review') {
       say('!', 'no', 'دفعتك وصلت، ونراجعها', 'حسابك مفعّل من قبل، فراح نتواصل وياك بخصوص الدفعة الثانية.', '<a class="btn y" href="/learn/">رجوع للمنصة</a>');
       return;
