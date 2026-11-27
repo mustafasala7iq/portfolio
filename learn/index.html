@@ -302,7 +302,7 @@ section+section{margin-top:26px}
       <div class="field" data-m="join free"><label for="city">المحافظة</label>
         <select class="input" id="city"><option value="">اختار محافظتك</option><option>البصرة</option><option>بغداد</option><option>أربيل</option><option>الأنبار</option><option>بابل</option><option>حلبجة</option><option>دهوك</option><option>ديالى</option><option>ذي قار</option><option>السليمانية</option><option>صلاح الدين</option><option>القادسية</option><option>كربلاء</option><option>كركوك</option><option>المثنى</option><option>ميسان</option><option>النجف</option><option>نينوى</option><option>واسط</option><option>خارج العراق</option></select></div>
       <div class="field" data-m="join"><label for="pay">شلون تحب تدفع؟</label>
-        <select class="input" id="pay"><option value="">اختار</option><option value="code">عندي كود تفعيل</option><option value="cash">كاش ويا المندوب (يوصلك الكود لباب البيت)</option></select>
+        <select class="input" id="pay"><option value="">اختار</option><option value="code">عندي كود تفعيل</option><option value="cash">كاش ويا المندوب (يوصلك الكود لباب البيت)</option><option value="transfer">حوالة إلكترونية</option></select>
         <p class="small pay-note" id="payNote" hidden></p></div>
       <div class="field" id="codeField" hidden><label for="code">كود التفعيل</label>
         <input class="input en" id="code" autocapitalize="characters" autocomplete="one-time-code" placeholder="TA-XXXXX"></div>
@@ -459,12 +459,13 @@ section+section{margin-top:26px}
     const c = mode === 'join' ? $('pay').value : '';
     $('codeField').hidden = c !== 'code';
     if (mode !== 'join') return;
-    $('loginBtn').textContent = { online: 'ادفع هسه وابدي الكورس ←', code: 'سوّي الحساب وابدي الكورس', cash: 'احجز مقعدي' }[c] || 'سوّي حسابك';
+    $('loginBtn').textContent = { online: 'ادفع هسه وابدي الكورس ←', code: 'سوّي الحساب وابدي الكورس', cash: 'احجز مقعدي', transfer: 'احجز مقعدي' }[c] || 'سوّي حسابك';
     const price = payInfo ? `<b class="num">${fmtN(payInfo.price)} د.ع</b>${payInfo.regular ? ` <s class="muted num">${fmtN(payInfo.regular)}</s>` : ''} · ` : '';
     const note = {
       online: price + 'تدفع بصفحة Wayl الآمنة بالبطاقة أو المحفظة الإلكترونية، وأول ما تكمّل ينفتحلك الكورس كامل.',
       code: 'اكتب الكود اللي وصلك ويا الفاتورة، وتبدي الكورس اليوم.',
       cash: 'نتواصل وياك على واتساب، والمندوب يوصلك الفاتورة والكود وتدفع كاش عند الاستلام. ولحد ذاك الوقت شوف الدرس الأول مجاناً.',
+      transfer: 'نتواصل وياك على واتساب ونرسلك تفاصيل الحوالة، وأول ما توصل نرسلك الكود. ولحد ذاك الوقت شوف الدرس الأول مجاناً.',
     }[c];
     $('payNote').hidden = !note; $('payNote').innerHTML = note || '';
   }
@@ -511,9 +512,9 @@ section+section{margin-top:26px}
       const body = { email: v('email'), password: $('pw').value };
       const r = mode === 'login' ? await call('/api/login', { method: 'POST', json: body })
         : await call('/api/register', { method: 'POST', json: { ...body, name: v('name'), phone: v('phone'),
-            free: mode === 'free' || pay === 'online' || pay === 'cash', code: pay === 'code' ? v('code') : '',
-            goal: v('goal'), city: v('city'), source: SOURCE, preorder: pay === 'online' || pay === 'cash',
-            pay: { online: 'دفع أونلاين', cash: 'كاش ويا المندوب' }[pay] || '' } });
+            free: mode === 'free' || (!!pay && pay !== 'code'), code: pay === 'code' ? v('code') : '',
+            goal: v('goal'), city: v('city'), source: SOURCE, preorder: !!pay && pay !== 'code',
+            pay: { online: 'دفع أونلاين', cash: 'كاش ويا المندوب', transfer: 'حوالة إلكترونية' }[pay] || '' } });
       token = r.token; store.set('learn_token', token); store.set('has_account', '1');
       if (pay === 'online') {
         // account made; now the order and Wayl's link, then off to pay
@@ -526,7 +527,7 @@ section+section{margin-top:26px}
         await load(true);
         return;
       }
-      if (mode !== 'login') px(pay === 'cash' ? 'Lead' : pay === 'code' ? 'Purchase' : 'CompleteRegistration');
+      if (mode !== 'login') px(pay === 'cash' || pay === 'transfer' ? 'Lead' : pay === 'code' ? 'Purchase' : 'CompleteRegistration');
       await load(true);
     } catch (x) { err.textContent = x.message; }
     finally { btn.disabled = false; }
@@ -653,17 +654,19 @@ section+section{margin-top:26px}
     }
     if (co) {
       box.innerHTML = `<h3>عجبك؟ اشترك هسه</h3>${payBlock(co)}
-        <details class="pay-alt"><summary class="muted small">أو احجز وادفع كاش ويا المندوب</summary>
-        <p class="muted small" style="margin:6px 0 8px">نتواصل وياك على واتساب، والمندوب يوصلك الفاتورة والكود وتدفع كاش عند الاستلام.</p>
-        <button type="button" class="btn" id="preGo">احجز وادفع كاش</button><div class="err small" id="preErr" style="min-height:0"></div></details>`;
+        <details class="pay-alt"><summary class="muted small">أو احجز وادفع كاش ويا المندوب أو بحوالة</summary>
+        <div class="row" style="margin-top:8px"><select class="input" id="prePay" style="flex:1;min-width:0"><option value="">شلون تحب تدفع؟</option><option>كاش ويا المندوب</option><option>حوالة إلكترونية</option></select>
+        <button type="button" class="btn" id="preGo">احجز</button></div><div class="err small" id="preErr" style="min-height:0"></div></details>`;
       wirePay(box);
     } else {
     box.innerHTML = `<h3>عجبك؟ احجز مقعدك</h3>
-      <p class="muted">بسعر الإطلاق. نتواصل وياك على واتساب، والمندوب يوصلك الفاتورة والكود وتدفع كاش عند الاستلام.</p>
-      <button type="button" class="btn y" id="preGo">احجز مقعدي</button><div class="err small" id="preErr" style="min-height:0"></div>`;
+      <p class="muted">بسعر الإطلاق، وبدون دفع هسة. نتواصل وياك على واتساب حتى نثبّت حجزك.</p>
+      <div class="row"><select class="input" id="prePay" style="flex:1;min-width:0"><option value="">شلون تحب تدفع؟</option><option>كاش ويا المندوب</option><option>حوالة إلكترونية</option></select>
+      <button type="button" class="btn y" id="preGo">احجز</button></div><div class="err small" id="preErr" style="min-height:0"></div>`;
     }
     $('preGo').onclick = async () => {
-      try { await call('/api/activate', { method: 'POST', json: { preorder: true, pay: 'كاش ويا المندوب' }, token }); data.preorder = true; px('Lead'); renderPre(); $('heroTag').textContent = 'درسك المجاني 🎁'; $('heroMeta').innerHTML = ''; $('actTitle').textContent = '🔑 وصلك كود التفعيل؟ اكتبه هنا'; $('preDone').scrollIntoView({ behavior: 'smooth', block: 'center' }); toast('✅ انحجز مقعدك'); }
+      if (!$('prePay').value) { $('preErr').textContent = 'اختار شلون تحب تدفع.'; return; }
+      try { await call('/api/activate', { method: 'POST', json: { preorder: true, pay: $('prePay').value }, token }); data.preorder = true; px('Lead'); renderPre(); $('heroTag').textContent = 'درسك المجاني 🎁'; $('heroMeta').innerHTML = ''; $('actTitle').textContent = '🔑 وصلك كود التفعيل؟ اكتبه هنا'; $('preDone').scrollIntoView({ behavior: 'smooth', block: 'center' }); toast('✅ انحجز مقعدك'); }
       catch (x) { $('preErr').textContent = x.message; }
     };
   }
